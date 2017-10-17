@@ -75,7 +75,7 @@ if(!$item = load_cache(5, $cache_key))
 						, l.name_loc?d as `name_loc`
 						, l.subname_loc' . $_SESSION['locale'] . ' as `subname_loc`
 					}
-					FROM ?_aowow_factiontemplate, ?_creature_template c
+					FROM aowow_factiontemplate, creature_template c
 					{ LEFT JOIN (?_locales_creature l) ON l.entry=c.entry AND ? }
 					WHERE
 	                                        c.lootid = ?d
