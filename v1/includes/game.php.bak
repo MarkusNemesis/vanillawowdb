@@ -371,16 +371,28 @@ function loot_table($table, $lootid, $max_percent=100) {
     $groups = array();
     // Мего запрос :)
     $rows = $DB->select('
-		SELECT l.ChanceOrQuestChance, l.mincountOrRef, l.maxcount as `d-max`, l.groupid, ?#, i.entry, i.maxcount
+
+		SELECT l.ChanceOrQuestChance, l.mincountOrRef, l.maxcount as `d-max`, l.groupid, ?#, i.entry, i.maxcount, i.patch
 			{, loc.name_loc?d AS `name_loc`}
 		FROM ' . $table . ' l
-			LEFT JOIN (?_aowow_icons a, ?_item_template i) ON l.item=i.entry AND a.id=i.displayid
+			LEFT JOIN (?_aowow_icons a, 
+				(
+					SELECT z.* FROM item_template z
+					INNER JOIN (
+						SELECT *, MAX(patch) patchno
+						FROM item_template
+						WHERE patch <= ?d
+						GROUP BY entry
+					) b ON z.entry = b.entry AND z.patch = b.patchno
+				) 
+			i) ON l.item=i.entry AND a.id=i.displayid
 			{LEFT JOIN (?_locales_item loc) ON loc.entry=i.entry AND ?d}
 		WHERE
 			l.entry=?d
 		{LIMIT ?d}
 		', $item_cols[2], 
 		($_SESSION['locale']) ? $_SESSION['locale'] : DBSIMPLE_SKIP, 
+		$UDWBaseconf['patch'],
 		($_SESSION['locale']) ? 1 : DBSIMPLE_SKIP, 
 		$lootid, 
 		($UDWBaseconf['limit'] != 0) ? $UDWBaseconf['limit'] : DBSIMPLE_SKIP
@@ -388,16 +400,6 @@ function loot_table($table, $lootid, $max_percent=100) {
 
     // Перебираем
     foreach ($rows as $i => $row) {
-		
-		// Check if the patch number is valid
-		echo $row['patch'];
-		if ($row['patch'] > $UDWBaseconf['patch'])
-		{
-			echo "Too new!";
-			unset($row[$i]);
-			break;
-		}
-			
         if ($row['mincountOrRef'] > 0) {
             // Не ссылка!
             if ($row['groupid'] > 0) {
