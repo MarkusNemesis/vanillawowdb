@@ -1,0 +1,17 @@
+SQL patch wrapper
+
+Items:
+
+SELECT a.* FROM 
+		(
+			--- ORIGINAL SQL QUERY HERE ---
+		) a
+		INNER JOIN (
+			SELECT *, MAX(patch) patchno
+			FROM item_template
+			WHERE patch <= ?d
+			GROUP BY entry
+		) b ON a.entry = b.entry AND a.patch = b.patchno
+		
+		
+		$UDWBaseconf['patch']

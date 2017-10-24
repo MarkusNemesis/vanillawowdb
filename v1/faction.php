@@ -56,12 +56,23 @@ if (!$faction = load_cache(18, intval($id))) {
 
         // Итемы с requiredreputationfaction
         $item_rows = $DB->select('
+		SELECT a.* FROM 
+		(
 			SELECT ?#, entry
 			FROM ?_item_template i, ?_aowow_icons a
 			WHERE
 				i.RequiredReputationFaction=?d
 				AND a.id=i.displayid
-			', $item_cols[2], $id
+		) a
+		INNER JOIN (
+			SELECT *, MAX(patch) patchno
+			FROM item_template
+			WHERE patch <= ?d
+			GROUP BY entry
+		) b ON a.entry = b.entry AND a.patch = b.patchno
+			', $item_cols[2], 
+			$id, 
+			$UDWBaseconf['patch']
         );
         if ($item_rows) {
             $faction['items'] = array();

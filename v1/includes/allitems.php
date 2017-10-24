@@ -18,13 +18,13 @@ require_once('includes/allquests.php');
 
 // Массивы с названиями столбцов, необходимых для различных уровней вызова функций
 // для allitems($level=0) - соответствия номер-иконка
-$item_cols[0] = array('entry', 'iconname', 'quality', 'name');
+$item_cols[0] = array('entry', 'patch', 'iconname', 'quality', 'name');
 // для allitems($level=1) - ajax, тултип
-$item_cols[1] = array('entry', 'name', 'quality', 'iconname', 'maxcount', 'bonding', 'startquest', 'Map', 'ContainerSlots', 'class', 'InventoryType', 'subclass', 'dmg_type1', 'dmg_min1', 'dmg_max1', 'delay', 'dmg_type2', 'dmg_min2', 'dmg_max2', 'dmg_type3', 'dmg_min3', 'dmg_max3', 'dmg_type4', 'dmg_min4', 'dmg_max4', 'dmg_type5', 'dmg_min5', 'dmg_max5', 'armor', 'block', 'stat_type1', 'stat_type2', 'stat_type3', 'stat_type4', 'stat_type5', 'stat_type6', 'stat_type7', 'stat_type8', 'stat_type9', 'stat_type10', 'stat_value1', 'stat_value2', 'stat_value3', 'stat_value4', 'stat_value5', 'stat_value6', 'stat_value7', 'stat_value8', 'stat_value9', 'stat_value10', 'holy_res', 'fire_res', 'nature_res', 'frost_res', 'shadow_res', 'arcane_res', 'RandomProperty', 'MaxDurability', 'AllowableClass', 'RequiredLevel', 'RequiredSkill', 'requiredspell', 'RequiredReputationFaction', 'RequiredReputationRank', 'spellid_1', 'spellid_2', 'spellid_3', 'spellid_4', 'spellid_5', 'spelltrigger_1', 'spelltrigger_2', 'spelltrigger_3', 'spelltrigger_4', 'spelltrigger_5', 'description', 'PageText', 'BagFamily', 'RequiredSkillRank');
+$item_cols[1] = array('entry',  'patch','name', 'quality', 'iconname', 'maxcount', 'bonding', 'startquest', 'Map', 'ContainerSlots', 'class', 'InventoryType', 'subclass', 'dmg_type1', 'dmg_min1', 'dmg_max1', 'delay', 'dmg_type2', 'dmg_min2', 'dmg_max2', 'dmg_type3', 'dmg_min3', 'dmg_max3', 'dmg_type4', 'dmg_min4', 'dmg_max4', 'dmg_type5', 'dmg_min5', 'dmg_max5', 'armor', 'block', 'stat_type1', 'stat_type2', 'stat_type3', 'stat_type4', 'stat_type5', 'stat_type6', 'stat_type7', 'stat_type8', 'stat_type9', 'stat_type10', 'stat_value1', 'stat_value2', 'stat_value3', 'stat_value4', 'stat_value5', 'stat_value6', 'stat_value7', 'stat_value8', 'stat_value9', 'stat_value10', 'holy_res', 'fire_res', 'nature_res', 'frost_res', 'shadow_res', 'arcane_res', 'RandomProperty', 'MaxDurability', 'AllowableClass', 'RequiredLevel', 'RequiredSkill', 'requiredspell', 'RequiredReputationFaction', 'RequiredReputationRank', 'spellid_1', 'spellid_2', 'spellid_3', 'spellid_4', 'spellid_5', 'spelltrigger_1', 'spelltrigger_2', 'spelltrigger_3', 'spelltrigger_4', 'spelltrigger_5', 'description', 'PageText', 'BagFamily', 'RequiredSkillRank');
 // для iteminfo($level=0) - строчки списка
 $item_cols[2] = array('name', 'patch', 'quality', 'iconname', 'InventoryType', 'ItemLevel', 'RequiredLevel', 'class', 'subclass', 'stackable', 'BuyPrice', 'armor', 'dmg_type1', 'dmg_min1', 'dmg_max1', 'delay', 'dmg_type2', 'dmg_min2', 'dmg_max2', 'dmg_type3', 'dmg_min3', 'dmg_max3', 'dmg_type4', 'dmg_min4', 'dmg_max4', 'dmg_type5', 'dmg_min5', 'dmg_max5', 'ContainerSlots');
 // для iteminfo($level=1)
-$item_cols[3] = array('entry', 'name', 'quality', 'iconname', 'maxcount', 'bonding', 'startquest', 'Map', 'ContainerSlots', 'class', 'InventoryType', 'subclass', 'dmg_type1', 'dmg_min1', 'dmg_max1', 'delay', 'dmg_type2', 'dmg_min2', 'dmg_max2', 'dmg_type3', 'dmg_min3', 'dmg_max3', 'dmg_type4', 'dmg_min4', 'dmg_max4', 'dmg_type5', 'dmg_min5', 'dmg_max5', 'armor', 'block', 'stat_type1', 'stat_type2', 'stat_type3', 'stat_type4', 'stat_type5', 'stat_type6', 'stat_type7', 'stat_type8', 'stat_type9', 'stat_type10', 'stat_value1', 'stat_value2', 'stat_value3', 'stat_value4', 'stat_value5', 'stat_value6', 'stat_value7', 'stat_value8', 'stat_value9', 'stat_value10', 'holy_res', 'fire_res', 'nature_res', 'frost_res', 'shadow_res', 'arcane_res', 'RandomProperty', 'MaxDurability', 'AllowableClass', 'RequiredLevel', 'RequiredSkill', 'requiredspell', 'RequiredReputationFaction', 'RequiredReputationRank', 'spellid_1', 'spellid_2', 'spellid_3', 'spellid_4', 'spellid_5', 'spelltrigger_1', 'spelltrigger_2', 'spelltrigger_3', 'spelltrigger_4', 'spelltrigger_5', 'description', 'PageText', 'BagFamily', 'RequiredSkillRank', 'ItemLevel', 'stackable', 'BuyPrice', 'DisenchantID', 'SellPrice'/* ,  [NOTE] not used in 1.12 'RequiredDisenchantSkill' */);
+$item_cols[3] = array('entry', 'patch','name', 'quality', 'iconname', 'maxcount', 'bonding', 'startquest', 'Map', 'ContainerSlots', 'class', 'InventoryType', 'subclass', 'dmg_type1', 'dmg_min1', 'dmg_max1', 'delay', 'dmg_type2', 'dmg_min2', 'dmg_max2', 'dmg_type3', 'dmg_min3', 'dmg_max3', 'dmg_type4', 'dmg_min4', 'dmg_max4', 'dmg_type5', 'dmg_min5', 'dmg_max5', 'armor', 'block', 'stat_type1', 'stat_type2', 'stat_type3', 'stat_type4', 'stat_type5', 'stat_type6', 'stat_type7', 'stat_type8', 'stat_type9', 'stat_type10', 'stat_value1', 'stat_value2', 'stat_value3', 'stat_value4', 'stat_value5', 'stat_value6', 'stat_value7', 'stat_value8', 'stat_value9', 'stat_value10', 'holy_res', 'fire_res', 'nature_res', 'frost_res', 'shadow_res', 'arcane_res', 'RandomProperty', 'MaxDurability', 'AllowableClass', 'RequiredLevel', 'RequiredSkill', 'requiredspell', 'RequiredReputationFaction', 'RequiredReputationRank', 'spellid_1', 'spellid_2', 'spellid_3', 'spellid_4', 'spellid_5', 'spelltrigger_1', 'spelltrigger_2', 'spelltrigger_3', 'spelltrigger_4', 'spelltrigger_5', 'description', 'PageText', 'BagFamily', 'RequiredSkillRank', 'ItemLevel', 'stackable', 'BuyPrice', 'DisenchantID', 'SellPrice'/* ,  [NOTE] not used in 1.12 'RequiredDisenchantSkill' */);
 
 $resz = array('holy_res', 'fire_res', 'nature_res', 'frost_res', 'shadow_res', 'arcane_res');
 $resz_desc = array(LOCALE_HOLY_RESISTANCE, LOCALE_FIRE_RESISTANCE, LOCALE_NATURE_RESISTANCE, LOCALE_FROST_RESISTANCE, LOCALE_SHADOW_RESISTANCE, LOCALE_ARCANE_RESISTANCE);
@@ -216,13 +216,25 @@ function allitemsinfo2(&$Row, $level=0) {
 function getitemname($id) {
     global $DB;
     $z = $DB->selectRow('
-			SELECT name {, l.name_loc?d as `name_loc`}
+	SELECT a.* FROM 
+		(
+			SELECT name, entry, patch {, l.name_loc?d as `name_loc`}
 			FROM ?_item_template i
 			{ LEFT JOIN (?_locales_item l) ON l.entry=i.entry AND ? }
 			WHERE
 				i.entry=?
 			LIMIT 1
-		', ($_SESSION['locale'] > 0) ? $_SESSION['locale'] : DBSIMPLE_SKIP, ($_SESSION['locale'] > 0) ? 1 : DBSIMPLE_SKIP, $id
+		) a
+		INNER JOIN (
+			SELECT *, MAX(patch) patchno
+			FROM item_template
+			WHERE patch <= ?d
+			GROUP BY entry
+		) b ON a.entry = b.entry AND a.patch = b.patchno
+		', ($_SESSION['locale'] > 0) ? $_SESSION['locale'] : DBSIMPLE_SKIP, 
+		($_SESSION['locale'] > 0) ? 1 : DBSIMPLE_SKIP, 
+		$id,
+		$UDWBaseconf['patch']
     );
     return!empty($z['name_loc']) ? $z['name_loc'] : $z['name'];
 }
@@ -237,11 +249,14 @@ function allitemsinfo($id, $level=0) {
     global $DB;
     global $allitems;
     global $item_cols;
-
+	global $UDWBaseconf;
+	
     if (isset($allitems[$id])) {
         return $allitems[$id];
     } else {
         $row = $DB->selectRow('
+		SELECT a.* FROM 
+		(
 			SELECT i.?#
 			{
 				, l.name_loc' . $_SESSION['locale'] . ' as `name_loc`
@@ -256,8 +271,20 @@ function allitemsinfo($id, $level=0) {
 			WHERE
 				i.entry=?
 				AND id=displayid
-			LIMIT 1
-			', $item_cols[$level], ($_SESSION['locale'] > 0) ? 1 : DBSIMPLE_SKIP, ($_SESSION['locale'] > 0) ? 1 : DBSIMPLE_SKIP, $id
+		) a
+		INNER JOIN (
+			SELECT *, MAX(patch) patchno
+			FROM item_template
+			WHERE patch <= ?d
+			GROUP BY entry
+		) b ON a.entry = b.entry AND a.patch = b.patchno
+		LIMIT 1
+			', 
+			$item_cols[$level], 
+			($_SESSION['locale'] > 0) ? 1 : DBSIMPLE_SKIP, 
+			($_SESSION['locale'] > 0) ? 1 : DBSIMPLE_SKIP, 
+			$id,
+			$UDWBaseconf['patch']
         );
         return allitemsinfo2($row, $level);
     }
@@ -621,19 +648,34 @@ function iteminfo2(&$Row, $level=0) {
 function iteminfo($id, $level=0) {
     global $item_cols;
     global $DB;
+	global $UDWBaseconf;
     $row = $DB->selectRow('
-		SELECT i.?#, i.entry, maxcount
-		{
-			, l.name_loc' . $_SESSION['locale'] . ' as `name_loc`
-			, l.description_loc' . $_SESSION['locale'] . ' as `description_loc`
-			, ?
-		}
-		FROM ?_aowow_icons, ?_item_template i
-		{ LEFT JOIN (?_locales_item l) ON l.entry=i.entry AND ? }
-		WHERE
-			(i.entry=?d and id=displayid)
-		LIMIT 1
-		', $item_cols[2 + $level], ($_SESSION['locale'] > 0) ? 1 : DBSIMPLE_SKIP, ($_SESSION['locale'] > 0) ? 1 : DBSIMPLE_SKIP, $id
+	SELECT a.* FROM 
+		(
+			SELECT i.?#
+			{
+				, l.name_loc' . $_SESSION['locale'] . ' as `name_loc`
+				, l.description_loc' . $_SESSION['locale'] . ' as `description_loc`
+				, ?
+			}
+			FROM ?_aowow_icons, ?_item_template i
+			{ LEFT JOIN (?_locales_item l) ON l.entry=i.entry AND ? }
+			WHERE
+				(i.entry=?d and id=displayid)
+			
+		) a
+		INNER JOIN (
+			SELECT *, MAX(patch) patchno
+			FROM item_template
+			WHERE patch <= ?d
+			GROUP BY entry
+		) b ON a.entry = b.entry AND a.patch = b.patchno
+		', 
+		$item_cols[2 + $level], 
+		($_SESSION['locale'] > 0) ? 1 : DBSIMPLE_SKIP, 
+		($_SESSION['locale'] > 0) ? 1 : DBSIMPLE_SKIP, 
+		$id,
+		$UDWBaseconf['patch']
     );
     return iteminfo2($row, $level);
 }

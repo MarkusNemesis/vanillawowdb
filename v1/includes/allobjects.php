@@ -382,7 +382,24 @@ function objectinfo2(&$Row, $level=0) {
                         case 1:
                             // Ключ
                             $object['key'] = array();
-                            $object['key'] = $DB->selectRow('SELECT entry as id, name, quality FROM ?_item_template WHERE entry=?d LIMIT 1', $lock_row['lockproperties' . $j]);
+                            $object['key'] = $DB->selectRow('
+							SELECT a.* FROM 
+							(
+								SELECT entry as id, name, quality FROM ?_item_template 
+								WHERE 
+								entry=?d 
+								LIMIT 1
+							) a
+							INNER JOIN (
+								SELECT *, MAX(patch) patchno
+								FROM item_template
+								WHERE patch <= ?d
+								GROUP BY entry
+							) b ON a.entry = b.entry AND a.patch = b.patchno
+							', 
+							$lock_row['lockproperties' . $j]
+							
+							);
                             break;
                         case 2:
                             // Скилл

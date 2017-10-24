@@ -38,15 +38,21 @@ if (!$items = load_cache(7, $cache_str)) {
 			{ AND class=? }
 			{ AND subclass=? }
 			ORDER BY quality DESC, name
-			LIMIT 200000
+			LIMIT ?d
 			) a
 		INNER JOIN (
 			SELECT *, MAX(patch) patchno
 			FROM item_template
-			WHERE patch < 5
+			WHERE patch <= ?d
 			GROUP BY entry
 		) b ON a.entry = b.entry AND a.patch = b.patchno
-		', $item_cols[2], ($_SESSION['locale']) ? $_SESSION['locale'] : DBSIMPLE_SKIP, ($_SESSION['locale']) ? 1 : DBSIMPLE_SKIP, ($class != '') ? $class : DBSIMPLE_SKIP, ($subclass != '') ? $subclass : DBSIMPLE_SKIP
+		', $item_cols[2], 
+		($_SESSION['locale']) ? $_SESSION['locale'] : DBSIMPLE_SKIP, ($_SESSION['locale']) ? 1 : DBSIMPLE_SKIP, 
+		($class != '') ? $class : DBSIMPLE_SKIP, 
+		($subclass != '') ? $subclass : DBSIMPLE_SKIP, 
+		($UDWBaseconf['limit'] != 0) ? $UDWBaseconf['limit'] : DBSIMPLE_SKIP,
+		$UDWBaseconf['patch']
+		
     );
 
     $i = 0;

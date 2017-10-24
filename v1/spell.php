@@ -25,6 +25,7 @@ if (!$spell = load_cache(13, intval($id))) {
 
     // БД
     global $DB;
+	global $UDWBaseconf;
     // Таблица спеллов
     global $allspells;
     // Таблица вещей
@@ -99,7 +100,25 @@ if (!$spell = load_cache(13, intval($id))) {
             if ($row['tool' . $j]) {
                 $spell['tools'][$i] = array();
                 // Имя инструмента
-                $tool_row = $DB->selectRow('SELECT ?#, `quality` FROM ?_item_template, ?_aowow_icons WHERE entry=?d AND id=displayid LIMIT 1', $item_cols[0], $row['tool' . $j]);
+                $tool_row = $DB->selectRow('
+				SELECT a.* FROM 
+				(
+					SELECT ?#, `quality` FROM ?_item_template, ?_aowow_icons 
+					WHERE 
+						entry=?d 
+						AND id=displayid 
+						LIMIT 1
+				) a
+				INNER JOIN (
+					SELECT *, MAX(patch) patchno
+					FROM item_template
+					WHERE patch <= ?d
+					GROUP BY entry
+				) b ON a.entry = b.entry AND a.patch = b.patchno
+				', $item_cols[0], 
+				$row['tool' . $j],
+				$UDWBaseconf['patch']
+				);
                 $spell['tools'][$i]['name'] = $tool_row['name'];
                 $spell['tools'][$i]['quality'] = $tool_row['quality'];
                 // ID инструмента
@@ -118,15 +137,28 @@ if (!$spell = load_cache(13, intval($id))) {
                 $spell['reagents'][$i] = array();
                 // Имя реагента
                 $reagentrow = $DB->selectRow('
-					SELECT c.?#, name
+				SELECT a.* FROM 
+				(
+					SELECT c.?#
 					{ ,l.name_loc?d as `name_loc` }
 					FROM ?_aowow_icons, ?_item_template c
 					{ LEFT JOIN (?_locales_item l) ON l.entry=c.entry AND ? }
 					WHERE
 						c.entry=?d
 						AND id=displayid
-					LIMIT 1
-					', $item_cols[0], ($_SESSION['locale'] > 0) ? $_SESSION['locale'] : DBSIMPLE_SKIP, ($_SESSION['locale'] > 0) ? 1 : DBSIMPLE_SKIP, $row['reagent' . $j]
+					) a
+					INNER JOIN (
+						SELECT *, MAX(patch) patchno
+						FROM item_template
+						WHERE patch <= ?d
+						GROUP BY entry
+					) b ON a.entry = b.entry AND a.patch = b.patchno
+				LIMIT 1
+					', $item_cols[0], 
+					($_SESSION['locale'] > 0) ? $_SESSION['locale'] : DBSIMPLE_SKIP, 
+					($_SESSION['locale'] > 0) ? 1 : DBSIMPLE_SKIP, 
+					$row['reagent' . $j],
+					$UDWBaseconf['patch']
                 );
                 $spell['reagents'][$i]['name'] = !empty($reagentrow['name_loc']) ? $reagentrow['name_loc'] : $reagentrow['name'];
                 $spell['reagents'][$i]['quality'] = $reagentrow['quality'];
@@ -298,6 +330,8 @@ if (!$spell = load_cache(13, intval($id))) {
         // Список книг/рецептов, просто обучающих спеллу
         $spell['taughtbyitem'] = array();
         $taughtbyitem = $DB->select('
+		SELECT a.* FROM 
+		(
 			SELECT ?#, c.entry
 			{ , name_loc?d AS name_loc }
 			FROM ?_aowow_icons, ?_item_template c
@@ -306,7 +340,20 @@ if (!$spell = load_cache(13, intval($id))) {
 				((spellid_2=?d)
 				AND (spelltrigger_2=6))
 				AND id=displayid
-			', $item_cols[2], ($_SESSION['locale'] > 0) ? $_SESSION['locale'] : DBSIMPLE_SKIP, ($_SESSION['locale'] > 0) ? 1 : DBSIMPLE_SKIP, $spell['entry']//, $spell['entry'], $spell['entry'], $spell['entry'], $spell['entry']
+		) a
+		INNER JOIN (
+			SELECT *, MAX(patch) patchno
+			FROM item_template
+			WHERE patch <= ?d
+			GROUP BY entry
+		) b ON a.entry = b.entry AND a.patch = b.patchno
+		
+			', $item_cols[2], 
+			($_SESSION['locale'] > 0) ? $_SESSION['locale'] : DBSIMPLE_SKIP, 
+			($_SESSION['locale'] > 0) ? 1 : DBSIMPLE_SKIP, 
+			$spell['entry'],
+			$UDWBaseconf['patch']
+			//, $spell['entry'], $spell['entry'], $spell['entry'], $spell['entry']
         );
         if ($taughtbyitem) {
             foreach ($taughtbyitem as $i => $itemrow)
@@ -380,6 +427,8 @@ if (!$spell = load_cache(13, intval($id))) {
 
             // Список книг, кастующих спелл, обучающий нужному спеллу
             $taughtbyitem = $DB->select('
+			SELECT a.* FROM 
+			(
 				SELECT ?#, c.entry
 				{ , name_loc?d AS name_loc }
 				FROM ?_aowow_icons, ?_item_template c
@@ -391,7 +440,21 @@ if (!$spell = load_cache(13, intval($id))) {
 					OR (spellid_4 IN (?a))
 					OR (spellid_5 IN (?a)))
 					AND id=displayid
-				', $item_cols[2], ($_SESSION['locale'] > 0) ? $_SESSION['locale'] : DBSIMPLE_SKIP, ($_SESSION['locale'] > 0) ? 1 : DBSIMPLE_SKIP, $taughtbyspells, $taughtbyspells, $taughtbyspells, $taughtbyspells, $taughtbyspells
+				) a
+				INNER JOIN (
+					SELECT *, MAX(patch) patchno
+					FROM item_template
+					WHERE patch <= ?d
+					GROUP BY entry
+				) b ON a.entry = b.entry AND a.patch = b.patchno
+				', $item_cols[2], 
+				($_SESSION['locale'] > 0) ? $_SESSION['locale'] : DBSIMPLE_SKIP, 
+				($_SESSION['locale'] > 0) ? 1 : DBSIMPLE_SKIP, 
+				$taughtbyspells, $taughtbyspells, 
+				$taughtbyspells, 
+				$taughtbyspells, 
+				$taughtbyspells,
+				$UDWBaseconf['patch']
             );
             if ($taughtbyitem) {
                 foreach ($taughtbyitem as $i => $itemrow)
@@ -419,6 +482,8 @@ if (!$spell = load_cache(13, intval($id))) {
 
         // Используется вещями:
         $usedbyitem = $DB->select('
+		SELECT a.* FROM 
+		(
 			SELECT ?#, c.entry
 			{ , name_loc?d AS name_loc }
 			FROM ?_aowow_icons, ?_item_template c
@@ -426,7 +491,21 @@ if (!$spell = load_cache(13, intval($id))) {
 			WHERE
 				(spellid_1=?d OR (spellid_2=?d AND spelltrigger_2!=6) OR spellid_3=?d OR spellid_4=?d OR spellid_5=?d)
 				AND id=displayID
-			', $item_cols[2], ($_SESSION['locale'] > 0) ? $_SESSION['locale'] : DBSIMPLE_SKIP, ($_SESSION['locale'] > 0) ? 1 : DBSIMPLE_SKIP, $spell['entry'], $spell['entry'], $spell['entry'], $spell['entry'], $spell['entry']
+		) a
+		INNER JOIN (
+			SELECT *, MAX(patch) patchno
+			FROM item_template
+			WHERE patch <= ?d
+			GROUP BY entry
+		) b ON a.entry = b.entry AND a.patch = b.patchno
+			', $item_cols[2], 
+			($_SESSION['locale'] > 0) ? $_SESSION['locale'] : DBSIMPLE_SKIP, 
+			($_SESSION['locale'] > 0) ? 1 : DBSIMPLE_SKIP, $spell['entry'], 
+			$spell['entry'], 
+			$spell['entry'], 
+			$spell['entry'], 
+			$spell['entry'],
+			$UDWBaseconf['patch']
         );
         if ($usedbyitem) {
             $spell['usedbyitem'] = array();
