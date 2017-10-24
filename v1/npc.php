@@ -21,6 +21,7 @@ $smarty->config_load($conf_file, 'npc');
 global $DB;
 global $spell_cols;
 global $npc_cols;
+global $UDWBaseconf;
 
 // Заголовок страницы
 $id = $podrazdel;
@@ -179,15 +180,28 @@ if (!$npc = load_cache(1, intval($id))) {
 
     // Продает:
     $rows_s = $DB->select('
-		SELECT ?#, i.entry, i.maxcount, n.`maxcount` as `drop-maxcount`
-			{, l.name_loc?d AS `name_loc`}
-		FROM ?_npc_vendor n, ?_aowow_icons, ?_item_template i
-			{LEFT JOIN (?_locales_item l) ON l.entry=i.entry AND ?d}
-		WHERE
-			n.entry=?
-			AND i.entry=n.item
-			AND id=i.displayid
-		', $item_cols[2], ($_SESSION['locale']) ? $_SESSION['locale'] : DBSIMPLE_SKIP, ($_SESSION['locale']) ? 1 : DBSIMPLE_SKIP, $id
+	SELECT a.* FROM 
+		(
+			SELECT ?#, i.entry, i.maxcount, n.`maxcount` as `drop-maxcount`
+				{, l.name_loc?d AS `name_loc`}
+			FROM ?_npc_vendor n, ?_aowow_icons, ?_item_template i
+				{LEFT JOIN (?_locales_item l) ON l.entry=i.entry AND ?d}
+			WHERE
+				n.entry=?
+				AND i.entry=n.item
+				AND id=i.displayid
+			) a
+		INNER JOIN (
+			SELECT *, MAX(patch) patchno
+			FROM item_template
+			WHERE patch <= ?d
+			GROUP BY entry
+		) b ON a.entry = b.entry AND a.patch = b.patchno
+		', $item_cols[4], 
+		($_SESSION['locale']) ? $_SESSION['locale'] : DBSIMPLE_SKIP, 
+		($_SESSION['locale']) ? 1 : DBSIMPLE_SKIP, 
+		$id,
+		$UDWBaseconf['patch']
     );
     if ($rows_s) {
         $npc['sells'] = array();

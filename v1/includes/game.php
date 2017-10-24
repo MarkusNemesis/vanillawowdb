@@ -379,7 +379,7 @@ function loot_table($table, $lootid, $max_percent=100) {
 		WHERE
 			l.entry=?d
 		{LIMIT ?d}
-		', $item_cols[2], 
+		', $item_cols[4], 
 		($_SESSION['locale']) ? $_SESSION['locale'] : DBSIMPLE_SKIP, 
 		($_SESSION['locale']) ? 1 : DBSIMPLE_SKIP, 
 		$lootid, 
@@ -390,7 +390,7 @@ function loot_table($table, $lootid, $max_percent=100) {
     foreach ($rows as $i => $row) {
 		
 		// Check if the patch number is valid
-		echo $row['patch'];
+		echo $row['patch']; // REMOVE BEFORE FLIGHT
 		if ($row['patch'] > $UDWBaseconf['patch'])
 		{
 			echo "Too new!";
