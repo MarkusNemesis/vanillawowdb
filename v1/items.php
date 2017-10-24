@@ -26,9 +26,7 @@ if (!$items = load_cache(7, $cache_str)) {
     unset($items);
 
     // Составляем запрос к БД, выполняющий поиск по заданным классу и подклассу
-    $rows = $DB->select('
-		SELECT a.* FROM 
-		(
+	$rows = $DB->select('
 		SELECT ?#, i.entry, maxcount
 			{, l.name_loc?d AS `name_loc`}
 		FROM ?_aowow_icons, ?_item_template i
@@ -38,23 +36,15 @@ if (!$items = load_cache(7, $cache_str)) {
 			{ AND class=? }
 			{ AND subclass=? }
 			ORDER BY quality DESC, name
-			LIMIT ?d
-			) a
-		INNER JOIN (
-			SELECT *, MAX(patch) patchno
-			FROM item_template
-			WHERE patch <= ?d
-			GROUP BY entry
-		) b ON a.entry = b.entry AND a.patch = b.patchno
+			LIMIT 200000
 		', $item_cols[2], 
-		($_SESSION['locale']) ? $_SESSION['locale'] : DBSIMPLE_SKIP, ($_SESSION['locale']) ? 1 : DBSIMPLE_SKIP, 
-		($class != '') ? $class : DBSIMPLE_SKIP, 
-		($subclass != '') ? $subclass : DBSIMPLE_SKIP, 
-		($UDWBaseconf['limit'] != 0) ? $UDWBaseconf['limit'] : DBSIMPLE_SKIP,
-		$UDWBaseconf['patch']
-		
+		($_SESSION['locale']) ? $_SESSION['locale'] : DBSIMPLE_SKIP, 
+		($_SESSION['locale']) ? 1 : DBSIMPLE_SKIP, ($class != '') ? $class : DBSIMPLE_SKIP, 
+		($subclass != '') ? $subclass : DBSIMPLE_SKIP
     );
-
+	
+	$rows = sanitiserows($rows);
+	
     $i = 0;
     $items = array();
     foreach ($rows as $numRow => $row) {

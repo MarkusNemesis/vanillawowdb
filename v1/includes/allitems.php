@@ -225,7 +225,6 @@ function getitemname($id) {
 			{ LEFT JOIN (?_locales_item l) ON l.entry=i.entry AND ? }
 			WHERE
 				i.entry=?
-			LIMIT 1
 		) a
 		INNER JOIN (
 			SELECT *, MAX(patch) patchno
@@ -233,6 +232,7 @@ function getitemname($id) {
 			WHERE patch <= ?d
 			GROUP BY entry
 		) b ON a.entry = b.entry AND a.patch = b.patchno
+		LIMIT 1
 		', ($_SESSION['locale'] > 0) ? $_SESSION['locale'] : DBSIMPLE_SKIP, 
 		($_SESSION['locale'] > 0) ? 1 : DBSIMPLE_SKIP, 
 		$id,
@@ -652,32 +652,51 @@ function iteminfo($id, $level=0) {
     global $DB;
 	global $UDWBaseconf;
     $row = $DB->selectRow('
-	SELECT a.* FROM 
-		(
-			SELECT i.?#
-			{
-				, l.name_loc' . $_SESSION['locale'] . ' as `name_loc`
-				, l.description_loc' . $_SESSION['locale'] . ' as `description_loc`
-				, ?
-			}
-			FROM ?_aowow_icons, ?_item_template i
-			{ LEFT JOIN (?_locales_item l) ON l.entry=i.entry AND ? }
-			WHERE
-				(i.entry=?d and id=displayid)
-			
-		) a
-		INNER JOIN (
-			SELECT *, MAX(patch) patchno
-			FROM item_template
-			WHERE patch <= ?d
-			GROUP BY entry
-		) b ON a.entry = b.entry AND a.patch = b.patchno
-		', 
-		$item_cols[2 + $level], 
-		($_SESSION['locale'] > 0) ? 1 : DBSIMPLE_SKIP, 
-		($_SESSION['locale'] > 0) ? 1 : DBSIMPLE_SKIP, 
-		$id,
-		$UDWBaseconf['patch']
+		SELECT i.?#, i.entry, maxcount
+		{
+			, l.name_loc' . $_SESSION['locale'] . ' as `name_loc`
+			, l.description_loc' . $_SESSION['locale'] . ' as `description_loc`
+			, ?
+		}
+		FROM ?_aowow_icons, ?_item_template i
+		{ LEFT JOIN (?_locales_item l) ON l.entry=i.entry AND ? }
+		WHERE
+			(i.entry=?d and id=displayid)
+		LIMIT 1
+		', $item_cols[2 + $level], ($_SESSION['locale'] > 0) ? 1 : DBSIMPLE_SKIP, ($_SESSION['locale'] > 0) ? 1 : DBSIMPLE_SKIP, $id
     );
+	$row = sanitiserows($row);
     return iteminfo2($row, $level);
 }
+
+// Sanitise item rows for progressive data
+/**
+ * @param type $rows
+ * @param type $level
+ * @return type array of rows
+ */
+ function sanitiserows($rows)
+ {
+	global $UDWBaseconf;
+	 // Remove items that are of a higher patch
+	foreach ($rows as $i => $row) {
+		// Check if the patch number is valid
+		if ($row['patch'] > $UDWBaseconf['patch'])
+		{
+			echo "Too new! - Removing " . $row['name'] . ' from patch ' . $row['patch'] . ' From index ' . $i . "! <br>";
+			unset($rows[$i]);
+		}
+	};
+	// Check for duplicates, and if there are, find the highest patched and delete the others.
+	foreach ($rows as $i => $row) {
+		foreach ($rows as $j => $jrow) {
+			if ($row['entry'] == $jrow['entry']) {
+				if ($row['patch'] > $jrow['patch']) {
+					echo "Too old! - Removing " . $jrow['name'] . ' from patch ' . $jrow['patch'] . ' From index ' . $j . "! <br>";
+					unset($rows[$j]);
+				}
+			}
+		}
+	};
+	return $rows;
+ }
