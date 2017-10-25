@@ -80,6 +80,7 @@ if (!$npc = load_cache(1, intval($id))) {
 
         $npc['rank'] = $smarty->get_config_vars('rank' . $npc['rank']);
         // faction_A = faction_H
+		
         $npc['faction_num'] = $row['factionID'];
         $npc['faction'] = $row['faction-name'];
         // Деньги
