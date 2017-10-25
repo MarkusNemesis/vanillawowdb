@@ -385,7 +385,8 @@ function loot_table($table, $lootid, $max_percent=100) {
 		$lootid, 
 		($UDWBaseconf['limit'] != 0) ? $UDWBaseconf['limit'] : DBSIMPLE_SKIP
     );
-
+	// Check patch validity
+	$rows = sanitiseitemrows($rows);
     // Перебираем
     foreach ($rows as $i => $row) {
         if ($row['mincountOrRef'] > 0) {

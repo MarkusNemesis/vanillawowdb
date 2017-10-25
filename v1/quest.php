@@ -380,6 +380,9 @@ if (!$quest = load_cache(10, intval($id))) {
 		($_SESSION['locale']>0)? 1: DBSIMPLE_SKIP,
 		$quest['entry']
 	);
+	
+	$rows = sanitiseitemrows($rows);
+	
     if ($rows) {
         foreach ($rows as $tmp) {
             if (!empty($tmp['name_loc']))

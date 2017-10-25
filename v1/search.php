@@ -64,6 +64,9 @@ $rows = $DB->select('
 			AND a.id = i.displayid;
 	', $item_cols[3], ($m) ? $_SESSION['locale'] : DBSIMPLE_SKIP, ($m) ? 1 : DBSIMPLE_SKIP, $nsearch, ($m) ? $m : DBSIMPLE_SKIP
 );
+
+$rows = sanitiseitemrows($rows);
+
 unset($m);
 unset($t);
 unset($tmp);

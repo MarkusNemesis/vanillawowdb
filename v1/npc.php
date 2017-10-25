@@ -187,8 +187,14 @@ if (!$npc = load_cache(1, intval($id))) {
 			n.entry=?
 			AND i.entry=n.item
 			AND id=i.displayid
-		', $item_cols[2], ($_SESSION['locale']) ? $_SESSION['locale'] : DBSIMPLE_SKIP, ($_SESSION['locale']) ? 1 : DBSIMPLE_SKIP, $id
+		', $item_cols[2], 
+		($_SESSION['locale']) ? $_SESSION['locale'] : DBSIMPLE_SKIP, 
+		($_SESSION['locale']) ? 1 : DBSIMPLE_SKIP, 
+		$id
     );
+	
+	$rows_s = sanitiseitemrows($rows_s);
+	
     if ($rows_s) {
         $npc['sells'] = array();
         foreach ($rows_s as $numRow => $row) {

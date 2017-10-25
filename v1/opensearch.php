@@ -25,6 +25,7 @@ $UDWBaseconf['realmd'] = false;
 // Настройка БД
 global $DB;
 require_once('includes/db.php');
+require_once ('includes/allitems.php');
 
 $search_query = $_GET['search'];
 if (strlen($search_query) < 2)
@@ -53,20 +54,22 @@ function SideByRace($race) {
 
 // Ищем вещи:
 $rows = $DB->select('
-	SELECT i.entry, ?#, iconname, quality
+	SELECT i.entry, ?#, iconname, quality, entry, patch
 	FROM ?_aowow_icons a, ?_item_template i{, ?# l}
 	WHERE
 		?# LIKE ?
 		AND a.id = i.displayid
 		{ AND l.entry = i.entry AND ?}
 	ORDER BY i.quality DESC, i.name
-	LIMIT 3', 
+	LIMIT 10', 
 	$_SESSION['locale'] == 0 ? 'name' : 'name_loc' . $_SESSION['locale'], // SELECT
         $_SESSION['locale'] == 0 ? DBSIMPLE_SKIP : 'locales_item', // FROM
         $_SESSION['locale'] == 0 ? 'name' : 'name_loc' . $_SESSION['locale'], // WHERE
         $search_query,
         $_SESSION['locale'] == 0 ? DBSIMPLE_SKIP : 1
 );
+
+$rows = sanitiseitemrows($rows);
 
 foreach ($rows as $i => $row)
     $found[$row['name'] . ' (Item)'] = array(

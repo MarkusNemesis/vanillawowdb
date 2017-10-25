@@ -243,8 +243,14 @@ if (!$item = load_cache(5, $id)) {
 				WHERE
 					c.entry=?d
 					AND id=displayid
-				', $item_cols[2], ($_SESSION['locale'] > 0) ? $_SESSION['locale'] : DBSIMPLE_SKIP, ($_SESSION['locale'] > 0) ? 1 : DBSIMPLE_SKIP, $lootid
+				', $item_cols[2], 
+				($_SESSION['locale'] > 0) ? $_SESSION['locale'] : DBSIMPLE_SKIP, 
+				($_SESSION['locale'] > 0) ? 1 : DBSIMPLE_SKIP, 
+				$lootid
             );
+			
+			$rows = sanitiseitemrows($rows);
+			
             foreach ($rows as $numRow => $row)
                 $item['containedinitem'][] = array_merge(iteminfo2($row, 0), $drop);
         }
@@ -331,8 +337,14 @@ if (!$item = load_cache(5, $id)) {
 				WHERE
 					DisenchantID=?d
 					AND id=displayid
-				', $item_cols[2], ($_SESSION['locale'] > 0) ? $_SESSION['locale'] : DBSIMPLE_SKIP, ($_SESSION['locale'] > 0) ? 1 : DBSIMPLE_SKIP, $lootid
+				', $item_cols[2], 
+				($_SESSION['locale'] > 0) ? $_SESSION['locale'] : DBSIMPLE_SKIP, 
+				($_SESSION['locale'] > 0) ? 1 : DBSIMPLE_SKIP, 
+				$lootid
             );
+			
+			$rows = sanitiseitemrows($rows);
+			
             foreach ($rows as $numRow => $row)
                 $item['disenchantedfrom'][] = array_merge(iteminfo2($row, 0), $drop);
         }
@@ -358,8 +370,14 @@ if (!$item = load_cache(5, $id)) {
 				BagFamily=?d
 				AND ContainerSlots>0
 				AND id=displayid
-			', $item_cols[2], ($_SESSION['locale'] > 0) ? $_SESSION['locale'] : DBSIMPLE_SKIP, ($_SESSION['locale'] > 0) ? 1 : DBSIMPLE_SKIP, $item['BagFamily']
+			', $item_cols[2], 
+			($_SESSION['locale'] > 0) ? $_SESSION['locale'] : DBSIMPLE_SKIP, 
+			($_SESSION['locale'] > 0) ? 1 : DBSIMPLE_SKIP, 
+			$item['BagFamily']
         );
+		
+		$item_cpi = sanitiseitemrows($item_cpi);
+		
         if ($rows_cpi) {
             $item['canbeplacedin'] = array();
             foreach ($rows_cpi as $numRow => $row)

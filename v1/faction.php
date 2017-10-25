@@ -63,6 +63,8 @@ if (!$faction = load_cache(18, intval($id))) {
 				AND a.id=i.displayid
 			', $item_cols[2], $id
         );
+		// Check itemisation
+		$item_rows = sanitiseitemrows($item_rows);
         if ($item_rows) {
             $faction['items'] = array();
             foreach ($item_rows as $i => $row)

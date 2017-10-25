@@ -19,7 +19,7 @@ $smarty->config_load($conf_file, 'items');
 point_delim($podrazdel, $class, $subclass);
 
 global $DB;
-
+global $UDWBaseconf;
 $cache_str = (!isset($class) ? 'x' : intval($class)) . '_' . (!isset($subclass) ? 'x' : intval($subclass));
 
 if (!$items = load_cache(7, $cache_str)) {
@@ -36,10 +36,17 @@ if (!$items = load_cache(7, $cache_str)) {
 			{ AND class=? }
 			{ AND subclass=? }
 			ORDER BY quality DESC, name
-			LIMIT 200
-		', $item_cols[2], ($_SESSION['locale']) ? $_SESSION['locale'] : DBSIMPLE_SKIP, ($_SESSION['locale']) ? 1 : DBSIMPLE_SKIP, ($class != '') ? $class : DBSIMPLE_SKIP, ($subclass != '') ? $subclass : DBSIMPLE_SKIP
+			LIMIT ?d
+		', $item_cols[2], 
+		($_SESSION['locale']) ? $_SESSION['locale'] : DBSIMPLE_SKIP, 
+		($_SESSION['locale']) ? 1 : DBSIMPLE_SKIP, 
+		($class != '') ? $class : DBSIMPLE_SKIP, 
+		($subclass != '') ? $subclass : DBSIMPLE_SKIP,
+		$UDWBaseconf['limit']
     );
 
+	$rows = sanitiseitemrows($rows);
+	
     $i = 0;
     $items = array();
     foreach ($rows as $numRow => $row) {

@@ -683,7 +683,7 @@ function spell_desc2($spellRow, $type='tooltip') {
 function render_spell_tooltip(&$row) {
     // БД
     global $DB;
-
+	global $UDWBaseconf;
     // Время каста
     if ($row['spellcasttimesID'] > 1)
         $casttime = ($DB->selectCell('SELECT base FROM ?_aowow_spellcasttimes WHERE id=? LIMIT 1', $row['spellcasttimesID'])) / 1000;
@@ -697,7 +697,22 @@ function render_spell_tooltip(&$row) {
         if ($row['reagent' . $j]) {
             $reagents[$i] = array();
             // Имя реагента
-            $reagents[$i]['name'] = $DB->selectCell("SELECT name FROM ?_item_template WHERE entry=? LIMIT 1", $row['reagent' . $j]);
+            $reagents[$i]['name'] = $DB->selectCell("
+			SELECT a.* FROM 
+			(
+				SELECT name FROM ?_item_template WHERE entry=?
+			) a
+			INNER JOIN (
+				SELECT *, MAX(patch) patchno
+				FROM item_template
+				WHERE patch <= ?d
+				GROUP BY entry
+			) b ON a.entry = b.entry AND a.patch = b.patchno
+			LIMIT 1
+			", 
+			$row['reagent' . $j],
+			$UDWBaseconf['patch']
+			);
             // Количество реагентов
             $reagents[$i]['count'] = $row['reagentcount' . $j];
             $i++;
@@ -711,7 +726,21 @@ function render_spell_tooltip(&$row) {
         if ($row['tool' . $j]) {
             $tools[$i] = array();
             // Имя инструмента
-            $tools[$i]['name'] = $DB->selectCell("SELECT name FROM ?_item_template WHERE entry=? LIMIT 1", $row['tool' . $j]);
+            $tools[$i]['name'] = $DB->selectCell("
+			SELECT a.* FROM 
+			(
+				SELECT name FROM ?_item_template WHERE entry=? 
+			) a
+			INNER JOIN (
+				SELECT *, MAX(patch) patchno
+				FROM item_template
+				WHERE patch <= ?d
+				GROUP BY entry
+			) b ON a.entry = b.entry AND a.patch = b.patchno
+			LIMIT 1", 
+			$row['tool' . $j],
+			$UDWBaseconf['patch']
+			);
             $i++;
         }
     }

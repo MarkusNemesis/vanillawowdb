@@ -587,7 +587,7 @@ var LANG = {
     count: "Count",
     daily: "Daily",
     dps: "DPS",
-    group: "Groooooooup",
+    group: "Group",
     instancetype: "Instance type",
     lastpost: "Last post",
     level: "Level",
