@@ -46,6 +46,9 @@ new Listview(
 					{/if}
 					minlevel: {$data[i].minlevel},
 					maxlevel: {$data[i].maxlevel},
+					{if $zonedata}
+					Hello!
+					{/if}
 					type: {$data[i].type},
 					classification: {$data[i].classification},
 					react: [{$data[i].react}],

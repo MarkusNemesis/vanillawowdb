@@ -230,6 +230,79 @@ function sum_subarrays_by_key($tab, $key) {
     return $sum;
 }
 
+// Get NPC Location
+function coord_tozone($mapid, $x, $y, $global) {
+    // Подключение к базе
+    global $DB;
+
+    $rows = $DB->select("SELECT * FROM ?_aowow_zones WHERE (mapID=? and x_min<? and x_max>? and y_min<? and y_max>?)", $mapid, $x, $x, $y, $y);
+
+    foreach ($rows as $numRow => $row) {
+        // Сохраяняем имя карты и координаты
+        $wow['zone'] = $row['areatableID'];
+        $wow['name'] = $row['name_loc' . $_SESSION['locale']];
+
+        // Т.к. в игре координаты начинают отсчёт с левого верхнего угла
+        //  а в системе координат сервера с правого нижнего,
+        //  делаем соответствующее преобразование.
+        $tx = 100 - ($y - $row["y_min"]) / (($row["y_max"] - $row["y_min"]) / 100);
+        $ty = 100 - ($x - $row["x_min"]) / (($row["x_max"] - $row["x_min"]) / 100);
+    }
+
+    $wow['x'] = round($tx, 4);
+    $wow['y'] = round($ty, 4);
+
+    return $wow;
+}
+
+function resolve_coord(&$data) {
+
+    // Гуиды для эвента
+    $guids = array();
+    // Объявляем новый массив с преобразованными данными
+    $xdata = array();
+    // Перебираем по порядку все координаты, посланные функции
+    //  Если таких же координат (уже преобразованных) ещё нет, добавляем в новый массив
+    foreach ($data as $ndata) {
+            $tmp = coord_tozone($ndata['m'], $ndata['x'], $ndata['y'], false);
+
+        $tmp['t'] = $ndata['type'];
+        $xdata[] = $tmp;
+    }
+
+    // Возвращаем новый массив
+    return $xdata;
+}
+
+function getLocation($id, $type) {
+    global $DB;
+
+    $data = $DB->select('SELECT guid, map AS m, position_x AS x, position_y AS y, spawntimesecs, {MovementType AS ?#, }"0" AS `type` FROM ?_' . $type . ' WHERE id = ?d GROUP BY ROUND(x,-2), ROUND(y,-2) ORDER BY x,y', ($type == 'gameobject' ? DBSIMPLE_SKIP : 'mt'), $id);
+
+    if (count($data) > 0) {
+        $data = resolve_coord($data);
+
+        // Сортируем массив. Зачем???
+        if ($data)
+            sort($data);
+
+        // Во временную переменную tmp заносим номер локации
+        $j = 0;
+        $tmp = $data[$j]['zone'];
+        // Номер массива
+        $n = 0;
+        $k = 0;
+        $real_count = 0;
+        $locationdata[$n] = array();
+        $locationdata[$n]['zone'] = $data[$j]['zone'];
+        $locationdata[$n]['name'] = $data[$j]['name'];
+		
+		return $locationdata[$n]['name'];
+    }
+}
+
+///// END LOCATION //////
+
 /**
  *
  * @param type $mapid
@@ -581,7 +654,7 @@ function position($id, $type) {
                 }
             }
         }
-
+		
         $smarty->assign('zonedata', $zonedata);
         $smarty->assign('exdata', $exdata);
     }

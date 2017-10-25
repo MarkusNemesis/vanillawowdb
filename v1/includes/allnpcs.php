@@ -9,7 +9,7 @@
  * GNU General Public License (http://gnu.org).
  *
  */
-
+require_once('includes/game.php');
 // Для списка creatureinfo()
 $npc_cols[0] = array('name', 'subname', 'minlevel', 'maxlevel', 'type', 'rank', 'A', 'H');
 $npc_cols[1] = array('subname', 'minlevel', 'maxlevel', 'type', 'rank', 'minhealth', 'maxhealth', 'minmana', 'maxmana', 'mingold', 'maxgold', 'lootid', /*'spell1', 'spell2', 'spell3', 'spell4',*/ 'A', 'H', 'mindmg', 'maxdmg', 'attackpower', 'dmg_multiplier', 'armor');
@@ -30,9 +30,9 @@ function creatureinfo2(&$Row) {
     // Min/Max уровни
     $creature['minlevel'] = $Row['minlevel'];
     $creature['maxlevel'] = $Row['maxlevel'];
-    // TODO: Месторасположение
-    //	$creature['location'] = location($creature['entry'],'creature');
-    // TODO: Реакция на фракции'
+	// Get Location
+	$creature['location'] = getLocation($creature['entry'], "creature");
+	// Reaction
     $creature['react'] = ($Row['A']) . ',' . ($Row['H']);
     // Тип NPC
     $creature['type'] = $Row['type'];
@@ -40,6 +40,7 @@ function creatureinfo2(&$Row) {
     $creature['tag'] = str_normalize($Row['subname']);
     // Ранг NPC
     $creature['classification'] = $Row['rank'];
+
     return $creature;
 }
 
