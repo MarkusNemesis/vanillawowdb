@@ -379,39 +379,15 @@ function loot_table($table, $lootid, $max_percent=100) {
 		WHERE
 			l.entry=?d
 		{LIMIT ?d}
-		', $item_cols[4], 
+		', $item_cols[2], 
 		($_SESSION['locale']) ? $_SESSION['locale'] : DBSIMPLE_SKIP, 
 		($_SESSION['locale']) ? 1 : DBSIMPLE_SKIP, 
 		$lootid, 
 		($UDWBaseconf['limit'] != 0) ? $UDWBaseconf['limit'] : DBSIMPLE_SKIP
     );
-	
-	// Remove items that are of a higher patch
-	foreach ($rows as $i => $row) {
-		
-		// Check if the patch number is valid
-		if ($row['patch'] > $UDWBaseconf['patch'])
-		{
-			echo "Too new! - Removing " . $row['name'] . ' from patch ' . $row['patch'] . ' From index ' . $i . "! <br>";
-			unset($rows[$i]);
-			break;
-		}
-	};
-	// Check for duplicates, and if there are, find the highest patched and delete the others.
-	foreach ($rows as $i => $row) {
-		foreach ($rows as $j => $jrow) {
-			if ($row['entry'] == $jrow['entry']) {
-				if ($row['patch'] > $jrow['patch']) {
-					echo "Too old! - Removing " . $jrow['name'] . ' from patch ' . $jrow['patch'] . ' From index ' . $j . "! <br>";
-					unset($rows[$j]);
-				}
-			}
-		}
-	};
-	
+
     // Перебираем
     foreach ($rows as $i => $row) {
-		
         if ($row['mincountOrRef'] > 0) {
             // Не ссылка!
             if ($row['groupid'] > 0) {

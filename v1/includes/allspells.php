@@ -683,8 +683,7 @@ function spell_desc2($spellRow, $type='tooltip') {
 function render_spell_tooltip(&$row) {
     // БД
     global $DB;
-	global $UDWBaseconf;
-	
+
     // Время каста
     if ($row['spellcasttimesID'] > 1)
         $casttime = ($DB->selectCell('SELECT base FROM ?_aowow_spellcasttimes WHERE id=? LIMIT 1', $row['spellcasttimesID'])) / 1000;
@@ -698,24 +697,7 @@ function render_spell_tooltip(&$row) {
         if ($row['reagent' . $j]) {
             $reagents[$i] = array();
             // Имя реагента
-            $reagents[$i]['name'] = $DB->selectCell("
-			SELECT a.* FROM 
-			(
-				SELECT name, entry, patch FROM ?_item_template 
-				WHERE entry=? 
-				LIMIT 1
-			) a
-			INNER JOIN (
-				SELECT *, MAX(patch) patchno
-				FROM item_template
-				WHERE patch <= ?d
-				GROUP BY entry
-			) b ON a.entry = b.entry AND a.patch = b.patchno
-			", 
-			$row['reagent' . $j],
-			$UDWBaseconf['patch']
-			
-			);
+            $reagents[$i]['name'] = $DB->selectCell("SELECT name FROM ?_item_template WHERE entry=? LIMIT 1", $row['reagent' . $j]);
             // Количество реагентов
             $reagents[$i]['count'] = $row['reagentcount' . $j];
             $i++;
@@ -729,23 +711,7 @@ function render_spell_tooltip(&$row) {
         if ($row['tool' . $j]) {
             $tools[$i] = array();
             // Имя инструмента
-            $tools[$i]['name'] = $DB->selectCell("
-			SELECT a.* FROM 
-			(
-				SELECT name FROM ?_item_template 
-				WHERE entry=? 
-				LIMIT 1
-			) a
-			INNER JOIN (
-				SELECT *, MAX(patch) patchno
-				FROM item_template
-				WHERE patch <= ?d
-				GROUP BY entry
-			) b ON a.entry = b.entry AND a.patch = b.patchno
-			", $row['tool' . $j],
-			$UDWBaseconf['patch']
-			
-			);
+            $tools[$i]['name'] = $DB->selectCell("SELECT name FROM ?_item_template WHERE entry=? LIMIT 1", $row['tool' . $j]);
             $i++;
         }
     }
@@ -862,13 +828,7 @@ function allspellsinfo2(&$row, $level=0) {
         if (IsSet($allitems[$row['effect1itemtype']]['icon']))
             $allspells[$num]['icon'] = trim($allitems[$row['effect1itemtype']]['icon'], "\r");
         else
-            $allspells[$num]['icon'] = trim($DB->selectCell('
-		SELECT iconname FROM ?_aowow_icons 
-		WHERE id=(SELECT displayid FROM ?_item_template WHERE entry=?d LIMIT 1)
-		LIMIT 1
-		', 
-		$row['effect1itemtype']) 
-		, "\r");
+            $allspells[$num]['icon'] = trim($DB->selectCell('SELECT iconname FROM ?_aowow_icons WHERE id=(SELECT displayid FROM ?_item_template WHERE entry=?d LIMIT 1) LIMIT 1', $row['effect1itemtype']) , "\r");
     } else {
         $allspells[$num]['icon'] = trim($row['iconname'], "\r");
     }
