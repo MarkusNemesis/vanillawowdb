@@ -6,7 +6,21 @@ var mn_quests = [[0, "Eastern Kingdoms", , [[36, "Alterac Mountains"], [45, "Ara
 var mn_spells = [[7, "Class Skills", , [[11, "Druid", , [[574, "Balance"], [134, "Feral Combat"], [573, "Restoration"]]], [3, "Hunter", , [[50, "Beast Mastery"], [163, "Marksmanship"], [51, "Survival"]]], [8, "Mage", , [[237, "Arcane"], [8, "Fire"], [6, "Frost"]]], [2, "Paladin", , [[594, "Holy"], [267, "Protection"], [184, "Retribution"]]], [5, "Priest", , [[613, "Discipline"], [56, "Holy"], [78, "Shadow Magic"]]], [4, "Rogue", , [[253, "Assassination"], [38, "Combat"], [633, "Lockpicking"], [39, "Subtlety"]]], [7, "Shaman", , [[375, "Elemental Combat"], [373, "Enhancement"], [374, "Restoration"]]], [9, "Warlock", , [[355, "Affliction"], [354, "Demonology"], [593, "Destruction"]]], [1, "Warrior", , [[26, "Arms"], [256, "Fury"], [257, "Protection"]]]]], [-3, "Pet Skills", , [[782, "Ghoul"], [, "Hunter"], [270, "Generic"], [653, "Bat"], [210, "Bear"], [655, "Bird of Prey"], [211, "Boar"], [213, "Carrion Bird"], [209, "Cat"], [780, "Chimera"], [787, "Core Hound"], [214, "Crab"], [212, "Crocolisk"], [781, "Devilsaur"], [763, "Dragonhawk"], [215, "Gorilla"], [654, "Hyena"], [775, "Moth"], [217, "Raptor"], [767, "Ravager"], [786, "Rhino"], [236, "Scorpid"], [768, "Serpent"], [783, "Silithid"], [203, "Spider"], [788, "Spirit Beast"], [765, "Sporebat"], [218, "Tallstrider"], [251, "Turtle"], [766, "Warp Stalker"], [785, "Wasp"], [656, "Wind Serpent"], [208, "Wolf"], [784, "Worm"], [, "Warlock"], [761, "Felguard"], [189, "Felhunter"], [188, "Imp"], [205, "Succubus"], [204, "Voidwalker"]]], [11, "Professions", , [[171, "Alchemy"], [164, "Blacksmithing", , [[9788, "Armorsmithing"], [9787, "Weaponsmithing"], [17041, "Master Axesmithing"], [17040, "Master Hammersmithing"], [17039, "Master Swordsmithing"]]], [333, "Enchanting"], [202, "Engineering", , [[20219, "Gnomish Engineering"], [20222, "Goblin Engineering"]]], [182, "Herbalism"], [165, "Leatherworking", , [[10656, "Dragonscale Leatherworking"], [10658, "Elemental Leatherworking"], [10660, "Tribal Leatherworking"]]], [186, "Mining"], [393, "Skinning"], [197, "Tailoring", , [[26798, "Mooncloth Tailoring"], [26801, "Shadoweave Tailoring"], [26797, "Spellfire Tailoring"]]]]], [9, "Secondary Skills", , [[185, "Cooking"], [129, "First Aid"], [356, "Fishing"], [762, "Riding"]]], [8, "Armor Proficiencies"], [10, "Languages"], [-4, "Racial Traits"], [6, "Weapon Skills"], [0, "Uncategorized"]];
 var mn_zones = [[0, "Eastern Kingdoms"], [1, "Kalimdor"], [2, "Dungeons"], [3, "Raids"], [6, "Battlegrounds"]];
 var mn_talentCalc = [["0", "Druid"], ["c", "Hunter"], ["o", "Mage"], ["s", "Paladin"], ["b", "Priest"], ["f", "Rogue"], ["h", "Shaman"], ["I", "Warlock"], ["L", "Warrior"]];
-var mn_database = [[, "Browse"], [0, "Items", "?items", mn_items], [2, "Item Sets", "?itemsets" ], [4, "NPCs", "?npcs", mn_npcs], [5, "Objects", "?objects", mn_objects], [3, "Quests", "?quests", mn_quests], [1, "Spells", "?spells", mn_spells], /*[6, "Zones", "?zones", mn_zones],*/ [7, "Factions", "?factions"], [, "Utilities"], [30, "Latest Comments", "?latest=comments"] /*, [31, "Latest Screenshots", "?latest=screenshots"] */ ];
+var mn_database=[
+	[0,"Items","?items",mn_items],
+	[2,"Item Sets","?itemsets"/*,mn_itemSets*/],
+	[4,"NPCs","?npcs",mn_npcs],
+	[3,"Quests","?quests",mn_quests],
+	//[6,"Zones","?zones",mn_zones],
+	[1,"Spells","?spells",mn_spells],
+	//[9,"Achievements","?achievements",mn_achievements],
+	[5,"Objects","?objects",mn_objects],
+	//[7,"Factions","?factions=1118",mn_factions],
+	//[10,"Titles","?titles",mn_titles],
+	//[8,"Hunter Pets","?pets",mn_pets],
+	//[11,"World Events","?events"/*,mn_holidays*/],
+	//[8,"Users","?users"]
+];
 var mn_tools = [ /*[0, "Talent Calculator", "?talent", mn_talentCalc],*/ [1, "Maps", "?maps"]];
 var mn_path = [[0, "Database", , mn_database], [1, "Tools", , mn_tools]];
 var g_chr_classes = {
