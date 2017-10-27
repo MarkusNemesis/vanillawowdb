@@ -161,6 +161,34 @@ function ct(A) {
     return document.createTextNode(A)
 }
 
+function ae(a, b) {
+    return a.appendChild(b)
+}
+function aef(a, b) {
+    return a.insertBefore(b, a.firstChild)
+}
+function ee(a, b) {
+    if (!b) {
+        b = 0
+    }
+    while (a.childNodes[b]) {
+        a.removeChild(a.childNodes[b])
+    }
+}
+function ct(a) {
+    return document.createTextNode(a)
+}
+function st(a, b) {
+    if (a.firstChild && a.firstChild.nodeType == 3) {
+        a.firstChild.nodeValue = b
+    } else {
+        aef(a, ct(b))
+    }
+}
+function nw(a) {
+    a.style.whiteSpace = "nowrap"
+}
+
 function rf() {
     return false
 }
@@ -951,6 +979,166 @@ function g_getIngameLink(A, C, B) {
 
 function g_isEmailValid(A) {
     return A.match(/^[A-Z0-9._-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i) != null
+}
+
+function g_onAfterTyping(a, d, c) {
+    var e;
+    var b = function() {
+        if (e) {
+            clearTimeout(e);
+            e = null
+        }
+        e = setTimeout(d, c)
+    };
+    a.onkeyup = b
+}
+function g_onClick(c, d) {
+    var b = 0;
+    function a(e) {
+        if (b) {
+            if (b != e) {
+                return
+            }
+        } else {
+            b = e
+        }
+        d(true)
+    }
+    c.oncontextmenu = function() {
+        a(1);
+        return false
+    };
+    c.onmouseup = function(f) {
+        f = $E(f);
+        if (f._button == 3 || f.shiftKey || f.ctrlKey) {
+            a(2)
+        } else {
+            if (f._button == 1) {
+                d(false)
+            }
+        }
+        return false
+    }
+}
+function g_createOrRegex(c) {
+    var e = c.split(" "), d = "";
+    for (var b = 0, a = e.length; b < a; ++b) {
+        if (b > 0) {
+            d += "|"
+        }
+        d += e[b]
+    }
+    return new RegExp("(" + d + ")", "gi")
+}
+function g_addPages(l, b) {
+    function o(q, d) {
+        var i;
+        if (q == b.page) {
+            i = ce("span");
+            i.className = "selected"
+        } else {
+            i = ce("a");
+            i.href = (q > 1 ? b.url + b.sep + q + b.pound : b.url + b.pound)
+        }
+        ae(i, ct(d != null ? d : q));
+        return i
+    }
+    if (!b.pound) {
+        b.pound = ""
+    }
+    if (!b.sep) {
+        b.sep = "."
+    }
+    if (b.allOrNothing && b.nPages <= 1) {
+        return
+    }
+    var c = (b.align && b.align == "left");
+    var e = ce("div"), k, p = ce("var");
+    e.className = "pages";
+    if (c) {
+        e.className += " pages-left"
+    }
+    if (b.nPages > 1) {
+        k = ce("div");
+        k.className = "pages-numbers";
+        var n = Math.max(2, b.page - 3);
+        var h = Math.min(b.nPages - 1, b.page + 3);
+        var m = [];
+        if (b.page != b.nPages) {
+            m.push(o(b.page + 1, LANG.lvpage_next + String.fromCharCode(8250)))
+        }
+        m.push(o(b.nPages));
+        if (h < b.nPages - 1) {
+            var a = ce("span");
+            ae(a, ct("..."));
+            m.push(a)
+        }
+        for (var g = h; g >= n; --g) {
+            m.push(o(g))
+        }
+        if (n > 2) {
+            var a = ce("span");
+            ae(a, ct("..."));
+            m.push(a)
+        }
+        m.push(o(1));
+        if (b.page != 1) {
+            m.push(o(b.page - 1, String.fromCharCode(8249) + LANG.lvpage_previous))
+        }
+        if (c) {
+            m.reverse()
+        }
+        for (var g = 0, j = m.length; g < j; ++g) {
+            ae(k, m[g])
+        }
+        k.firstChild.style.marginRight = "0";
+        k.lastChild.style.marginLeft = "0"
+    }
+    var p = ce("var");
+    ae(p, ct(sprintf(LANG[b.wording[b.nItems == 1 ? 0 : 1]], b.nItems)));
+    if (b.nPages > 1) {
+        var a = ce("span");
+        ae(a, ct(String.fromCharCode(8211)));
+        ae(p, a);
+        var f = ce("a");
+        f.className = "gotopage";
+        f.href = "javascript:;";
+        ns(f);
+        if (Browser.ie) {
+            ae(f, ct(" "))
+        }
+        f.onclick = function() {
+            var d = prompt(sprintf(LANG.prompt_gotopage, 1, b.nPages), b.page);
+            if (d != null) {
+                d |= 0;
+                if (d != b.page && d >= 1 && d <= b.nPages) {
+                    document.location.href = (d > 1 ? b.url + b.sep + d + b.pound : b.url + b.pound)
+                }
+            }
+        };
+        f.onmouseover = function(d) {
+            Tooltip.showAtCursor(d, LANG.tooltip_gotopage, 0, 0, "q")
+        };
+        f.onmousemove = Tooltip.cursorUpdate;
+        f.onmouseout = Tooltip.hide;
+        ae(p, f)
+    }
+    if (c) {
+        ae(e, p);
+        if (k) {
+            ae(e, k)
+        }
+    } else {
+        if (k) {
+            ae(e, k)
+        }
+        ae(e, p)
+    }
+    ae(l, e)
+}
+function g_disclose(a, b) {
+    b.className = "disclosure-" + (g_toggleDisplay(a) ? "on" : "off");
+    return false
 }
 
 function g_userDescription() {
@@ -2047,37 +2235,73 @@ var Tooltip = {
     }
 };
 var g_listviews = {};
-
-function Listview(A) {
-    cO(this, A);
+function Listview(a) {
+    cO(this, a);
     if (this.id) {
-        var K = (this.tabs ? "tab-" : "lv-") + this.id;
+        var m = (this.tabs ? "tab-" : "lv-") + this.id;
         if (this.parent) {
-            var H = ce("div");
-            H.id = K;
-            ae($(this.parent), H);
-            this.container = H
+            var k = ce("div");
+            k.id = m;
+            ae($(this.parent), k);
+            this.container = k
         } else {
-            this.container = ge(K)
+            this.container = ge(m)
         }
     } else {
         return
     }
-    if (this.template) {
+    if (this.template && Listview.templates[this.template]) {
         this.template = Listview.templates[this.template]
     } else {
         return
     }
     g_listviews[this.id] = this;
+    if (this.data == null) {
+        this.data = []
+    }
     if (this.poundable == null) {
         if (this.template.poundable != null) {
             this.poundable = this.template.poundable
         } else {
-            this.poundable = 1
+            this.poundable = true
+        }
+    }
+    if (this.searchable == null) {
+        if (this.template.searchable != null) {
+            this.searchable = this.template.searchable
+        } else {
+            this.searchable = false
+        }
+    }
+    if (this.filtrable == null) {
+        if (this.template.filtrable != null) {
+            this.filtrable = this.template.filtrable
+        } else {
+            this.filtrable = false
+        }
+    }
+    if (this.data.length == 1) {
+        this.filtrable = false;
+        this.searchable = false
+    }
+    if (this.searchable && this.searchDelay == null) {
+        if (this.template.searchDelay != null) {
+            this.searchDelay = this.template.searchDelay
+        } else {
+            this.searchDelay = 333
         }
     }
     if (this.hideBands == null) {
         this.hideBands = this.template.hideBands
+    }
+    if (this.hideNav == null) {
+        this.hideNav = this.template.hideNav
+    }
+    if (this.hideHeader == null) {
+        this.hideHeader = this.template.hideHeader
+    }
+    if (this.hideCount == null) {
+        this.hideCount = this.template.hideCount
     }
     if (this.computeDataFunc == null && this.template.computeDataFunc != null) {
         this.computeDataFunc = this.template.computeDataFunc
@@ -2085,8 +2309,12 @@ function Listview(A) {
     if (this.createCbControls == null && this.template.createCbControls != null) {
         this.createCbControls = this.template.createCbControls
     }
-    if (this.onBeforeCreate == null && this.template.onBeforeCreate != null) {
-        this.onBeforeCreate = this.template.onBeforeCreate
+    if (this.template.onBeforeCreate != null) {
+        if (this.onBeforeCreate == null) {
+            this.onBeforeCreate = this.template.onBeforeCreate
+        } else {
+            this.onBeforeCreate = [this.template.onBeforeCreate, this.onBeforeCreate]
+        }
     }
     if (this.onAfterCreate == null && this.template.onAfterCreate != null) {
         this.onAfterCreate = this.template.onAfterCreate
@@ -2094,23 +2322,35 @@ function Listview(A) {
     if (this.createNote == null && this.template.createNote != null) {
         this.createNote = this.template.createNote
     }
-    this.rowOffset = 0;
+    if (this.customFilter == null && this.template.customFilter != null) {
+        this.customFilter = this.template.customFilter
+    }
+    if (this.customFilter) {
+        this.customFilter = this.customFilter.bind(this)
+    }
+    if (this.clip == null && this.template.clip != null) {
+        this.clip = this.template.clip
+    }
     if (this.mode == null) {
         this.mode = this.template.mode
     }
-    this.mode |= 0;
     if (this.nItemsPerPage == null) {
-        var N = this.template.nItemsPerPage;
-        this.nItemsPerPage = (N != null ? N : 50)
+        if (this.template.nItemsPerPage != null) {
+            this.nItemsPerPage = this.template.nItemsPerPage
+        } else {
+            this.nItemsPerPage = 50
+        }
     }
     this.nItemsPerPage |= 0;
     if (this.nItemsPerPage <= 0) {
         this.nItemsPerPage = 0
     }
-    if (this.mode == 3) {
+    this.nFilters = 0;
+    this.resetRowVisibility();
+    if (this.mode == Listview.MODE_TILED) {
         if (this.nItemsPerRow == null) {
-            var M = this.template.nItemsPerRow;
-            this.nItemsPerRow = (M != null ? M : 4)
+            var q = this.template.nItemsPerRow;
+            this.nItemsPerRow = (q != null ? q : 4)
         }
         this.nItemsPerRow |= 0;
         if (this.nItemsPerRow <= 1) {
@@ -2119,92 +2359,96 @@ function Listview(A) {
     } else {
         this.nItemsPerRow = 1
     }
-    this.columns = this.template.columns.slice(0);
+    this.columns = [];
+    for (var e = 0, j = this.template.columns.length; e < j; ++e) {
+        var p = this.template.columns[e], c = {};
+        cO(c, p);
+        this.columns.push(c)
+    }
     if (this.extraCols != null) {
-        for (var D = 0, G = this.extraCols.length; D < G; ++D) {
-            var I = null;
-            var C = this.extraCols[D];
-            if (C.after != null) {
-                var F = in_array(this.columns, C.after, function (O) {
-                    return O.id
+        for (var e = 0, j = this.extraCols.length; e < j; ++e) {
+            var l = null;
+            var b = this.extraCols[e];
+            if (b.after || b.before) {
+                var h = in_array(this.columns, (b.after ? b.after : b.before), function(d) {
+                    return d.id
                 });
-                if (F != -1) {
-                    I = F + 1
+                if (h != -1) {
+                    l = (b.after ? h + 1 : h - 1)
                 }
             }
-            if (I == null) {
-                I = this.columns.length
+            if (l == null) {
+                l = this.columns.length
             }
-            this.columns.splice(I, 0, C)
+            this.columns.splice(l, 0, b)
         }
     }
     this.visibility = [];
-    var L = [],
-        J = [];
+    var n = [], o = [];
     if (this.visibleCols != null) {
-        array_walk(this.visibleCols, function (O) {
-            L[O] = 1
+        array_walk(this.visibleCols, function(d) {
+            n[d] = 1
         })
     }
     if (this.hiddenCols != null) {
-        array_walk(this.hiddenCols, function (O) {
-            J[O] = 1
+        array_walk(this.hiddenCols, function(d) {
+            o[d] = 1
         })
     }
-    for (var D = 0, G = this.columns.length; D < G; ++D) {
-        var C = this.columns[D];
-        if (L[C.id] != null || (!C.hidden && J[C.id] == null)) {
-            this.visibility.push(D)
+    for (var e = 0, j = this.columns.length; e < j; ++e) {
+        var b = this.columns[e];
+        if (n[b.id] != null || (!b.hidden && o[b.id] == null)) {
+            this.visibility.push(e)
         }
     }
     if (this.sort == null && this.template.sort) {
         this.sort = this.template.sort.slice(0)
     } else {
         if (this.sort != null) {
-            var B = this.sort;
+            var g = this.sort;
             this.sort = [];
-            for (var D = 0, G = B.length; D < G; ++D) {
-                var C = parseInt(B[D]);
-                if (isNaN(C)) {
-                    var E = 0;
-                    if (B[D].charAt(0) == "-") {
-                        E = 1;
-                        B[D] = B[D].substring(1)
+            for (var e = 0, j = g.length; e < j; ++e) {
+                var b = parseInt(g[e]);
+                if (isNaN(b)) {
+                    var f = 0;
+                    if (g[e].charAt(0) == "-") {
+                        f = 1;
+                        g[e] = g[e].substring(1)
                     }
-                    var F = in_array(this.columns, B[D], function (O) {
-                        return O.id
+                    var h = in_array(this.columns, g[e], function(d) {
+                        return d.id
                     });
-                    if (F != -1) {
-                        if (E) {
-                            this.sort.push(-(F + 1))
+                    if (h != -1) {
+                        if (f) {
+                            this.sort.push(-(h + 1))
                         } else {
-                            this.sort.push(F + 1)
+                            this.sort.push(h + 1)
                         }
                     }
                 } else {
-                    this.sort.push(C)
+                    this.sort.push(b)
                 }
             }
+        } else {
+            this.sort = []
         }
     }
     if (this.tabs) {
-        this.tabIndex = this.tabs.add(this.getTabName(), {
-            id: this.id,
-            onLoad: this.initialize.bind(this)
-        })
+        this.tabIndex = this.tabs.add(this.getTabName(), {id: this.id,onLoad: this.initialize.bind(this)})
     } else {
         this.initialize()
     }
 }
-Listview.prototype = {
-    initialize: function () {
-        if (!this.data.length) {
-            this.showNoData();
-            return
-        }
-        if (this.computeDataFunc != null) {
-            for (var E = 0, C = this.data.length; E < C; ++E) {
-                this.computeDataFunc(this.data[E])
+Listview.MODE_DEFAULT = 0;
+Listview.MODE_CHECKBOX = 1;
+Listview.MODE_DIV = 2;
+Listview.MODE_TILED = 3;
+Listview.prototype = {initialize: function() {
+        if (this.data.length) {
+            if (this.computeDataFunc != null) {
+                for (var d = 0, a = this.data.length; d < a; ++d) {
+                    this.computeDataFunc(this.data[d])
+                }
             }
         }
         if (this.tabs) {
@@ -2216,467 +2460,685 @@ Listview.prototype = {
             this.readPound()
         }
         this.updateSortIndex();
-        var B;
+        var b;
         if (this.onBeforeCreate != null) {
-            B = this.onBeforeCreate()
+            if (typeof this.onBeforeCreate == "function") {
+                b = this.onBeforeCreate()
+            } else {
+                for (var d = 0; d < this.onBeforeCreate.length; ++d) {
+                    (this.onBeforeCreate[d].bind(this))()
+                }
+            }
         }
-        if (this.mode == 2) {
-            this.mainDiv = ce("div");
-            this.mainDiv.className = "listview-mode2";
-            this.refreshRows();
-            this.createBands(this.mainDiv)
+        this.noData = ce("div");
+        this.noData.className = "listview-nodata text";
+        if (this.mode == Listview.MODE_DIV) {
+            this.mainContainer = this.mainDiv = ce("div");
+            this.mainContainer.className = "listview-mode-div"
         } else {
-            this.table = ce("table");
+            this.mainContainer = this.table = ce("table");
             this.thead = ce("thead");
             this.tbody = ce("tbody");
-            if (this.mode == 3) {
-                this.tbody.className = "listview-mode3";
-                var A = ce("colgroup");
-                var F = (100 / this.nItemsPerRow) + "%";
-                for (var E = 0; E < this.nItemsPerRow; ++E) {
-                    var D = ce("col");
-                    D.style.width = F;
-                    ae(A, D)
+            if (this.mode == Listview.MODE_TILED) {
+                this.table.className = "listview-mode-tiled";
+                var e = (100 / this.nItemsPerRow) + "%", f = ce("colgroup"), c;
+                for (var d = 0; d < this.nItemsPerRow; ++d) {
+                    c = ce("col");
+                    c.style.width = e;
+                    ae(f, c)
                 }
-                ae(this.table, A)
+                ae(this.mainContainer, f)
             } else {
-                this.tbody.className = "listview-std";
+                this.table.className = "listview-mode-default";
                 this.createHeader();
                 this.updateSortArrow()
             }
             ae(this.table, this.thead);
             ae(this.table, this.tbody);
-            this.refreshRows();
-            this.createBands(this.table);
-            if (this.mode == 1 && Browser.ie) {
+            if (this.mode == Listview.MODE_CHECKBOX && Browser.ie) {
                 setTimeout(Listview.cbIeFix.bind(this), 1)
             }
         }
-
-        //	Сортируем при загрузке, дабы снизить нагрузку с сервера
+        this.createBands();
+        if (this.customFilter != null) {
+            this.updateFilters()
+        }
+        this.updateNav();
         this.applySort();
         this.refreshRows();
-
         if (this.onAfterCreate != null) {
-            this.onAfterCreate(B)
+            this.onAfterCreate(b)
         }
-    },
-    createHeader: function () {
-        var H = ce("tr");
-        if (this.mode == 1) {
-            var C = ce("th");
-            var B = ce("div");
-            var J = ce("a");
-            C.style.width = "33px";
-            if (this.poundable == 2) {
-                J.style.cursor = "default";
-                J.style.backgroundColor = "#585858"
-            }
-            J.href = "javascript:;";
-            J.className = "listview-cb";
-            ns(J);
-            ae(J, ct(String.fromCharCode(160)));
-            ae(B, J);
-            ae(C, B);
-            ae(H, C)
+    },createHeader: function() {
+        var h = ce("tr");
+        if (this.mode == Listview.MODE_CHECKBOX) {
+            var g = ce("th"), j = ce("div"), c = ce("a");
+            g.style.width = "33px";
+            c.href = "javascript:;";
+            c.className = "listview-cb";
+            ns(c);
+            ae(c, ct(String.fromCharCode(160)));
+            ae(j, c);
+            ae(g, j);
+            ae(h, g)
         }
-        for (var E = 0, G = this.visibility.length; E < G; ++E) {
-            var I = this.visibility[E];
-            var D = this.columns[I];
-            var C = ce("th");
-            var B = ce("div");
-            var J = ce("a");
-            var A = ce("span");
-            var F = ce("span");
-            if (this.poundable == 2) {
-                J.style.cursor = "default";
-                J.style.backgroundColor = "#585858"
+        for (var f = 0, b = this.visibility.length; f < b; ++f) {
+            var e = this.visibility[f], d = this.columns[e], g = ce("th");
+            j = ce("div"), c = ce("a"), outerSpan = ce("span"), innerSpan = ce("span");
+            d.__th = g;
+            c.href = "javascript:;";
+            if (this.filtrable && (d.filtrable == null || d.filtrable)) {
+                c.onmouseup = Listview.headerClick.bind(this, d, e);
+                c.onclick = c.oncontextmenu = rf
+            } else {
+                c.onclick = this.sortBy.bind(this, e + 1)
             }
-            J.href = "javascript:;";
-            J.onclick = this.sortBy.bind(this, I + 1);
-            ns(J);
-            if (D.tooltip != null) {
-                J.onmouseover = Listview.headerOver.bind(J, D.tooltip);
-                J.onmousemove = Tooltip.cursorUpdate;
-                J.onmouseout = Tooltip.hide
+            c.onmouseover = Listview.headerOver.bind(this, c, d);
+            c.onmouseout = Tooltip.hide;
+            ns(c);
+            if (d.width != null) {
+                g.style.width = d.width
             }
-            if (D.width != null) {
-                C.style.width = D.width
+            if (d.align != null) {
+                g.style.textAlign = d.align
             }
-            if (D.align != null) {
-                C.style.textAlign = D.align
+            if (d.span != null) {
+                g.colSpan = d.span
             }
-            if (D.span != null) {
-                C.colSpan = D.span
-            }
-            ae(F, ct(D.name));
-            ae(A, F);
-            ae(J, A);
-            ae(B, J);
-            ae(C, B);
-            ae(H, C)
+            ae(innerSpan, ct(d.name));
+            ae(outerSpan, innerSpan);
+            ae(c, outerSpan);
+            ae(j, c);
+            ae(g, j);
+            ae(h, g)
         }
-        ae(this.thead, H)
-    },
-    createBands: function (E) {
-        var C = ce("div"),
-            D = ce("div");
-        C.className = "listview-band-top";
-        D.className = "listview-band-bottom";
-        this.navTop = this.createNav();
-        this.navBot = this.createNav();
-        var A = ce("div"),
-            B = ce("div");
-        A.className = B.className = "listview-note";
+        if (this.hideHeader) {
+            this.thead.style.display = "none"
+        }
+        ae(this.thead, h)
+    },createBands: function() {
+        var h = ce("div"), j = ce("div"), k = ce("div"), i = ce("div");
+        this.bandTop = h;
+        this.bandBot = j;
+        this.noteTop = k;
+        this.noteBot = i;
+        h.className = "listview-band-top";
+        j.className = "listview-band-bottom";
+        this.navTop = this.createNav(true);
+        this.navBot = this.createNav(false);
+        k.className = i.className = "listview-note";
         if (this.note) {
-            A.innerHTML = this.note
+            k.innerHTML = this.note
         } else {
             if (this.createNote) {
-                this.createNote(A, B)
+                this.createNote(k, i)
             }
         }
-        if (!A.firstChild && this.mode != 1) {
-            ae(A, ct(String.fromCharCode(160)))
+        if (!k.firstChild && this.mode != Listview.MODE_CHECKBOX) {
+            ae(k, ct(String.fromCharCode(160)))
         }
-        if (this.mode != 1) {
-            ae(B, ct(String.fromCharCode(160)))
+        if (this.mode != Listview.MODE_CHECKBOX) {
+            ae(i, ct(String.fromCharCode(160)))
         }
-        ae(C, this.navTop);
-        ae(D, this.navBot);
-        ae(C, A);
-        ae(D, B);
-        if (this.mode == 1) {
-            ae(C, this.createCbBar());
-            ae(D, this.createCbBar())
+        ae(h, this.navTop);
+        if (this.searchable) {
+            var l = this.updateFilters.bind(this, true), d = (this._truncated ? "search-within-results2" : "search-within-results"), c = ce("span"), b = ce("em"), g = ce("a"), f = ce("input");
+            c.className = "listview-quicksearch";
+            ae(c, b);
+            g.href = "javascript:;";
+            g.onclick = function() {
+                var a = this.nextSibling;
+                a.value = "";
+                a.className = d;
+                l()
+            };
+            g.style.display = "none";
+            ae(g, ce("span"));
+            ae(c, g);
+            ns(g);
+            f.setAttribute("type", "text");
+            f.className = d;
+            f.style.width = (this._truncated ? "19em" : "15em");
+            g_onAfterTyping(f, l, this.searchDelay);
+            f.onmouseover = function() {
+                if (trim(this.value) != "") {
+                    this.className = ""
+                }
+            };
+            f.onfocus = function() {
+                this.className = ""
+            };
+            f.onblur = function() {
+                if (trim(this.value) == "") {
+                    this.className = d;
+                    this.value = ""
+                }
+            };
+            if (Browser.ie) {
+                setTimeout(function() {
+                    f.value = ""
+                }, 1)
+            }
+            ae(c, f);
+            this.quickSearchBox = f;
+            this.quickSearchGlass = b;
+            this.quickSearchClear = g;
+            ae(h, c)
         }
-        this.bandTop = C;
-        this.bandBot = D;
-        this.updateNav();
-        if (this.hideBands != null) {
-            C.style.display = D.style.display = "none"
+        ae(h, k);
+        ae(j, this.navBot);
+        ae(j, i);
+        if (this.mode == Listview.MODE_CHECKBOX) {
+            if (this.note) {
+                k.style.paddingBottom = "5px"
+            }
+            this.cbBarTop = this.createCbBar(true);
+            this.cbBarBot = this.createCbBar(false);
+            ae(h, this.cbBarTop);
+            ae(j, this.cbBarBot);
+            if (!this.noteTop.firstChild && !this.cbBarTop.firstChild) {
+                this.noteTop.innerHTML = "&nbsp;"
+            }
+            if (!this.noteBot.firstChild && !this.cbBarBot.firstChild) {
+                this.noteBot.innerHTML = "&nbsp;"
+            }
+            if (this.noteTop.firstChild && this.cbBarTop.firstChild) {
+                this.noteTop.style.paddingBottom = "6px"
+            }
+            if (this.noteBot.firstChild && this.cbBarBot.firstChild) {
+                this.noteBot.style.paddingBottom = "6px"
+            }
+        }
+        if (this.hideBands & 1) {
+            h.style.display = "none"
+        }
+        if (this.hideBands & 2) {
+            j.style.display = "none"
         }
         ae(this.container, this.bandTop);
-        ae(this.container, E);
+        if (this.clip) {
+            var e = ce("div");
+            e.className = "listview-clip";
+            e.style.width = this.clip.w + "px";
+            e.style.height = this.clip.h + "px";
+            this.clipDiv = e;
+            ae(e, this.mainContainer);
+            ae(e, this.noData);
+            ae(this.container, e)
+        } else {
+            ae(this.container, this.mainContainer);
+            ae(this.container, this.noData)
+        }
         ae(this.container, this.bandBot)
-    },
-    createNav: function () {
-        var B = ce("div");
-        B.className = "listview-nav";
-        var D = ce("a"),
-            C = ce("a"),
-            A = ce("a"),
-            I = ce("a");
-        D.href = C.href = A.href = I.href = "javascript:;";
-        ae(D, ct(String.fromCharCode(171) + LANG.lvpage_first));
-        ae(C, ct(String.fromCharCode(8249) + LANG.lvpage_previous));
-        ae(A, ct(LANG.lvpage_next + String.fromCharCode(8250)));
-        ae(I, ct(LANG.lvpage_last + String.fromCharCode(187)));
-        ns(D);
-        ns(C);
-        ns(A);
-        ns(I);
-        D.onclick = this.firstPage.bind(this);
-        C.onclick = this.previousPage.bind(this);
-        A.onclick = this.nextPage.bind(this);
-        I.onclick = this.lastPage.bind(this);
-        var H = ce("span");
-        var G = ce("b"),
-            F = ce("b"),
-            E = ce("b");
-        ae(G, ct("a"));
-        ae(F, ct("a"));
-        ae(E, ct("a"));
-        ae(H, G);
-        ae(H, ct(LANG.hyphen));
-        ae(H, F);
-        ae(H, ct(LANG.lvpage_of));
-        ae(H, E);
-        ae(B, D);
-        ae(B, C);
-        ae(B, H);
-        ae(B, A);
-        ae(B, I);
-        return B
-    },
-    createCbBar: function () {
-        var F = ce("div");
-        var C = ce("div");
-        var B = ce("a"),
-            A = ce("a"),
-            E = ce("a");
-        B.href = A.href = E.href = "javascript:;";
-        ae(B, ct("All"));
-        ae(A, ct("None"));
-        ae(E, ct("Inverse"));
-        B.onclick = Listview.cbSelect.bind(this, true);
-        A.onclick = Listview.cbSelect.bind(this, false);
-        E.onclick = Listview.cbSelect.bind(this, null);
-        ns(B);
-        ns(A);
-        ns(E);
-        ae(C, ct("Select: "));
-        ae(C, B);
-        ae(C, ct(LANG.comma));
-        ae(C, A);
-        ae(C, ct(LANG.comma));
-        ae(C, E);
-        if (this.createCbControls) {
-            var D = ce("div");
-            this.createCbControls(D, C);
-            D.style.paddingBottom = "6px";
-            ae(F, D)
-        }
-        ae(F, C);
-        return F
-    },
-    refreshRows: function () {
-        var B = this.data.length;
-        var D = (this.mode == 2 ? this.mainDiv : this.tbody);
-        while (D.firstChild) {
-            D.removeChild(D.firstChild)
-        }
-        if (B > 0) {
-            var G, A, F;
-            if (this.nItemsPerPage > 0) {
-                G = this.rowOffset;
-                A = Math.min(B, this.rowOffset + this.nItemsPerPage)
-            } else {
-                G = 0;
-                A = B
-            }
-            if (this.mode == 2) {
-                for (var E = G; E < A; ++E) {
-                    ae(this.mainDiv, this.getDiv(E))
-                }
-            } else {
-                if (this.mode == 3) {
-                    var C = 0,
-                        H = ce("tr");
-                    for (var E = G; E < A; ++E) {
-                        ae(H, this.getCell(E));
-                        if (++C == this.nItemsPerRow) {
-                            ae(this.tbody, H);
-                            if (E + 1 < A) {
-                                H = ce("tr")
-                            }
-                            C = 0
-                        }
-                    }
-                    if (C != 0) {
-                        for (; C < 4; ++C) {
-                            D = ce("td");
-                            D.className = "empty-cell";
-                            ae(H, D)
-                        }
-                        ae(this.tbody, H)
-                    }
-                } else {
-                    for (var E = G; E < A; ++E) {
-                        ae(this.tbody, this.getRow(E))
-                    }
-                }
+    },createNav: function(g) {
+        var c = ce("div"), d = ce("a"), b = ce("a"), a = ce("a"), j = ce("a"), i = ce("span"), h = ce("b"), f = ce("b"), e = ce("b");
+        c.className = "listview-nav";
+        d.href = b.href = a.href = j.href = "javascript:;";
+        ae(d, ct(String.fromCharCode(171) + LANG.lvpage_first));
+        ae(b, ct(String.fromCharCode(8249) + LANG.lvpage_previous));
+        ae(a, ct(LANG.lvpage_next + String.fromCharCode(8250)));
+        ae(j, ct(LANG.lvpage_last + String.fromCharCode(187)));
+        ns(d);
+        ns(b);
+        ns(a);
+        ns(j);
+        d.onclick = this.firstPage.bind(this);
+        b.onclick = this.previousPage.bind(this);
+        a.onclick = this.nextPage.bind(this);
+        j.onclick = this.lastPage.bind(this);
+        ae(h, ct("a"));
+        ae(f, ct("a"));
+        ae(e, ct("a"));
+        ae(i, h);
+        ae(i, ct(LANG.hyphen));
+        ae(i, f);
+        ae(i, ct(LANG.lvpage_of));
+        ae(i, e);
+        ae(c, d);
+        ae(c, b);
+        ae(c, i);
+        ae(c, a);
+        ae(c, j);
+        if (g) {
+            if (this.hideNav & 1) {
+                c.style.display = "none"
             }
         } else {
-            this.bandTop.style.display = this.bandBot.style.display = "none";
-            if (this.mode == 2) {
-                this.mainDiv.style.display = "none"
-            } else {
-                this.table.style.display = "none"
+            if (this.hideNav & 2) {
+                c.style.display = "none"
             }
-            this.showNoData()
         }
-    },
-    showNoData: function () {
-        var B = ce("div");
-        B.className = "listview-nodata";
-        var A = -1;
+        return c
+    },createCbBar: function(a) {
+        var b = ce("div");
+        if (this.createCbControls) {
+            this.createCbControls(b, a)
+        }
+        if (b.firstChild) {
+            b.className = "listview-withselected" + (a ? "" : "2")
+        }
+        return b
+    },refreshRows: function() {
+        var a = (this.mode == Listview.MODE_DIV ? this.mainContainer : this.tbody);
+        ee(a);
+        if (this.nRowsVisible == 0) {
+            if (!this.filtered) {
+                this.bandTop.style.display = this.bandBot.style.display = "none";
+                this.mainContainer.style.display = "none"
+            }
+            this.noData.style.display = "";
+            this.showNoData();
+            return
+        }
+        var n, b, c;
+        if (!(this.hideBands & 1)) {
+            this.bandTop.style.display = ""
+        }
+        if (!(this.hideBands & 2)) {
+            this.bandBot.style.display = ""
+        }
+        if (this.nItemsPerPage > 0) {
+            n = this.rowOffset;
+            b = Math.min(n + this.nRowsVisible, n + this.nItemsPerPage);
+            if (this.filtered && this.rowOffset > 0) {
+                for (var f = 0, g = 0; f < this.data.length && g < this.rowOffset; ++f) {
+                    var o = this.data[f];
+                    if (o.__hidden || o.__deleted) {
+                        ++n
+                    } else {
+                        ++g
+                    }
+                }
+                b += (n - this.rowOffset)
+            }
+        } else {
+            n = 0;
+            b = this.nRowsVisible
+        }
+        var h = b - n;
+        if (this.mode == Listview.MODE_DIV) {
+            for (var e = 0; e < h; ++e) {
+                var f = n + e, o = this.data[f];
+                if (!o) {
+                    break
+                }
+                if (o.__hidden || o.__deleted) {
+                    ++h;
+                    continue
+                }
+                ae(this.mainDiv, this.getDiv(f))
+            }
+        } else {
+            if (this.mode == Listview.MODE_TILED) {
+                var d = 0, l = ce("tr");
+                for (var e = 0; e < h; ++e) {
+                    var f = n + e, o = this.data[f];
+                    if (!o) {
+                        break
+                    }
+                    if (o.__hidden || o.__deleted) {
+                        ++h;
+                        continue
+                    }
+                    ae(l, this.getCell(f));
+                    if (++d == this.nItemsPerRow) {
+                        ae(this.tbody, l);
+                        if (e + 1 < h) {
+                            l = ce("tr")
+                        }
+                        d = 0
+                    }
+                }
+                if (d != 0) {
+                    for (; d < 4; ++d) {
+                        var m = ce("td");
+                        m.className = "empty-cell";
+                        ae(l, m)
+                    }
+                    ae(this.tbody, l)
+                }
+            } else {
+                for (var e = 0; e < h; ++e) {
+                    var f = n + e, o = this.data[f];
+                    if (!o) {
+                        break
+                    }
+                    if (o.__hidden || o.__deleted) {
+                        ++h;
+                        continue
+                    }
+                    ae(this.tbody, this.getRow(f))
+                }
+            }
+        }
+        this.mainContainer.style.display = "";
+        this.noData.style.display = "none"
+    },showNoData: function() {
+        var b = this.noData;
+        ee(b);
+        var a = -1;
         if (this.template.onNoData) {
-            A = (this.template.onNoData.bind(this, B))()
+            a = (this.template.onNoData.bind(this, b))()
         }
-        if (A == -1) {
-            ae(B, ct(LANG.lvnodata))
+        if (a == -1) {
+            ae(this.noData, ct(this.filtered ? LANG.lvnodata2 : LANG.lvnodata))
         }
-        ae(this.container, B)
-    },
-    getDiv: function (B) {
-        var A = this.data[B];
-        if (A.__div == null) {
-            this.createDiv(A, B)
+    },getDiv: function(a) {
+        var b = this.data[a];
+        if (b.__div == null) {
+            this.createDiv(b, a)
         }
-        return A.__div
-    },
-    createDiv: function (A, B) {
-        var C = ce("div");
-        A.__div = C;
-        (this.template.compute.bind(this, A, C, B))()
-    },
-    getCell: function (B) {
-        var A = this.data[B];
-        if (A.__div == null) {
-            this.createCell(A, B)
+        return b.__div
+    },createDiv: function(b, a) {
+        var c = ce("div");
+        b.__div = c;
+        (this.template.compute.bind(this, b, c, a))()
+    },getCell: function(a) {
+        var b = this.data[a];
+        if (b.__div == null) {
+            this.createCell(b, a)
         }
-        return A.__td
-    },
-    createCell: function (A, B) {
-        var C = ce("td");
-        A.__td = C;
-        (this.template.compute.bind(this, A, C, B))();
+        return b.__td
+    },createCell: function(b, a) {
+        var c = ce("td");
+        b.__td = c;
+        (this.template.compute.bind(this, b, c, a))();
         if (this.template.getItemLink) {
-            C.onclick = this.itemClick.bind(this, A)
+            c.onclick = this.itemClick.bind(this, b)
         }
         if (Browser.ie6) {
-            C.onmouseover = Listview.itemOver;
-            C.onmouseout = Listview.itemOut
+            c.onmouseover = Listview.itemOver;
+            c.onmouseout = Listview.itemOut
         }
-    },
-    getRow: function (A) {
-        var B = this.data[A];
-        if (B.__tr == null) {
-            this.createRow(B)
+    },getRow: function(a) {
+        var b = this.data[a];
+        if (b.__tr == null) {
+            this.createRow(b)
         }
-        return B.__tr
-    },
-    createRow: function (I) {
-        var F = ce("tr");
-        I.__tr = F;
-        if (this.mode == 1) {
-            var B = ce("td");
-            B.className = "listview-cb";
-            B.onclick = Listview.cbCellClick;
-            var C = ce("input");
-            ns(C);
-            C.type = "checkbox";
-            C.onclick = Listview.cbClick;
-            if (I.__chk) {
-                C.checked = true;
-                if (Browser.ie) {
-                    C.defaultChecked = true
+        return b.__tr
+    },createRow: function(j) {
+        var g = ce("tr");
+        j.__tr = g;
+        if (this.mode == Listview.MODE_CHECKBOX) {
+            var c = ce("td");
+            if (!j.__nochk) {
+                c.className = "listview-cb";
+                c.onclick = Listview.cbCellClick;
+                var b = ce("input");
+                ns(b);
+                b.type = "checkbox";
+                b.onclick = Listview.cbClick;
+                if (j.__chk) {
+                    b.checked = true;
+                    if (Browser.ie) {
+                        b.defaultChecked = true
+                    }
                 }
+                j.__cb = b;
+                ae(c, b)
             }
-            I.__cb = C;
-            ae(B, C);
-            ae(F, B)
+            ae(g, c)
         }
-        for (var D = 0, E = this.visibility.length; D < E; ++D) {
-            var G = this.visibility[D];
-            var A = this.columns[G];
-            var B = ce("td");
-            if (A.align != null) {
-                B.style.textAlign = A.align
+        for (var d = 0, e = this.visibility.length; d < e; ++d) {
+            var f = this.visibility[d], a = this.columns[f], c = ce("td"), h;
+            if (a.align != null) {
+                c.style.textAlign = a.align
             }
-            var H = null;
-            if (A.compute) {
-                H = (A.compute.bind(this, I, B, F, G))()
+            if (a.compute) {
+                h = (a.compute.bind(this, j, c, g, f))()
             } else {
-                if (I[A.value] != null) {
-                    ae(B, ct(I[A.value]))
+                if (j[a.value] != null) {
+                    h = j[a.value]
                 } else {
-                    H = -1
+                    h = -1
                 }
             }
-            if (H != -1 && H != null) {
-                B.insertBefore(ct(H), B.firstChild)
+            if (h != -1 && h != null) {
+                c.insertBefore(ct(h), c.firstChild)
             }
-            ae(F, B)
+            ae(g, c)
         }
-        if (this.mode == 1 && I.__chk) {
-            F.className = "checked"
+        if (this.mode == Listview.MODE_CHECKBOX && j.__chk) {
+            g.className = "checked"
         }
         if (this.template.getItemLink) {
-            F.onclick = this.itemClick.bind(this, I)
+            g.onclick = this.itemClick.bind(this, j)
         }
         if (Browser.ie6) {
-            F.onmouseover = Listview.itemOver;
-            F.onmouseout = Listview.itemOut
+            g.onmouseover = Listview.itemOver;
+            g.onmouseout = Listview.itemOut
         }
-    },
-    itemClick: function (A, D) {
-        D = $E(D);
-        var B = 0,
-            C = D._target;
-        while (C && B < 3) {
-            if (C.nodeName == "A") {
+    },itemClick: function(d, c) {
+        c = $E(c);
+        var a = 0, b = c._target;
+        while (b && a < 3) {
+            if (b.nodeName == "A") {
                 return
             }
-            C = C.parentNode
+            b = b.parentNode
         }
-        location.href = this.template.getItemLink(A)
-    },
-    validatePage: function () {
-        var C = this.nItemsPerPage,
-            B = this.rowOffset,
-            A = this.data.length;
-        if (B < 0) {
+        location.href = this.template.getItemLink(d)
+    },validatePage: function() {
+        var c = this.nItemsPerPage, b = this.rowOffset, a = this.nRowsVisible;
+        if (b < 0) {
             this.rowOffset = 0
         } else {
-            this.rowOffset = this.getRowOffset(B + C > A ? A - 1 : B)
+            this.rowOffset = this.getRowOffset(b + c > a ? a - 1 : b)
         }
-    },
-    getRowOffset: function (B) {
-        var A = this.nItemsPerPage;
-        return (A > 0 && B > 0 ? Math.floor(B / A) * A : 0)
-    },
-    changePage: function () {
+    },getRowOffset: function(b) {
+        var a = this.nItemsPerPage;
+        return (a > 0 && b > 0 ? Math.floor(b / a) * a : 0)
+    },resetRowVisibility: function() {
+        for (var b = 0, a = this.data.length; b < a; ++b) {
+            this.data[b].__hidden = false
+        }
+        this.filtered = false;
+        this.rowOffset = 0;
+        this.nRowsVisible = this.data.length
+    },getColText: function(b, a) {
+        if (a.getVisibleText) {
+            return a.getVisibleText(b)
+        }
+        if (a.getValue) {
+            return a.getValue(b)
+        }
+        if (a.value) {
+            return b[a.value]
+        }
+        if (a.compute) {
+            return a.compute(b)
+        }
+        return ""
+    },updateFilters: function(d) {
+        Tooltip.hide();
+        this.resetRowVisibility();
+        var w, q, c;
+        if (this.searchable) {
+            w = trim(this.quickSearchBox.value);
+            if (w) {
+                this.quickSearchGlass.style.display = "none";
+                this.quickSearchClear.style.display = "";
+                w = w.toLowerCase().replace(/\s+/g, " ");
+                q = w.split(" ");
+                c = q.length
+            } else {
+                this.quickSearchGlass.style.display = "";
+                this.quickSearchClear.style.display = "none"
+            }
+        }
+        if (!w && this.nFilters == 0 && this.customFilter == null) {
+            if (d) {
+                this.updateNav();
+                this.refreshRows()
+            }
+            return
+        }
+        var z = {1: function(i, j) {
+                return i > j
+            },2: function(i, j) {
+                return i == j
+            },3: function(i, j) {
+                return i < j
+            },4: function(i, j) {
+                return i >= j
+            },5: function(i, j) {
+                return i <= j
+            },6: function(i, k, j) {
+                return k <= i && i <= j
+            }};
+        var p = {1: function(j, i, k) {
+                return i > k
+            },2: function(j, i, k) {
+                return j <= k && k <= i
+            },3: function(j, i, k) {
+                return j < k
+            },4: function(j, i, k) {
+                return i >= k
+            },5: function(j, i, k) {
+                return j <= k
+            },6: function(j, i, B, k) {
+                return B <= i && j <= k
+            }};
+        var o = 0;
+        for (var u = 0, v = this.data.length; u < v; ++u) {
+            var g = this.data[u], m = 0;
+            nSearchMatches = 0, matches = [];
+            g.__hidden = true;
+            if (this.customFilter && !this.customFilter(g)) {
+                continue
+            }
+            for (var t = 0, h = this.visibility.length; t < h; ++t) {
+                var n = this.visibility[t];
+                var e = this.columns[n];
+                if (e.__filter) {
+                    var a = e.__filter, b = false;
+                    if (e.type == null || e.type == "num") {
+                        var r = null;
+                        if (e.getValue) {
+                            r = e.getValue(g)
+                        } else {
+                            if (e.value) {
+                                r = parseFloat(g[e.value])
+                            }
+                        }
+                        if (!r) {
+                            r = 0
+                        }
+                        b = (z[a.type])(r, a.value, a.value2)
+                    } else {
+                        if (e.type == "range") {
+                            var A = e.getMinValue(g), y = e.getMaxValue(g);
+                            b = (p[a.type])(A, y, a.value, a.value2)
+                        } else {
+                            var l = this.getColText(g, e);
+                            if (l) {
+                                l = l.toString().toLowerCase();
+                                if (a.invert) {
+                                    b = l.match(a.regex) != null
+                                } else {
+                                    var x = 0;
+                                    for (var s = 0, f = a.words.length; s < f; ++s) {
+                                        if (l.indexOf(a.words[s]) != -1) {
+                                            ++x
+                                        } else {
+                                            break
+                                        }
+                                    }
+                                    b = (x == a.words.length)
+                                }
+                            }
+                        }
+                    }
+                    if (a.invert) {
+                        b = !b
+                    }
+                    if (b) {
+                        ++m
+                    } else {
+                        break
+                    }
+                }
+                if (w) {
+                    var l = this.getColText(g, e);
+                    if (l) {
+                        l = l.toString().toLowerCase();
+                        for (var s = 0, f = q.length; s < f; ++s) {
+                            if (!matches[s]) {
+                                if (l.indexOf(q[s]) != -1) {
+                                    matches[s] = 1;
+                                    ++nSearchMatches
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            if ((this.nFilters == 0 || m == this.nFilters) && (!w || nSearchMatches == c)) {
+                g.__hidden = false;
+                ++o
+            }
+        }
+        this.filtered = (o < this.data.length);
+        this.nRowsVisible = o;
+        if (d) {
+            this.updateNav();
+            this.refreshRows()
+        }
+    },changePage: function() {
         this.validatePage();
         this.refreshRows();
         this.updateNav();
         this.updatePound();
-        var A = g_getScroll(),
-            B = ac(this.container);
-        if (A.y > B[1]) {
-            scrollTo(A.x, B[1])
+        var a = g_getScroll(), b = ac(this.container);
+        if (a.y > b[1]) {
+            scrollTo(a.x, b[1])
         }
-    },
-    firstPage: function () {
+    },firstPage: function() {
         this.rowOffset = 0;
         this.changePage();
         return false
-    },
-    previousPage: function () {
+    },previousPage: function() {
         this.rowOffset -= this.nItemsPerPage;
         this.changePage();
         return false
-    },
-    nextPage: function () {
+    },nextPage: function() {
         this.rowOffset += this.nItemsPerPage;
         this.changePage();
         return false
-    },
-    lastPage: function () {
+    },lastPage: function() {
         this.rowOffset = 99999999;
         this.changePage();
         return false
-    },
-    addSort: function (A, C) {
-        var B = in_array(A, C, function (D) {
-            return Math.abs(D)
+    },addSort: function(a, c) {
+        var b = in_array(a, Math.abs(c), function(d) {
+            return Math.abs(d)
         });
-        if (B != -1) {
-            C = A[B];
-            A.splice(B, 1)
+        if (b != -1) {
+            c = a[b];
+            a.splice(b, 1)
         }
-        A.splice(0, 0, C)
-    },
-    sortBy: function (A) {
-        if (this.poundable == 2 || A <= 0 || A > this.columns.length) {
+        a.splice(0, 0, c)
+    },sortBy: function(a) {
+        if (a <= 0 || a > this.columns.length) {
             return
         }
-        if (Math.abs(this.sort[0]) == A) {
+        if (Math.abs(this.sort[0]) == a) {
             this.sort[0] = -this.sort[0]
         } else {
-            this.addSort(this.sort, A)
+            var b = -1;
+            if (this.columns[a - 1].type == "text") {
+                b = 1
+            }
+            this.addSort(this.sort, b * a)
         }
         this.applySort();
-        if (this.template.onSort) {
-            (this.template.onSort.bind(this))()
-        }
         this.refreshRows();
-        if (this.mode != 2) {
-            this.updateSortArrow()
-        }
+        this.updateSortArrow();
         this.updatePound()
-    },
-    applySort: function () {
+    },applySort: function() {
+        if (this.sort.length == 0) {
+            return
+        }
         Listview.sort = this.sort;
         Listview.columns = this.columns;
         if (this.indexCreated) {
@@ -2685,2681 +3147,3282 @@ Listview.prototype = {
             this.data.sort(Listview.sortRows)
         }
         this.updateSortIndex()
-    },
-    setSort: function (B, A, C) {
-        if (this.sort.toString() != B.toString()) {
-            this.sort = B;
+    },setSort: function(b, c, a) {
+        if (this.sort.toString() != b.toString()) {
+            this.sort = b;
             this.applySort();
-            if (A) {
+            if (c) {
                 this.refreshRows()
             }
-            if (C) {
+            if (a) {
                 this.updatePound()
             }
         }
-    },
-    readPound: function () {
+    },readPound: function() {
         if (!this.poundable || !location.hash.length) {
             return
         }
-        var B = location.hash.substr(1);
+        var b = location.hash.substr(1);
         if (this.tabs) {
-            var G = B.indexOf(":");
-            if (G == -1) {
+            var g = b.indexOf(":");
+            if (g == -1) {
                 return
             }
-            B = B.substr(G + 1)
+            b = b.substr(g + 1)
         }
-        var A = parseInt(B);
-        if (!isNaN(A)) {
-            this.rowOffset = A;
+        var a = parseInt(b);
+        if (!isNaN(a)) {
+            this.rowOffset = a;
             this.validatePage();
             if (this.poundable != 2) {
-                var D = [];
-                var F = B.match(/(\+|\-)[0-9]+/g);
-                if (F != null) {
-                    for (var C = F.length - 1; C >= 0; --C) {
-                        var E = parseInt(F[C]) | 0;
-                        var B = Math.abs(E);
-                        if (B <= 0 || B > this.columns.length) {
+                var d = [];
+                var f = b.match(/(\+|\-)[0-9]+/g);
+                if (f != null) {
+                    for (var c = f.length - 1; c >= 0; --c) {
+                        var e = parseInt(f[c]) | 0;
+                        var b = Math.abs(e);
+                        if (b <= 0 || b > this.columns.length) {
                             break
                         }
-                        this.addSort(D, E)
+                        this.addSort(d, e)
                     }
-                    this.setSort(D, false, false)
+                    this.setSort(d, false, false)
                 }
             }
             if (this.tabs) {
                 this.tabs.setTabPound(this.tabIndex, this.getTabPound())
             }
         }
-    },
-    updateSortArrow: function () {
-        if (!this.sort.length) {
+    },updateSortArrow: function() {
+        if (!this.sort.length || !this.thead) {
             return
         }
-        var A = in_array(this.visibility, Math.abs(this.sort[0]) - 1);
-        if (A == -1) {
+        var a = in_array(this.visibility, Math.abs(this.sort[0]) - 1);
+        if (a == -1) {
             return
         }
-        if (this.mode == 1) {
-            ++A
+        if (this.mode == Listview.MODE_CHECKBOX) {
+            a += 1
         }
-        var B = this.thead.firstChild.childNodes[A].firstChild.firstChild.firstChild;
-        if (this.lsa && this.lsa != B) {
+        var b = this.thead.firstChild.childNodes[a].firstChild.firstChild.firstChild;
+        if (this.lsa && this.lsa != b) {
             this.lsa.className = ""
         }
-        B.className = (this.sort[0] < 0 ? "sortdesc" : "sortasc");
-        this.lsa = B
-    },
-    updateSortIndex: function () {
-        var B = this.data;
-        for (var C = 0, A = B.length; C < A; ++C) {
-            B[C].__si = C
+        b.className = (this.sort[0] < 0 ? "sortdesc" : "sortasc");
+        this.lsa = b
+    },updateSortIndex: function() {
+        var b = this.data;
+        for (var c = 0, a = b.length; c < a; ++c) {
+            b[c].__si = c
         }
         this.indexCreated = true
-    },
-    updateTabName: function () {
-        if (this.tabIndex != null) {
+    },updateTabName: function() {
+        if (this.tabs && this.tabIndex != null) {
             this.tabs.setTabName(this.tabIndex, this.getTabName())
         }
-    },
-    updatePound: function () {
+    },updatePound: function() {
         if (!this.poundable) {
             return
         }
-        var A = this.getTabPound();
+        var a = this.getTabPound();
         if (this.tabs) {
-            this.tabs.setTabPound(this.tabIndex, A);
-            location.replace("#" + this.id + ":" + A)
+            this.tabs.setTabPound(this.tabIndex, a);
+            location.replace("#" + this.id + ":" + a)
         } else {
-            location.replace("#" + A)
+            location.replace("#" + a)
         }
-    },
-    updateNav: function () {
-        var J = this.nItemsPerPage,
-            H = this.rowOffset,
-            D = this.data.length;
-        var B = 0,
-            F = 0,
-            C = 0,
-            I = 0;
-        if (J) {
-            if (H > 0) {
-                F = 1;
-                if (H >= J + J) {
-                    B = 1
+    },updateNav: function() {
+        var e = [this.navTop, this.navBot], j = this.nItemsPerPage, h = this.rowOffset, d = this.nRowsVisible, g = 0, b = 0, f = 0, k = 0;
+        if (d > 0) {
+            if (!(this.hideNav & 1)) {
+                e[0].style.display = ""
+            }
+            if (!(this.hideNav & 2)) {
+                e[1].style.display = ""
+            }
+        } else {
+            e[0].style.display = e[1].style.display = "none"
+        }
+        if (j) {
+            if (h > 0) {
+                b = 1;
+                if (h >= j + j) {
+                    g = 1
                 }
             }
-            if (H + J < D) {
-                C = 1;
-                if (H + J + J < D) {
-                    I = 1
+            if (h + j < d) {
+                f = 1;
+                if (h + j + j < d) {
+                    k = 1
                 }
             }
         }
-        var E = [this.navTop, this.navBot];
-        for (var A = 0; A < 2; ++A) {
-            var G = E[A].childNodes;
-            G[0].style.display = (B ? "" : "none");
-            G[1].style.display = (F ? "" : "none");
-            G[3].style.display = (C ? "" : "none");
-            G[4].style.display = (I ? "" : "none");
-            G = G[2].childNodes;
-            G[0].firstChild.nodeValue = H + 1;
-            G[2].firstChild.nodeValue = J ? Math.min(H + J, D) : D;
-            G[4].firstChild.nodeValue = D
+        for (var c = 0; c < 2; ++c) {
+            var a = e[c].childNodes;
+            a[0].style.display = (g ? "" : "none");
+            a[1].style.display = (b ? "" : "none");
+            a[3].style.display = (f ? "" : "none");
+            a[4].style.display = (k ? "" : "none");
+            a = a[2].childNodes;
+            a[0].firstChild.nodeValue = h + 1;
+            a[2].firstChild.nodeValue = j ? Math.min(h + j, d) : d;
+            a[4].firstChild.nodeValue = d
         }
-    },
-    getTabName: function () {
-        var A = this.name;
-        var B = this.data.length;
-        if (B > 0) {
-            A += sprintf(LANG.qty, B)
+    },getTabName: function() {
+        var a = this.name, b = this.data.length;
+        if (b > 0 && !this.hideCount) {
+            a += sprintf(LANG.qty, b)
         }
-        return A
-    },
-    getTabPound: function () {
-        var A = "";
-        A += this.rowOffset;
+        return a
+    },getTabPound: function() {
+        var a = "";
+        a += this.rowOffset;
         if (this.poundable != 2 && this.sort.length) {
-            A += ("+" + this.sort.join("+")).replace(/\+\-/g, "-")
+            a += ("+" + this.sort.join("+")).replace(/\+\-/g, "-")
         }
-        return A
-    },
-    getCheckedRows: function () {
-        var D = [];
-        for (var C = 0, A = this.data.length; C < A; ++C) {
-            var B = this.data[C];
-            if ((B.__cb && B.__cb.checked) || (!B.__cb && B.__chk)) {
-                D.push(B)
+        return a
+    },getCheckedRows: function() {
+        var d = [];
+        for (var c = 0, a = this.data.length; c < a; ++c) {
+            var b = this.data[c];
+            if ((b.__cb && b.__cb.checked) || (!b.__cb && b.__chk)) {
+                d.push(b)
             }
         }
-        return D
-    },
-    deleteRows: function (M) {
-        if (!M.length) {
+        return d
+    },deleteRows: function(c) {
+        if (!c || !c.length) {
             return
         }
-        var C = 0;
-        var H = 0;
-        for (var E = M.length - 1; E >= 0; --E) {
-            var L = M[E];
-            var G = -1;
-            if (L.__tr && L.__tr.rowIndex > 0) {
-                G = this.rowOffset + L.__tr.rowIndex - 1
-            } else {
-                G = in_array(this.data, L);
-                H = 1
+        for (var b = 0, a = c.length; b < a; ++b) {
+            var d = c[b];
+            if (!d.__hidden && !d.__hidden) {
+                this.nRowsVisible -= 1
             }
-            if (G == -1) {
-                continue
-            }++C;
-            var K = this.nItemsPerPage;
-            var F = this.rowOffset;
-            var J = F + (K > 0 ? K : this.data.length) - 1;
-            if (G >= F && G <= J) {
-                if (this.mode == 2) {
-                    de(L.__div)
-                } else {
-                    de(L.__tr)
-                }
-            }
-            this.data.splice(G, 1)
-        }
-        if (C == 0) {
-            return
+            d.__deleted = true
         }
         this.updateTabName();
-        if (this.rowOffset >= this.data.length) {
+        if (this.rowOffset >= this.nRowsVisible) {
             this.previousPage()
         } else {
-            if (this.data.length == 0 || H) {
-                this.refreshRows()
-            }
-            this.updateNav();
-            var K = this.nItemsPerPage;
-            var A = (this.mode == 2 ? this.mainDiv : this.tbody);
-            var B = (this.mode == 2 ? this.getDiv : this.getRow);
-            var I = A.childNodes.length;
-            if (K > 0 && this.rowOffset + I < this.data.length) {
-                for (var E = this.rowOffset + I, D = E + K - I; E < D; ++E) {
-                    ae(A, B(E))
-                }
-            }
+            this.refreshRows();
+            this.updateNav()
         }
-    }
-};
-Listview.sortRows = function (C, B) {
-    var G = Listview.sort,
-        H = Listview.columns;
-    for (var F = 0, A = G.length; F < A; ++F) {
-        var E, D = H[Math.abs(G[F]) - 1];
-        if (D.sortFunc) {
-            E = D.sortFunc(C, B, G[F])
+    },setData: function(a) {
+        this.data = a;
+        this.indexCreated = false;
+        this.resetRowVisibility();
+        if (this.tabs) {
+            this.pounded = (this.tabs.poundedTab == this.tabIndex);
+            if (this.pounded) {
+                this.readPound()
+            }
         } else {
-            E = strcmp(C[D.value], B[D.value])
+            this.readPound()
         }
-        if (E != 0) {
-            return E * G[F]
+        this.applySort();
+        this.updateSortArrow();
+        if (this.customFilter != null) {
+            this.updateFilters()
+        }
+        this.updateNav();
+        this.refreshRows()
+    },getClipDiv: function() {
+        return this.clipDiv
+    },getNoteTopDiv: function() {
+        return this.noteTop
+    },focusSearch: function() {
+        this.quickSearchBox.focus()
+    },clearSearch: function() {
+        this.quickSearchBox.value = ""
+    }};
+Listview.sortRows = function(e, d) {
+    var j = Listview.sort, k = Listview.columns;
+    for (var h = 0, c = j.length; h < c; ++h) {
+        var g, f = k[Math.abs(j[h]) - 1];
+        if (f.sortFunc) {
+            g = f.sortFunc(e, d, j[h])
+        } else {
+            g = strcmp(e[f.value], d[f.value])
+        }
+        if (g != 0) {
+            return g * j[h]
         }
     }
     return 0
-}, Listview.sortIndexedRows = function (B, A) {
-    var E = Listview.sort,
-        F = Listview.columns;
-    var D, C = F[Math.abs(E[0]) - 1];
-    if (C.sortFunc) {
-        D = C.sortFunc(B, A, E[0])
+}, Listview.sortIndexedRows = function(d, c) {
+    var g = Listview.sort, h = Listview.columns, e = h[Math.abs(g[0]) - 1], f;
+    if (e.sortFunc) {
+        f = e.sortFunc(d, c, g[0])
     } else {
-        D = strcmp(B[C.value], A[C.value])
+        f = strcmp(d[e.value], c[e.value])
     }
-    if (D != 0) {
-        return D * E[0]
+    if (f != 0) {
+        return f * g[0]
     }
-    return B.__si - A.__si
-}, Listview.cbSelect = function (B) {
-    for (var D = 0, A = this.data.length; D < A; ++D) {
-        var C = this.data[D];
-        var F = B;
-        if (C.__tr) {
-            var E = C.__tr.firstChild.firstChild;
-            if (F == null) {
-                F = !E.checked
+    return (d.__si - c.__si)
+}, Listview.cbSelect = function(b) {
+    for (var d = 0, a = this.data.length; d < a; ++d) {
+        var c = this.data[d];
+        var f = b;
+        if (!c.__nochk && c.__tr) {
+            var e = c.__tr.firstChild.firstChild;
+            if (f == null) {
+                f = !e.checked
             }
-            if (E.checked != F) {
-                E.checked = F;
-                C.__tr.className = (E.checked ? "checked" : "");
+            if (e.checked != f) {
+                e.checked = f;
+                c.__tr.className = (e.checked ? "checked" : "");
                 if (Browser.ie) {
-                    E.defaultChecked = F;
+                    e.defaultChecked = f;
                     if (Browser.ie6) {
-                        (Listview.itemOut.bind(C.__tr))()
+                        (Listview.itemOut.bind(c.__tr))()
                     }
                 }
             }
         } else {
-            if (F == null) {
-                F = true
+            if (f == null) {
+                f = true
             }
         }
-        C.__chk = F
+        c.__chk = f
     }
 };
-Listview.cbClick = function (A) {
+Listview.cbClick = function(a) {
     setTimeout(Listview.cbUpdate.bind(0, 0, this, this.parentNode.parentNode), 1);
-    sp(A)
+    sp(a)
 };
-Listview.cbCellClick = function (A) {
+Listview.cbCellClick = function(a) {
     setTimeout(Listview.cbUpdate.bind(0, 1, this.firstChild, this.parentNode), 1);
-    sp(A)
+    sp(a)
 };
-Listview.cbIeFix = function () {
-    var D = gE(this.tbody, "tr");
-    for (var C = 0, A = D.length; C < A; ++C) {
-        var B = D[C].firstChild.firstChild;
-        B.checked = B.defaultChecked = false
-    }
-};
-Listview.cbUpdate = function (B, A, C) {
-    if (B) {
-        A.checked = !A.checked
-    }
-    C.className = (A.checked ? "checked" : "");
-    if (Browser.ie) {
-        A.defaultChecked = A.checked;
-        if (Browser.ie6) {
-            (Listview.itemOver.bind(C))()
+Listview.cbIeFix = function() {
+    var d = gE(this.tbody, "tr");
+    for (var c = 0, a = d.length; c < a; ++c) {
+        var b = d[c].firstChild.firstChild;
+        if (b) {
+            b.checked = b.defaultChecked = false
         }
     }
 };
-Listview.itemOver = function () {
+Listview.cbUpdate = function(c, a, b) {
+    if (c) {
+        a.checked = !a.checked
+    }
+    b.className = (a.checked ? "checked" : "");
+    if (Browser.ie) {
+        a.defaultChecked = a.checked;
+        if (Browser.ie6) {
+            (Listview.itemOver.bind(b))()
+        }
+    }
+};
+Listview.itemOver = function() {
     this.style.backgroundColor = (this.className == "checked" ? "#2C2C2C" : "#202020")
 };
-Listview.itemOut = function () {
+Listview.itemOut = function() {
     this.style.backgroundColor = (this.className == "checked" ? "#242424" : "transparent")
 };
-Listview.headerOver = function (B, A) {
-    Tooltip.showAtCursor(A, B, 0, 0, "q")
-};
-Listview.extraCols = {
-    cost: {
-        id: "cost",
-        name: LANG.cost,
-        compute: function (A, B) {
-            Listview.funcBox.appendMoney(B, A.cost[0], null, A.cost[1], A.cost[2], A.cost[3])
-        },
-        sortFunc: function (B, A, C) {
-            var E = 0,
-                D = 0;
-            if (B.cost[3] != null) {
-                array_walk(B.cost[3], function (F, G, G, H) {
-                    E += Math.pow(10, H) + F[1]
-                })
-            }
-            if (A.cost[3] != null) {
-                array_walk(A.cost[3], function (F, G, G, H) {
-                    D += Math.pow(10, H) + F[1]
-                })
-            }
-            return strcmp(E, D) || strcmp(B.cost[2], A.cost[2]) || strcmp(B.cost[1], A.cost[1]) || strcmp(B.cost[0], A.cost[0])
-        }
-    },
-    count: {
-        id: "count",
-        name: LANG.count,
-        width: "11%",
-        value: "count",
-        compute: function (B, C) {
-            if (B.outof) {
-                var A = ce("div");
-                A.className = "small q0";
-                ae(A, ct(sprintf(LANG.lvdrop_outof, B.outof)));
-                ae(C, A)
-            }
-            return B.count
-        }
-    },
-    percent: {
-        id: "percent",
-        name: "%",
-        width: "10%",
-        value: "percent",
-        compute: function (A, B) {
-            if (A.percent >= 1.95) {
-                return A.percent.toFixed(0)
-            } else if (A.percent < 0) {
-                return ((-1 * A.percent) + ' (' + LANG.types[5][0] + ')')
-            } else {
-                return parseFloat(A.percent.toFixed(4))
-            }
-        }
-    },
-    stock: {
-        id: "stock",
-        name: LANG.stock,
-        width: "10%",
-        value: "stock",
-        compute: function (A, B) {
-            if (A.stock > 0) {
-                return A.stock
-            } else {
-                B.style.fontFamily = "Verdana, sans-serif";
-                return String.fromCharCode(8734)
-            }
-        }
+Listview.headerClick = function(a, b, c) {
+    c = $E(c);
+    if (c._button == 3 || c.shiftKey || c.ctrlKey) {
+        Tooltip.hide();
+        setTimeout(Listview.headerFilter.bind(this, a, null), 1)
+    } else {
+        this.sortBy(b + 1)
     }
+    return false
 };
-Listview.funcBox = {
-    createSimpleCol: function (C, D, A, B) {
-        return {
-            id: C,
-            name: LANG[D],
-            width: A,
-            value: B
+Listview.headerFilter = function(c, f) {
+    var j = "";
+    if (c.__filter) {
+        if (c.__filter.invert) {
+            j += "!"
         }
-    },
-    initLootTable: function (A) {
-        if (this._totalCount != null) {
-            A.percent = A.count / this._totalCount
-        } else {
-            A.percent = A.count / A.outof
-        }
-        A.percent *= 100
-    },
-    beforeUserComments: function () {
-        if ((g_user.roles & 26) != 0) {
-            this.mode = 1;
-            this.createCbControls = function (B) {
-                var A = ce("input");
-                A.type = "button";
-                A.value = "Delete";
-                A.onclick = (function () {
-                    var E = this.getCheckedRows();
-                    if (!E.length) {
-                        alert("No comments selected.")
+        j += c.__filter.text
+    }
+    if (f == null) {
+        var f = prompt(sprintf(LANG.prompt_colfilter1 + (c.type == "text" ? LANG.prompt_colfilter2 : LANG.prompt_colfilter3), c.name), j)
+    }
+    if (f != null) {
+        var e = {text: "",type: -1};
+        f = trim(f.replace(/\s+/g, " "));
+        if (f) {
+            if (f.charAt(0) == "!" || f.charAt(0) == "-") {
+                e.invert = 1;
+                f = f.substr(1)
+            }
+            if (c.type == "text") {
+                e.type = 0;
+                e.text = f;
+                if (e.invert) {
+                    e.regex = g_createOrRegex(f)
+                } else {
+                    e.words = f.toLowerCase().split(" ")
+                }
+            } else {
+                var i, b;
+                if (f.match(/(>|=|<|>=|<=)\s*([0-9\.]+)/)) {
+                    i = parseFloat(RegExp.$2);
+                    if (!isNaN(i)) {
+                        switch (RegExp.$1) {
+                            case ">":
+                                e.type = 1;
+                                break;
+                            case "=":
+                                e.type = 2;
+                                break;
+                            case "<":
+                                e.type = 3;
+                                break;
+                            case ">=":
+                                e.type = 4;
+                                break;
+                            case "<=":
+                                e.type = 5;
+                                break
+                        }
+                        e.value = i;
+                        e.text = RegExp.$1 + " " + i
+                    }
+                } else {
+                    if (f.match(/([0-9\.]+)\s*\-\s*([0-9\.]+)/)) {
+                        i = parseFloat(RegExp.$1);
+                        b = parseFloat(RegExp.$2);
+                        if (!isNaN(i) && !isNaN(b)) {
+                            if (i > b) {
+                                var g = i;
+                                i = b;
+                                b = g
+                            }
+                            if (i == b) {
+                                e.type = 2;
+                                e.value = i;
+                                e.text = "= " + i
+                            } else {
+                                e.type = 6;
+                                e.value = i;
+                                e.value2 = b;
+                                e.text = i + " - " + b
+                            }
+                        }
                     } else {
-                        if (confirm("Are you sure that you want to delete " + (E.length == 1 ? "this comment" : "these " + E.length + " comments") + "?")) {
-                            var C = "";
-                            var D = 0;
-                            array_walk(E, function (F) {
-                                if (F.purged == 0 && F.deleted == 0) {
-                                    F.deleted = 1;
-                                    if (F.__tr != null) {
-                                        F.__tr.childNodes[2].lastChild.lastChild.firstChild.nodeValue = " (Deleted)"
-                                    }
-                                    C += F.id + ","
+                        var d = f.toLowerCase().split(" ");
+                        if (d.length == 1 && !isNaN(i = parseFloat(d[0]))) {
+                            e.type = 2;
+                            e.value = i;
+                            e.text = "= " + i
+                        } else {
+                            if (c.type == "text") {
+                                e.type = 0;
+                                e.text = f;
+                                if (e.invert) {
+                                    e.regex = g_createOrRegex(f)
                                 } else {
-                                    if (F.purged == 1) {
-                                        ++D
-                                    }
+                                    e.words = d
                                 }
-                            });
-                            C = rtrim(C, ",");
-                            if (C != "") {
-                                new Ajax("?comment=delete&id=" + C + "&username=" + g_pageInfo.username)
-                            }(Listview.cbSelect.bind(this, false))();
-                            if (D > 0) {
-                                alert("Purged comments cannot be deleted.\n\nA purged comment is a comment that has been\nautomatically removed from the site due to a negative rating.")
                             }
                         }
                     }
-                }).bind(this);
-                ae(B, A);
-                if (g_user.roles & 26) {
-                    var A = ce("input");
-                    A.type = "button";
-                    A.value = "Undelete";
-                    A.onclick = (function () {
-                        var D = this.getCheckedRows();
-                        if (!D.length) {
-                            alert("No comments selected.")
-                        } else {
-                            var C = "";
-                            array_walk(D, function (E) {
-                                if (E.deleted == 1) {
-                                    E.deleted = 0;
-                                    if (E.__tr != null) {
-                                        E.__tr.childNodes[2].lastChild.lastChild.firstChild.nodeValue = ""
-                                    }
-                                    C += E.id + ","
-                                }
-                            });
-                            C = rtrim(C, ",");
-                            if (C != "") {
-                                new Ajax("?comment=undelete&id=" + C + "&username=" + g_pageInfo.username)
-                            }(Listview.cbSelect.bind(this, false))()
-                        }
-                    }).bind(this);
-                    ae(B, A)
                 }
             }
+            if (e.type == -1) {
+                alert(LANG.message_invalidfilter);
+                return
+            }
         }
-    },
-    assocArrCmp: function (C, B, A) {
-        if (C == null) {
+        if (!c.__filter || e.text != c.__filter.text || e.invert != c.__filter.invert) {
+            var h = c.__th.firstChild.firstChild;
+            if (f && e.text) {
+                if (!c.__filter) {
+                    h.className = "q5";
+                    ++(this.nFilters)
+                }
+                c.__filter = e
+            } else {
+                if (c.__filter) {
+                    h.className = "";
+                    --(this.nFilters)
+                }
+                c.__filter = null
+            }
+            this.updateFilters(1)
+        }
+    }
+};
+Listview.headerOver = function(b, c, f) {
+    var d = "";
+    d += '<b class="q1">' + (c.tooltip ? c.tooltip : c.name) + "</b>";
+    if (c.__filter) {
+        d += "<br />" + sprintf((c.__filter.invert ? LANG.tooltip_colfilter2 : LANG.tooltip_colfilter1), c.__filter.text)
+    }
+    d += '<br /><span class="q2">' + LANG.tooltip_lvheader1 + "</span>";
+    if (this.filtrable && (c.filtrable == null || c.filtrable)) {
+        d += '<br /><span class="q2">' + (Browser.opera ? LANG.tooltip_lvheader3 : LANG.tooltip_lvheader2) + "</span>"
+    }
+    Tooltip.show(b, d, 0, 0, "q")
+};
+Listview.extraCols = {cost: {id: "cost",name: LANG.cost,getValue: function(a) {
+            return (a.cost[3] ? a.cost[3][0][1] : 0) || a.cost[2] || a.cost[1] || a.cost[0]
+        },compute: function(a, b) {
+            Listview.funcBox.appendMoney(b, a.cost[0], null, a.cost[1], a.cost[2], a.cost[3])
+        },sortFunc: function(d, c, e) {
+            var g = 0, f = 0;
+            if (d.cost[3] != null) {
+                array_walk(d.cost[3], function(a, b, j, h) {
+                    g += Math.pow(10, h) + a[1]
+                })
+            }
+            if (c.cost[3] != null) {
+                array_walk(c.cost[3], function(a, b, j, h) {
+                    f += Math.pow(10, h) + a[1]
+                })
+            }
+            return strcmp(g, f) || strcmp(d.cost[2], c.cost[2]) || strcmp(d.cost[1], c.cost[1]) || strcmp(d.cost[0], c.cost[0])
+        }},count: {id: "count",name: LANG.count,width: "11%",value: "count",compute: function(b, c) {
+            if (!(this._totalCount > 0 || b.outof > 0)) {
+                return
+            }
+            if (b.outof) {
+                var a = ce("div");
+                a.className = "small q0";
+                ae(a, ct(sprintf(LANG.lvdrop_outof, b.outof)));
+                ae(c, a)
+            }
+            return b.count
+        },getVisibleText: function(a) {
+            var b = a.count;
+            if (a.outof) {
+                b += " " + a.outof
+            }
+            return b
+        }},percent: {id: "percent",name: "%",width: "10%",value: "percent",compute: function(a, b) {
+            if (a.count == -1) {
+                return "??"
+            }
+            if (a.percent >= 1.95) {
+                return a.percent.toFixed(0)
+            } else if (a.percent < 0) {
+                return ((-1 * a.percent) + ' (' + LANG.types[5][0] + ')')
+            } else {
+                return parseFloat(a.percent.toFixed(4))
+            }
+        },sortFunc: function(d, c, e) {
+            return strcmp(Math.abs(d.percent), Math.abs(c.percent));
+        },getVisibleText: function(a) {
+            if (a.count == -1) {
+                return "??"
+            }
+            if (a.percent >= 1.95) {
+                return a.percent.toFixed(0)
+            } else if (a.percent < 0) {
+                return ((-1 * a.percent) + ' (' + LANG.types[5][0] + ')')
+            } else {
+                return parseFloat(a.percent.toFixed(1))
+            }
+        }},stock: {id: "stock",name: LANG.stock,width: "10%",value: "stock",compute: function(a, b) {
+            if (a.stock > 0) {
+                return a.stock
+            } else {
+                b.style.fontFamily = "Verdana, sans-serif";
+                return String.fromCharCode(8734)
+            }
+        },getVisibleText: function(a) {
+            if (a.stock > 0) {
+                return a.stock
+            } else {
+                return String.fromCharCode(8734) + " infinity"
+            }
+        }}};
+Listview.funcBox = {createSimpleCol: function(c, d, a, b) {
+        return {id: c,name: LANG[d],width: a,value: b}
+    },initLootTable: function(b) {
+        var a;
+        if (this._totalCount != null) {
+            a = this._totalCount
+        } else {
+            a = b.outof
+        }
+        if (a == 0) {
+            if (b.count != -1) {
+                b.percent = b.count
+            } else {
+                b.percent = 0
+            }
+        } else {
+            b.percent = b.count / a * 100
+        }
+    },assocArrCmp: function(e, d, c) {
+        if (e == null) {
             return -1
         } else {
-            if (B == null) {
+            if (d == null) {
                 return 1
             }
         }
-        var F = Math.max(C.length, B.length);
-        for (var E = 0; E < F; ++E) {
-            if (C[E] == null) {
+        var h = Math.max(e.length, d.length);
+        for (var g = 0; g < h; ++g) {
+            if (e[g] == null) {
                 return -1
             } else {
-                if (B[E] == null) {
+                if (d[g] == null) {
                     return 1
                 }
             }
-            var D = strcmp(A[C[E]], A[B[E]]);
-            if (D != 0) {
-                return D
+            var f = strcmp(c[e[g]], c[d[g]]);
+            if (f != 0) {
+                return f
             }
         }
         return 0
-    },
-    location: function (E, F) {
-        if (E.location == null) {
+    },location: function(f, g) {
+        if (f.location == null) {
             return -1
         }
-        for (var D = 0, B = E.location.length; D < B; ++D) {
-            if (D > 0) {
-                ae(F, ct(LANG.comma))
+        for (var d = 0, b = f.location.length; d < b; ++d) {
+            if (d > 0) {
+                ae(g, ct(LANG.comma))
             }
-            var A = E.location[D];
-            if (A == -1) {
-                ae(F, ct(LANG.ellipsis))
+            var e = f.location[d];
+            if (e == -1) {
+                ae(g, ct(LANG.ellipsis))
             } else {
-                var C = ce("a");
-                C.className = "q1";
-                C.href = "?zone=" + A;
-                ae(C, ct(g_zones[A]));
-                ae(F, C)
+                var c = ce("a");
+                c.className = "q1";
+                c.href = "?maps=" + e;
+                ae(c, ct(g_zones[e]));
+                ae(g, c)
             }
         }
-    },
-    createCenteredIcons: function (I, C, L) {
-        if (I != null) {
-            var H = ce("div"),
-                A = ce("div");
-            if (L) {
-                var G = ce("div");
-                G.style.position = "relative";
-                G.style.width = "1px";
-                var J = ce("div");
-                J.className = "q0";
-                J.style.position = "absolute";
-                J.style.right = "2px";
-                J.style.lineHeight = "26px";
-                J.style.fontSize = "11px";
-                J.style.whiteSpace = "nowrap";
-                ae(J, ct(L));
-                ae(G, J);
-                ae(H, G)
+    },arrayText: function(b, e) {
+        if (b == null) {
+            return
+        }
+        var d = "";
+        for (var c = 0, a = b.length; c < a; ++c) {
+            if (c > 0) {
+                d += " "
             }
-            for (var D = 0, F = I.length; D < F; ++D) {
-                var B, E;
-                if (typeof I[D] == "object") {
-                    B = I[D][0];
-                    E = I[D][1]
+            if (!e[b[c]]) {
+                continue
+            }
+            d += e[b[c]]
+        }
+        return d
+    },createCenteredIcons: function(h, c, p, m) {
+        if (h != null) {
+            var l = ce("div"), a = ce("div");
+            if (p) {
+                var k = ce("div");
+                k.style.position = "relative";
+                k.style.width = "1px";
+                var n = ce("div");
+                n.className = "q0";
+                n.style.position = "absolute";
+                n.style.right = "2px";
+                n.style.lineHeight = "26px";
+                n.style.fontSize = "11px";
+                n.style.whiteSpace = "nowrap";
+                ae(n, ct(p));
+                ae(k, n);
+                ae(l, k)
+            }
+            var g = g_items;
+            if (m == 1) {
+                g = g_spells
+            }
+            for (var e = 0, j = h.length; e < j; ++e) {
+                var o;
+                if (h[e] == null) {
+                    o = ce("div");
+                    o.style.width = o.style.height = "26px"
                 } else {
-                    B = I[D]
+                    var b, f;
+                    if (typeof h[e] == "object") {
+                        b = h[e][0];
+                        f = h[e][1]
+                    } else {
+                        b = h[e]
+                    }
+                    if (b) {
+                        o = g.createIcon(b, 0, f)
+                    } else {
+                        o = Icon.create("inventoryslot_empty", 0, null, "javascript:;")
+                    }
                 }
-                var K = g_items.createIcon(B, 0, E);
-                K.style.cssFloat = K.style.styleFloat = "left";
-                ae(H, K)
+                o.style.cssFloat = o.style.styleFloat = "left";
+                ae(l, o)
             }
-            H.style.margin = "0 auto";
-            H.style.textAlign = "left";
-            H.style.width = (26 * I.length) + "px";
-            A.className = "clear";
-            ae(C, H);
-            ae(C, A);
+            l.style.margin = "0 auto";
+            l.style.textAlign = "left";
+            l.style.width = (26 * h.length) + "px";
+            a.className = "clear";
+            ae(c, l);
+            ae(c, a);
             return true
         }
-    },
-    getItemType: function (C, B, A) {
-        if (A != null && g_item_subsubclasses[C] != null && g_item_subsubclasses[C][B] != null) {
-            return g_item_subsubclasses[C][B][A]
-        }
-        if (g_item_subclasses[C] != null) {
-            return g_item_subclasses[C][B]
-        } else {
-            return g_item_classes[C]
-        }
-    },
-    getQuestCategory: function (A) {
-        if (A > 0) {
-            return g_zones[A]
-        } else {
-            return g_quest_sorts[-A]
-        }
-    },
-    createTextRange: function (B, A) {
-        B |= 0;
-        A |= 0;
-        if (B > 1 || A > 1) {
-            if (B != A && A > 0) {
-                return B + "-" + A
+    },createSocketedIcons: function(b, e, c, g, n) {
+        var m = 0, k = ce("div"), a = ce("div");
+        for (var f = 0, h = b.length; f < h; ++f) {
+            var l, j = c[f];
+            if (!c || !j) {
+                l = Icon.create(null, 0, null, "javascript:;")
             } else {
-                return B + ""
+                if (g_items[j]) {
+                    l = g_items.createIcon(j, 0)
+                } else {
+                    l = Icon.create(g_gems[j].icon, 0, null, "?item=" + j)
+                }
+            }
+            l.className += " iconsmall-socket-" + g_file_gems[b[f]] + (!c || !j ? "-empty" : "");
+            l.style.cssFloat = l.style.styleFloat = "left";
+            if (g && g[f]) {
+                l.insertBefore(ce("var"), l.childNodes[1]);
+                ++m
+            }
+            ae(k, l)
+        }
+        k.style.margin = "0 auto";
+        k.style.textAlign = "left";
+        k.style.width = (26 * b.length) + "px";
+        a.className = "clear";
+        ae(e, k);
+        ae(e, a);
+        if (n && m == b.length) {
+            k = ce("div");
+            k.style.paddingTop = "4px";
+            ae(k, ct(n));
+            ae(e, k)
+        }
+    },getItemType: function(c, a, b) {
+        if (b != null && g_item_subsubclasses[c] != null && g_item_subsubclasses[c][a] != null) {
+            return {url: "?items=" + c + "." + a + "." + b,text: g_item_subsubclasses[c][a][b]}
+        }
+        if (g_item_subclasses[c] != null) {
+            return {url: "?items=" + c + "." + a,text: g_item_subclasses[c][a]}
+        } else {
+            return {url: "?items=" + c,text: g_item_classes[c]}
+        }
+    },getQuestCategory: function(a) {
+        if (a > 0) {
+            return g_zones[a]
+        } else {
+            return g_quest_sorts[ - a]
+        }
+    },getFactionCategory: function(b, a) {
+        if (b) {
+            return g_faction_categories[b]
+        } else {
+            return g_faction_categories[a]
+        }
+    },createTextRange: function(b, a) {
+        b |= 0;
+        a |= 0;
+        if (b > 1 || a > 1) {
+            if (b != a && a > 0) {
+                return b + "-" + a
+            } else {
+                return b + ""
             }
         }
         return null
-    },
-    coGetColor: function (C, A) {
-        if (C.user && g_customColors[C.user]) {
-            return " comment-" + g_customColors[C.user]
+    },coReport: function(c, d, f) {
+        if (!g_user.id || !g_report_reasons[f]) {
+            return
         }
-        switch (A) {
-        case -1:
-            var B = C.divPost.childNodes[1].className.match(/comment-([a-z]+)/);
-            if (B != null) {
-                return " comment-" + B[1]
+        var a = "";
+        if (f == 4) {
+            a = prompt(LANG.prompt_details, "")
+        } else {
+            if (!confirm(sprintf((c == 0 ? LANG.confirm_report : LANG.confirm_report2), g_contact_reasons[f]))) {
+                return
             }
-            break;
-        case 3:
-        case 4:
-            if (C.roles & 24) {
-                return " comment-green"
-            }
-            break
         }
-        if (C.roles & 2) {
+        if (a != null) {
+            var e = "?report&type=" + c + "&typeid=" + d.id + "&reason=" + f;
+            if (a) {
+                e += "&reasonmore=" + urlencode(a)
+            }
+            new Ajax(e);
+            var b = ce("span");
+            ae(b, ct(LANG.lvcomment_reported));
+            this.parentNode.replaceChild(b, this)
+        }
+    },coReportClick: function(b, a, c) {
+        this.menu = [[2, g_report_reasons[2], Listview.funcBox.coReport.bind(this, a, b, 2)], [1, g_report_reasons[1], Listview.funcBox.coReport.bind(this, a, b, 1)], [3, g_report_reasons[3], Listview.funcBox.coReport.bind(this, a, b, 3)], [4, g_report_reasons[4], Listview.funcBox.coReport.bind(this, a, b, 4)]];
+		if (a == 1 && b.op && typeof g_pageInfo != "undefined" && !g_pageInfo.sticky) {
+            this.menu.splice(3, 0, [0, g_report_reasons[0], Listview.funcBox.coReport.bind(this, a, b, 0)])
+        }
+        (Menu.showAtCursor.bind(this, c))()
+    },coGetColor: function(c, a) {
+        if (c.user && g_customColors[c.user]) {
+            return " comment-" + g_customColors[c.user]
+        }
+        switch (a) {
+            case -1:
+                var b = c.divPost.childNodes[1].className.match(/comment-([a-z]+)/);
+                if (b != null) {
+                    return " comment-" + b[1]
+                }
+                break;
+            case 3:
+            case 4:
+                if (c.roles & 56) {
+                    return " comment-green"
+                } else {
+                    if (c.roles & 64) {
+                        return " comment-gold"
+                    }
+                }
+                break
+        }
+        if (c.roles & 2) {
             return " comment-blue"
         } else {
-            if (C.rating >= 10) {
+            if (c.rating >= 10) {
                 return " comment-green"
             } else {
-                if (C.rating < 0) {
+                if (c.rating < 0) {
                     return " comment-bt"
                 }
             }
         }
         return ""
-    },
-    coToggleVis: function (A) {
-        this.firstChild.nodeValue = (g_toggleDisplay(A.divBody) ? LANG.lvcomment_hide : LANG.lvcomment_show);
-        if (A.ratable) {
-            A.divHeader.firstChild.lastChild.style.display = ""
+    },coToggleVis: function(b) {
+        this.firstChild.nodeValue = (g_toggleDisplay(b.divBody) ? LANG.lvcomment_hide : LANG.lvcomment_show);
+        var a = b.divHeader.firstChild.lastChild;
+        if (b.ratable) {
+            a.style.display = ""
+        } else {
+            if (b.deleted || b.purged) {
+                a.style.fontWeight = "normal";
+                a.className = "q10";
+                a.innerHTML = (b.deleted ? LANG.lvcomment_deleted : LANG.lvcomment_purged);
+                a.style.display = ""
+            }
         }
-        g_toggleDisplay(A.divLinks);
-        if (A.lastEdit != null) {
-            g_toggleDisplay(A.divLastEdit)
+        g_toggleDisplay(b.divLinks);
+        if (b.lastEdit != null) {
+            g_toggleDisplay(b.divLastEdit)
         }
-    },
-    coRate: function (D, B) {
-        if (B == 0) {
-            var A = 5;
+    },coRate: function(e, a) {
+        if (a == 0) {
+            var c = 5;
             if (g_user.roles & 2) {
-                A = 25
+                c = 25
             } else {
                 if (g_user.roles & 16) {
-                    A = 15
+                    c = 15
                 }
             }
-            var C = prompt(sprintf(LANG.prompt_customrating, A, A), 0);
-            if (C == null) {
+            var d = prompt(sprintf(LANG.prompt_customrating, c, c), 0);
+            if (d == null) {
                 return
             } else {
-                C |= 0;
-                if (C != 0 && Math.abs(C) <= A) {
-                    B = C
+                d |= 0;
+                if (d != 0 && Math.abs(d) <= c) {
+                    a = d
                 }
             }
-            if (B == 0) {
+            if (a == 0) {
                 return
             }
         } else {
             if (g_user.roles & 26) {
-                B *= 5
+                a *= 5
             }
         }
-        new Ajax("?comment=rate&id=" + D.id + "&rating=" + B);
-        D.rating += B;
-        _ = D.divHeader.firstChild;
-        _ = _.childNodes[_.childNodes.length - 3];
-        _.lastChild.firstChild.nodeValue = (D.rating > 0 ? "+" : "") + D.rating;
+        new Ajax("?comment=rate&id=" + e.id + "&rating=" + a);
+        e.rating += a;
+        var b = e.divHeader.firstChild;
+        b = b.childNodes[b.childNodes.length - 3];
+        b.lastChild.firstChild.nodeValue = (e.rating > 0 ? "+" : "") + e.rating;
         Tooltip.hide();
-        de(_.nextSibling);
-        de(_.nextSibling)
-    },
-    coDelete: function (A) {
-        if (A.purged) {
+        de(b.nextSibling);
+        de(b.nextSibling)
+    },coDelete: function(a) {
+        if (a.purged) {
             alert(LANG.message_cantdeletecomment)
         } else {
             if (confirm(LANG.confirm_deletecomment)) {
-                new Ajax("?comment=delete&id=" + A.id);
-                this.deleteRows([A])
+                new Ajax("?comment=delete&id=" + a.id);
+                this.deleteRows([a])
             }
         }
-    },
-    coDetach: function (A) {
-        if (A.replyTo == 0) {
+    },coDetach: function(a) {
+        if (a.replyTo == 0) {
             alert(LANG.message_cantdetachcomment)
         } else {
             if (confirm(LANG.confirm_detachcomment)) {
-                new Ajax("?comment=detach&id=" + A.id);
-                A.replyTo = 0;
+                new Ajax("?comment=detach&id=" + a.id);
+                a.replyTo = 0;
                 alert(LANG.message_commentdetached)
             }
         }
-    },
-    coEdit: function (G, E) {
-        G.divBody.style.display = "none";
-        G.divLinks.firstChild.style.display = "none";
-        var F = ce("div");
-        F.className = "comment-edit";
-        G.divEdit = F;
-        if (E == -1) {
-            if (g_users[G.user] != null) {
-                G.roles = g_users[G.user].roles
+    },coEdit: function(g, e) {
+        g.divBody.style.display = "none";
+        g.divLinks.firstChild.style.display = "none";
+        var f = ce("div");
+        f.className = "comment-edit";
+        g.divEdit = f;
+        if (e == -1) {
+            if (g_users[g.user] != null) {
+                g.roles = g_users[g.user].roles
             }
         }
-        var C = Listview.funcBox.coEditAppend(F, G, E);
-        var B = ce("div");
-        B.className = "comment-edit-buttons";
-        var D = ce("input");
-        D.type = "button";
-        D.value = LANG.compose_save;
-        D.onclick = Listview.funcBox.coEditButton.bind(D, G, true, E);
-        ae(B, D);
-        ae(B, ct(" "));
-        D = ce("input");
-        D.type = "button";
-        D.value = LANG.compose_cancel;
-        D.onclick = Listview.funcBox.coEditButton.bind(D, G, false, E);
-        ae(B, D);
-        ae(F, B);
-        var A = F;
+        var a = Listview.funcBox.coEditAppend(f, g, e);
+        var b = ce("div");
+        b.className = "comment-edit-buttons";
+        var d = ce("input");
+        d.type = "button";
+        d.value = LANG.compose_save;
+        d.onclick = Listview.funcBox.coEditButton.bind(d, g, true, e);
+        ae(b, d);
+        ae(b, ct(" "));
+        d = ce("input");
+        d.type = "button";
+        d.value = LANG.compose_cancel;
+        d.onclick = Listview.funcBox.coEditButton.bind(d, g, false, e);
+        ae(b, d);
+        ae(f, b);
+        var c = f;
         if (Browser.ie6) {
-            A = ce("div");
-            A.style.width = "99%";
-            ae(A, F)
+            c = ce("div");
+            c.style.width = "99%";
+            ae(c, f)
         }
-        if (E == -1) {
-            G.divPost.insertBefore(A, G.divBody.nextSibling)
+        if (e == -1) {
+            g.divPost.insertBefore(c, g.divBody.nextSibling)
         } else {
-            G.__div.insertBefore(A, G.divBody.nextSibling)
+            g.__div.insertBefore(c, g.divBody.nextSibling)
         }
-        C.focus()
-    },
-    coEditAppend: function (L, C, K) {
-        var F = Listview.funcBox.coGetCharLimit(K);
-        if (K == 1 || K == 3 || K == 4) {
-            C.user = g_user.name;
-            C.roles = g_user.roles;
-            C.rating = 1
+        a.focus()
+    },coEditAppend: function(m, b, l) {
+        var f = Listview.funcBox.coGetCharLimit(l);
+        if (l == 1 || l == 3 || l == 4) {
+            b.user = g_user.name;
+            b.roles = g_user.roles;
+            b.rating = 1
         } else {
-            if (K >= 1) {
-                C.roles = 0;
-                C.rating = 1
+            if (l == 2) {
+                b.roles = g_user.roles;
+                b.rating = 1
             }
         }
-        if (K == -1 || K == 0) {
-            var J = ce("div");
-            J.className = "comment-edit-modes";
-            ae(J, ct(LANG.compose_mode));
-            var P = ce("a");
-            P.className = "selected";
-            P.onclick = Listview.funcBox.coModeLink.bind(P, 1, K);
-            P.href = "javascript:;";
-            ae(P, ct(LANG.compose_edit));
-            ae(J, P);
-            ae(J, ct("|"));
-            var N = ce("a");
-            N.onclick = Listview.funcBox.coModeLink.bind(N, 2, K);
-            N.href = "javascript:;";
-            ae(N, ct(LANG.compose_preview));
-            ae(J, N);
-            ae(L, J)
+        if (l == -1 || l == 0) {
+            var j = ce("div");
+            j.className = "comment-edit-modes";
+            ae(j, ct(LANG.compose_mode));
+            var o = ce("a");
+            o.className = "selected";
+            o.onclick = Listview.funcBox.coModeLink.bind(o, 1, l, b);
+            o.href = "javascript:;";
+            ae(o, ct(LANG.compose_edit));
+            ae(j, o);
+            ae(j, ct("|"));
+            var u = ce("a");
+            u.onclick = Listview.funcBox.coModeLink.bind(u, 2, l, b);
+            u.href = "javascript:;";
+            ae(u, ct(LANG.compose_preview));
+            ae(j, u);
+            ae(m, j)
         }
-        var A = ce("div");
-        A.style.display = "none";
-        A.className = "comment-body" + Listview.funcBox.coGetColor(C, K);
-        ae(L, A);
-        var H = ce("div");
-        H.className = "comment-edit-body";
-        var G = ce("div");
-        G.className = "toolbar";
-        var I = ce("textarea");
-        I.className = "comment-editbox";
-        I.rows = 10;
-        I.value = C.body;
-        switch (K) {
-        case 1:
-            I.name = "commentbody";
-            break;
-        case 2:
-            I.name = "desc";
-            I.originalValue = C.body;
-            break;
-        case 3:
-            I.name = "body";
-            break;
-        case 4:
-            I.name = "sig";
-            I.originalValue = C.body;
-            I.rows = (Browser.gecko ? 2 : 3);
-            I.style.height = "auto";
-            break
+        var a = ce("div");
+        a.style.display = "none";
+        a.className = "comment-body" + Listview.funcBox.coGetColor(b, l);
+        ae(m, a);
+        var h = ce("div");
+        h.className = "comment-edit-body";
+        var e = ce("div");
+        e.className = "toolbar";
+        var g = ce("textarea");
+        g.className = "comment-editbox";
+        g.rows = 10;
+        g.value = b.body;
+        switch (l) {
+            case 1:
+                g.name = "commentbody";
+                g.onfocus = g_revealCaptcha;
+                break;
+            case 2:
+                g.name = "desc";
+                g.originalValue = b.body;
+                break;
+            case 3:
+                g.name = "body";
+                g.onfocus = g_revealCaptcha;
+                break;
+            case 4:
+                g.name = "sig";
+                g.originalValue = b.body;
+                g.rows = (Browser.gecko ? 2 : 3);
+                g.style.height = "auto";
+                break
         }
-        if (K != -1 && K != 0) {
-            var E = ce("h3"),
-                W = ce("a"),
-                O = ce("div"),
-                V = ce("div");
-            var D = Listview.funcBox.coLivePreview.bind(I, C, K, O);
-            if (C.body) {
-                W.className = "disclosure-off";
-                O.style.display = "none"
+        if (l != -1 && l != 0) {
+            var d = ce("h3"), v = ce("a"), t = ce("div"), s = ce("div");
+            var c = Listview.funcBox.coLivePreview.bind(g, b, l, t);
+            if (b.body) {
+                v.className = "disclosure-off";
+                t.style.display = "none"
             } else {
-                W.className = "disclosure-on"
+                v.className = "disclosure-on"
             }
-            ae(W, ct(LANG.compose_livepreview));
-            ae(E, W);
-            W.href = "javascript:;";
-            W.onclick = function () {
-                D(1);
-                W.className = "disclosure-" + (g_toggleDisplay(O) ? "on" : "off")
+            ae(v, ct(LANG.compose_livepreview));
+            ae(d, v);
+            v.href = "javascript:;";
+            v.onclick = function() {
+                c(1);
+                v.className = "disclosure-" + (g_toggleDisplay(t) ? "on" : "off")
             };
-            ns(W);
-            E.className = "first";
-            V.className = "pad";
-            ae(A, E);
-            ae(A, O);
-            ae(A, V);
-            var U;
-            var T = function () {
-                    if (U) {
-                        clearTimeout(U);
-                        U = null
-                    }
-                    U = setTimeout(D, 50)
-                };
-            I.onchange = T;
-            I.onkeyup = T;
-            aE(I, "focus", function () {
-                D();
-                A.style.display = "";
-                if (K != 4) {
-                    I.style.height = "22em"
+            ns(v);
+            d.className = "first";
+            s.className = "pad";
+            ae(a, d);
+            ae(a, t);
+            ae(a, s);
+            g_onAfterTyping(g, c, 50);
+            aE(g, "focus", function() {
+                c();
+                a.style.display = "";
+                if (l != 4) {
+                    g.style.height = "22em"
                 }
             })
         } else {
-            if (K != 4) {
-                aE(I, "focus", function () {
-                    I.style.height = "22em"
+            if (l != 4) {
+                aE(g, "focus", function() {
+                    g.style.height = "22em"
                 })
             }
         }
-        var S = [{
-            id: "b",
-            title: LANG.markup_b,
-            pre: "[b]",
-            post: "[/b]"
-        },
-                    {
-            id: "i",
-            title: LANG.markup_i,
-            pre: "[i]",
-            post: "[/i]"
-        },
-                    {
-            id: "u",
-            title: LANG.markup_u,
-            pre: "[u]",
-            post: "[/u]"
-        },
-                    {
-            id: "s",
-            title: LANG.markup_s,
-            pre: "[s]",
-            post: "[/s]"
-        },
-                    {
-            id: "small",
-            title: LANG.markup_small,
-            pre: "[small]",
-            post: "[/small]"
-        },
-                    {
-            id: "url",
-            title: LANG.markup_url,
-            onclick: function () {
-                var Y = prompt(LANG.prompt_linkurl, "http://");
-                if (Y) {
-                    g_insertTag(I, "[url=" + Y + "]", "[/url]")
-                }
-            }
-        },
-                    {
-            id: "quote",
-            title: LANG.markup_quote,
-            pre: "[quote]",
-            post: "[/quote]"
-        },
-                    {
-            id: "code",
-            title: LANG.markup_code,
-            pre: "[code]",
-            post: "[/code]"
-        },
-                    {
-            id: "ul",
-            title: LANG.markup_ul,
-            pre: "[ul]\n[li]",
-            post: "[/li]\n[/ul]",
-            rep: function (Y) {
-                return Y.replace(/\n/g, "[/li]\n[li]")
-            }
-        },
-                    {
-            id: "ol",
-            title: LANG.markup_ol,
-            pre: "[ol]\n[li]",
-            post: "[/li]\n[/ol]",
-            rep: function (Y) {
-                return Y.replace(/\n/g, "[/li]\n[li]")
-            }
-        },
-                    {
-            id: "li",
-            title: LANG.markup_li,
-            pre: "[li]",
-            post: "[/li]"
-        }];
-        for (var Q = 0, R = S.length; Q < R; ++Q) {
-            var B = S[Q];
-            if (K == 4 && B.id == "quote") {
+        var r = [{id: "b",title: LANG.markup_b,pre: "[b]",post: "[/b]"}, {id: "i",title: LANG.markup_i,pre: "[i]",post: "[/i]"}, {id: "u",title: LANG.markup_u,pre: "[u]",post: "[/u]"}, {id: "s",title: LANG.markup_s,pre: "[s]",post: "[/s]"}, {id: "small",title: LANG.markup_small,pre: "[small]",post: "[/small]"}, {id: "url",title: LANG.markup_url,onclick: function() {
+                    var i = prompt(LANG.prompt_linkurl, "http://");
+                    if (i) {
+                        g_insertTag(g, "[url=" + i + "]", "[/url]")
+                    }
+                }}, {id: "quote",title: LANG.markup_quote,pre: "[quote]",post: "[/quote]"}, {id: "code",title: LANG.markup_code,pre: "[code]",post: "[/code]"}, {id: "ul",title: LANG.markup_ul,pre: "[ul]\n[li]",post: "[/li]\n[/ul]",rep: function(i) {
+                    return i.replace(/\n/g, "[/li]\n[li]")
+                }}, {id: "ol",title: LANG.markup_ol,pre: "[ol]\n[li]",post: "[/li]\n[/ol]",rep: function(i) {
+                    return i.replace(/\n/g, "[/li]\n[li]")
+                }}, {id: "li",title: LANG.markup_li,pre: "[li]",post: "[/li]"}];
+        for (var p = 0, q = r.length; p < q; ++p) {
+            var k = r[p];
+            if (l == 4 && k.id == "quote") {
                 break
             }
-            var M = ce("button");
-            var X = ce("img");
-            M.setAttribute("type", "button");
-            M.title = B.title;
-            if (B.onclick != null) {
-                M.onclick = B.onclick
+            var n = ce("button");
+            var w = ce("img");
+            n.setAttribute("type", "button");
+            n.title = k.title;
+            if (k.onclick != null) {
+                n.onclick = k.onclick
             } else {
-                M.onclick = g_insertTag.bind(0, I, B.pre, B.post, B.rep)
+                n.onclick = g_insertTag.bind(0, g, k.pre, k.post, k.rep)
             }
-            X.src = "templates/wowhead/images/pixel.gif";
-            X.className = "toolbar-" + B.id;
-            ae(M, X);
-            ae(G, M)
+            w.src = "templates/wowhead/images/pixel.gif";
+            w.className = "toolbar-" + k.id;
+            ae(n, w);
+            ae(e, n)
         }
-        ae(H, G);
-        ae(H, I);
-        ae(H, ce("br"));
-        if (K == 4) {
-            ae(H, ct(sprintf(LANG.compose_limit2, F)))
+        ae(h, e);
+        ae(h, g);
+        ae(h, ce("br"));
+        if (l == 4) {
+            ae(h, ct(sprintf(LANG.compose_limit2, f, 3)))
         } else {
-            ae(H, ct(sprintf(LANG.compose_limit, F)))
+            ae(h, ct(sprintf(LANG.compose_limit, f)))
         }
-        ae(L, H);
-        return I
-    },
-    coLivePreview: function (E, F, A, B) {
-        if (B != 1 && A.style.display == "none") {
+        ae(m, h);
+        return g
+    },coLivePreview: function(f, e, a, b) {
+        if (b != 1 && a.style.display == "none") {
             return
         }
-        var C = this,
-            I = Listview.funcBox.coGetCharLimit(F),
-            G = (C.value.length > I ? C.value.substring(0, I) : C.value);
-        if (F == 4) {
-            var H;
-            if ((H = G.indexOf("\n")) != -1 && (H = G.indexOf("\n", H + 1)) != -1 && (H = G.indexOf("\n", H + 1)) != -1) {
-                G = G.substring(0, H)
+        var c = this, i = Listview.funcBox.coGetCharLimit(e), g = (c.value.length > i ? c.value.substring(0, i) : c.value);
+        if (e == 4) {
+            var h;
+            if ((h = g.indexOf("\n")) != -1 && (h = g.indexOf("\n", h + 1)) != -1 && (h = g.indexOf("\n", h + 1)) != -1) {
+                g = g.substring(0, h)
             }
         }
-        var D = Markup.toHtml(G, {
-            mode: Markup.MODE_COMMENT
-        });
-        if (D) {
-            A.innerHTML = D
+        var d = Markup.toHtml(g, {mode: Markup.MODE_COMMENT,roles: f.roles});
+        if (d) {
+            a.innerHTML = d
         } else {
-            A.innerHTML = '<span class="q6">...</span>'
+            a.innerHTML = '<span class="q6">...</span>'
         }
-    },
-    coEditButton: function (E, D, B) {
-        if (D) {
-            var A = gE(E.divEdit, "textarea")[0];
-            if (!Listview.funcBox.coValidate(A, B)) {
+    },coEditButton: function(f, d, e) {
+        if (d) {
+            var a = gE(f.divEdit, "textarea")[0];
+            if (!Listview.funcBox.coValidate(a, e)) {
                 return
             }
-            if (A.value != E.body) {
-                var C = 0;
-                if (E.lastEdit != null) {
-                    C = E.lastEdit[1]
-                }++C;
-                E.lastEdit = [g_serverTime, C, g_user.name];
-                Listview.funcBox.coUpdateLastEdit(E);
-                E.divBody.innerHTML = Markup.toHtml((A.value.length > 7500 ? A.value.substring(0, 7500) : A.value), {
-                    mode: Markup.MODE_COMMENT
-                });
-                E.body = A.value;
-                if (B == -1) {
-                    new Ajax("?forums=editpost&id=" + E.id, {
-                        method: "POST",
-                        params: "body=" + urlencode(E.body)
-                    })
+            if (a.value != f.body) {
+                var c = 0;
+                if (f.lastEdit != null) {
+                    c = f.lastEdit[1]
+                }
+                ++c;
+                f.lastEdit = [g_serverTime, c, g_user.name];
+                Listview.funcBox.coUpdateLastEdit(f);
+                var b = Listview.funcBox.coGetCharLimit(e);
+                f.divBody.innerHTML = Markup.toHtml((a.value.length > b ? a.value.substring(0, b) : a.value), {mode: Markup.MODE_COMMENT,roles: f.roles});
+                f.body = a.value;
+                if (e == -1) {
+                    new Ajax("?forums=editpost&id=" + f.id, {method: "POST",params: "body=" + urlencode(f.body)})
                 } else {
-                    new Ajax("?comment=edit&id=" + E.id, {
-                        method: "POST",
-                        params: "body=" + urlencode(E.body)
-                    })
+                    new Ajax("?comment=edit&id=" + f.id, {method: "POST",params: "body=" + urlencode(f.body)})
                 }
             }
         }
-        E.divBody.style.display = "";
-        E.divLinks.firstChild.style.display = "";
-        de(E.divEdit);
-        E.divEdit = null
-    },
-    coGetCharLimit: function (A) {
-        if (A == 4) {
-            return 250
-        } else {
-            return 7500
+        f.divBody.style.display = "";
+        f.divLinks.firstChild.style.display = "";
+        de(f.divEdit);
+        f.divEdit = null
+    },coGetCharLimit: function(a) {
+        switch (a) {
+            case 0:
+            case 1:
+            case 2:
+                return 7500;
+            case 4:
+                return 250;
+            default:
+                return 15000
         }
-    },
-    coModeLink: function (D, A) {
-        var I = Listview.funcBox.coGetCharLimit(D);
-        var B = Markup.MODE_COMMENT;
-        array_walk(gE(this.parentNode, "a"), function (J) {
-            J.className = ""
+    },coModeLink: function(e, b, f) {
+        var j = Listview.funcBox.coGetCharLimit(e);
+        var c = Markup.MODE_COMMENT;
+        array_walk(gE(this.parentNode, "a"), function(k) {
+            k.className = ""
         });
         this.className = "selected";
-        var C = gE(this.parentNode.parentNode, "textarea")[0],
-            H = C.parentNode,
-            E = H.previousSibling;
-        if (A == 4) {
-            B = Markup.MODE_SIGNATURE
+        var d = gE(this.parentNode.parentNode, "textarea")[0], i = d.parentNode, a = i.previousSibling;
+        if (b == 4) {
+            c = Markup.MODE_SIGNATURE
         }
-        switch (D) {
-        case 1:
-            H.style.display = "";
-            E.style.display = "none";
-            H.firstChild.focus();
-            break;
-        case 2:
-            H.style.display = "none";
-            var F = (C.value.length > I ? C.value.substring(0, I) : C.value);
-            if (A == 4) {
-                var G;
-                if ((G = F.indexOf("\n")) != -1 && (G = F.indexOf("\n", G + 1)) != -1 && (G = F.indexOf("\n", G + 1)) != -1) {
-                    F = F.substring(0, G)
+        switch (e) {
+            case 1:
+                i.style.display = "";
+                a.style.display = "none";
+                i.firstChild.focus();
+                break;
+            case 2:
+                i.style.display = "none";
+                var g = (d.value.length > j ? d.value.substring(0, j) : d.value);
+                if (b == 4) {
+                    var h;
+                    if ((h = g.indexOf("\n")) != -1 && (h = g.indexOf("\n", h + 1)) != -1 && (h = g.indexOf("\n", h + 1)) != -1) {
+                        g = g.substring(0, h)
+                    }
                 }
-            }
-            E.innerHTML = Markup.toHtml(F, {
-                mode: B
-            });
-            E.style.display = "";
-            break
+                a.innerHTML = Markup.toHtml(g, {mode: c,roles: f.roles});
+                a.style.display = "";
+                break
         }
-    },
-    coReply: function (B) {
-        document.forms.addcomment.elements.replyto.value = B.replyTo;
-        var A = ge("replybox-generic");
-        gE(A, "span")[0].innerHTML = B.user;
-        A.style.display = "";
+    },coReply: function(b) {
+        document.forms.addcomment.elements.replyto.value = b.replyTo;
+        var a = ge("gjkdlfgkjh436");
+        gE(a, "span")[0].innerHTML = b.user;
+        a.style.display = "";
         co_addYourComment()
-    },
-    coValidate: function (A, B) {
-        B |= 0;
-        if (B == 1 || B == -1) {
-            if (trim(A.value).length < 1) {
+    },coValidate: function(a, c) {
+        c |= 0;
+        if (c == 1 || c == -1) {
+            if (trim(a.value).length < 1) {
                 alert(LANG.message_forumposttooshort);
                 return false
             }
         } else {
-            if (trim(A.value).length < 10) {
+            if (trim(a.value).length < 10) {
                 alert(LANG.message_commenttooshort);
                 return false
             }
         }
-        if (A.value.length > 7500) {
-            if (!confirm(sprintf((B == 1 ? LANG.confirm_forumposttoolong : LANG.confirm_commenttoolong), A.value.substring(7470, 7500)))) {
+        var b = Listview.funcBox.coGetCharLimit(c);
+        if (a.value.length > b) {
+            if (!confirm(sprintf(c == 1 ? LANG.confirm_forumposttoolong : LANG.confirm_commenttoolong, b, a.value.substring(b - 30, b)))) {
                 return false
             }
         }
         return true
-    },
-    coCustomRatingOver: function (A) {
-        Tooltip.showAtCursor(A, LANG.tooltip_customrating, 0, 0, "q")
-    },
-    coPlusRatingOver: function (A) {
-        Tooltip.showAtCursor(A, LANG.tooltip_uprate, 0, 0, "q2")
-    },
-    coMinusRatingOver: function (A) {
-        Tooltip.showAtCursor(A, LANG.tooltip_downrate, 0, 0, "q7")
-    },
-    coSortDate: function (A) {
-        A.nextSibling.nextSibling.className = "";
-        A.className = "selected";
-        this.mainDiv.className = "listview-aci";
+    },coCustomRatingOver: function(a) {
+        Tooltip.showAtCursor(a, LANG.tooltip_customrating, 0, 0, "q")
+    },coPlusRatingOver: function(a) {
+        Tooltip.showAtCursor(a, LANG.tooltip_uprate, 0, 0, "q2")
+    },coMinusRatingOver: function(a) {
+        Tooltip.showAtCursor(a, LANG.tooltip_downrate, 0, 0, "q10")
+    },coSortDate: function(a) {
+        a.nextSibling.nextSibling.className = "";
+        a.className = "selected";
+        this.mainDiv.className += " listview-aci";
         this.setSort([1], true, false)
-    },
-    coSortHighestRatedFirst: function (A) {
-        A.previousSibling.previousSibling.className = "";
-        A.className = "selected";
-        this.mainDiv.className = "";
+    },coSortHighestRatedFirst: function(a) {
+        a.previousSibling.previousSibling.className = "";
+        a.className = "selected";
+        this.mainDiv.className = this.mainDiv.className.replace("listview-aci", "");
         this.setSort([-3, 2], true, false)
-    },
-    coUpdateLastEdit: function (F) {
-        var B = F.divLastEdit;
-        if (!B) {
+    },coUpdateLastEdit: function(f) {
+        var b = f.divLastEdit;
+        if (!b) {
             return
         }
-        if (F.lastEdit != null) {
-            var E = F.lastEdit;
-            B.childNodes[1].firstChild.nodeValue = E[2];
-            B.childNodes[1].href = "?user=" + E[2];
-            var D = new Date(E[0]);
-            var A = (g_serverTime - D) / 1000;
-            if (B.childNodes[3].firstChild) {
-                de(B.childNodes[3].firstChild)
+        if (f.lastEdit != null) {
+            var e = f.lastEdit;
+            b.childNodes[1].firstChild.nodeValue = e[2];
+            b.childNodes[1].href = "?user=" + e[2];
+            var c = new Date(e[0]);
+            var d = (g_serverTime - c) / 1000;
+            if (b.childNodes[3].firstChild) {
+                de(b.childNodes[3].firstChild)
             }
-            Listview.funcBox.coFormatDate(B.childNodes[3], A, D);
-            var C = "";
-            if (F.rating != null) {
-                C += LANG.lvcomment_patch1 + g_getPatchVersion(D) + LANG.lvcomment_patch2
+            Listview.funcBox.coFormatDate(b.childNodes[3], d, c);
+            var a = "";
+            if (f.rating != NULL) 
+            {
+            	a += LANG.lvcomment_patch1 + g_getPatchVersion(c) + LANG.lvcomment_patch2
             }
-            if (E[1] > 1) {
-                C += LANG.dash + sprintf(LANG.lvcomment_nedits, E[1])
+            if (e[1] > 1) {
+                a += LANG.dash + sprintf(LANG.lvcomment_nedits, e[1])
             }
-            B.childNodes[4].nodeValue = C;
-            B.style.display = ""
+            b.childNodes[4].nodeValue = a;
+            b.style.display = ""
         } else {
-            B.style.display = "none"
+            b.style.display = "none"
         }
-    },
-    coFormatDate: function (E, A, D, F, G) {
-        var C;
-        if (A < 2592000) {
-            txt = sprintf(LANG.date_ago, g_formatTimeElapsed(A));
-            var B = D;
-            B.setTime(B.getTime() + (g_localTime - g_serverTime));
-            E.style.cursor = "help";
-            E.title = B.toLocaleString()
+    },coFormatDate: function(f, e, b, g, h) {
+        var d;
+        if (e < 2592000) {
+            var a = sprintf(LANG.date_ago, g_formatTimeElapsed(e));
+            var c = new Date();
+            c.setTime(b.getTime() + (g_localTime - g_serverTime));
+            f.style.cursor = "help";
+            f.title = c.toLocaleString()
         } else {
-            txt = LANG.date_on + g_formatDateSimple(D, F);
-            E.style.cursor = E.title = ""
+            a = LANG.date_on + g_formatDateSimple(b, g)
         }
-        if (G == 1) {
-            txt = txt.substr(0, 1).toUpperCase() + txt.substr(1)
+        if (h == 1) {
+            a = a.substr(0, 1).toUpperCase() + a.substr(1)
         }
-        C = ct(txt);
-        ae(E, C)
-    },
-    ssCellOver: function () {
+        d = ct(a);
+        ae(f, d)
+    },ssCellOver: function() {
         this.className = "screenshot-caption-over"
-    },
-    ssCellOut: function () {
+    },ssCellOut: function() {
         this.className = "screenshot-caption"
-    },
-    ssCellClick: function (B, D) {
-        D = $E(D);
-        if (D.shiftKey || D.ctrlKey) {
+    },ssCellClick: function(b, d) {
+        d = $E(d);
+        if (d.shiftKey || d.ctrlKey) {
             return
         }
-        var A = 0,
-            C = D._target;
-        while (C && A < 3) {
-            if (C.nodeName == "A") {
+        var a = 0, c = d._target;
+        while (c && a < 3) {
+            if (c.nodeName == "A") {
                 return
             }
-            if (C.nodeName == "IMG") {
+            if (c.nodeName == "IMG") {
                 break
             }
-            C = C.parentNode
+            c = c.parentNode
         }
-        ScreenshotViewer.show({
-            screenshots: this.data,
-            pos: B
-        })
-    },
-    moneyHonorOver: function (A) {
-        Tooltip.showAtCursor(A, "<b>" + LANG.tooltip_honorpoints + "</b>", 0, 0, "q")
-    },
-    moneyArenaOver: function (A) {
-        Tooltip.showAtCursor(A, "<b>" + LANG.tooltip_arenapoints + "</b>", 0, 0, "q")
-    },
-    appendMoney: function (E, A, F, J, K, B) {
-        var I, H = 0;
-        if (A >= 10000) {
-            H = 1;
-            I = ce("span");
-            I.className = "moneygold";
-            ae(I, ct(Math.floor(A / 10000)));
-            ae(E, I);
-            A %= 10000
+        ScreenshotViewer.show({screenshots: this.data,pos: b})
+    },moneyHonorOver: function(a) {
+        Tooltip.showAtCursor(a, LANG.tooltip_honorpoints, 0, 0, "q")
+    },moneyArenaOver: function(a) {
+        Tooltip.showAtCursor(a, LANG.tooltip_arenapoints, 0, 0, "q")
+    },moneyAchievementOver: function(a) {
+        Tooltip.showAtCursor(a, LANG.tooltip_achievementpoints, 0, 0, "q")
+    },appendMoney: function(g, a, f, m, j, c, l) {
+        var k, h = 0;
+        if (a >= 10000) {
+            h = 1;
+            k = ce("span");
+            k.className = "moneygold";
+            ae(k, ct(Math.floor(a / 10000)));
+            ae(g, k);
+            a %= 10000
         }
-        if (A >= 100) {
-            if (H) {
-                ae(E, ct(" "))
+        if (a >= 100) {
+            if (h) {
+                ae(g, ct(" "))
             } else {
-                H = 1
+                h = 1
             }
-            I = ce("span");
-            I.className = "moneysilver";
-            ae(I, ct(Math.floor(A / 100)));
-            ae(E, I);
-            A %= 100
+            k = ce("span");
+            k.className = "moneysilver";
+            ae(k, ct(Math.floor(a / 100)));
+            ae(g, k);
+            a %= 100
         }
-        if (A >= 1 || F != null) {
-            if (H) {
-                ae(E, ct(" "))
+        if (a >= 1 || f != null) {
+            if (h) {
+                ae(g, ct(" "))
             } else {
-                H = 1
+                h = 1
             }
-            I = ce("span");
-            I.className = "moneycopper";
-            ae(I, ct(A));
-            ae(E, I)
+            k = ce("span");
+            k.className = "moneycopper";
+            ae(k, ct(a));
+            ae(g, k)
         }
-        if (J != null && J != 0) {
-            if (H) {
-                ae(E, ct(" "))
+        if (m != null && m != 0) {
+            if (h) {
+                ae(g, ct(" "))
             } else {
-                H = 1
+                h = 1
             }
-            I = ce("span");
-            I.className = "money" + (J < 0 ? "horde" : "alliance") + " tip";
-            I.onmouseover = Listview.funcBox.moneyHonorOver;
-            I.onmousemove = Tooltip.cursorUpdate;
-            I.onmouseout = Tooltip.hide;
-            ae(I, ct(number_format(Math.abs(J))));
-            ae(E, I)
+            k = ce("span");
+            k.className = "money" + (m < 0 ? "horde" : "alliance") + " tip";
+            k.onmouseover = Listview.funcBox.moneyHonorOver;
+            k.onmousemove = Tooltip.cursorUpdate;
+            k.onmouseout = Tooltip.hide;
+            ae(k, ct(number_format(Math.abs(m))));
+            ae(g, k)
         }
-        if (K >= 1) {
-            if (H) {
-                ae(E, ct(" "))
+        if (j >= 1) {
+            if (h) {
+                ae(g, ct(" "))
             } else {
-                H = 1
+                h = 1
             }
-            I = ce("span");
-            I.className = "moneyarena tip";
-            I.onmouseover = Listview.funcBox.moneyArenaOver;
-            I.onmousemove = Tooltip.cursorUpdate;
-            I.onmouseout = Tooltip.hide;
-            ae(I, ct(number_format(K)));
-            ae(E, I)
+            k = ce("span");
+            k.className = "moneyarena tip";
+            k.onmouseover = Listview.funcBox.moneyArenaOver;
+            k.onmousemove = Tooltip.cursorUpdate;
+            k.onmouseout = Tooltip.hide;
+            ae(k, ct(number_format(j)));
+            ae(g, k)
         }
-        if (B != null) {
-            for (var C = 0; C < B.length; ++C) {
-                if (H) {
-                    ae(E, ct(" "))
+        if (c != null) {
+            for (var b = 0; b < c.length; ++b) {
+                if (h) {
+                    ae(g, ct(" "))
                 } else {
-                    H = 1
+                    h = 1
                 }
-                var G = B[C][0];
-                var D = B[C][1];
-                I = ce("a");
-                I.href = "?item=" + G;
-                I.className = "moneyitem";
-                I.style.backgroundImage = "url(images/icons/small/" + g_items.getIcon(G).toLowerCase() + ".png)";
-                ae(I, ct(D));
-                ae(E, I)
+                var n = c[b][0];
+                var e = c[b][1];
+                k = ce("a");
+                k.href = "?item=" + n;
+                k.className = "moneyitem";
+                k.style.backgroundImage = "url(images/icons/tiny/" + g_items.getIcon(n).toLowerCase() + ".gif)";
+                ae(k, ct(e));
+                ae(g, k)
             }
         }
-    }
-};
-Listview.templates = {
-    faction: {
-        sort: [1],
-        nItemsPerPage: -1,
-        columns: [{
-            id: "name",
-            name: LANG.name,
-            align: "left",
-            value: "name",
-            compute: function (C, D) {
-                var A = ce("a");
-                A.style.fontFamily = "Verdana, sans-serif";
-                A.href = this.template.getItemLink(C);
-                ae(A, ct(C.name));
-                if (C.expansion == 1) {
-                    var B = ce("span");
-                    B.className = "bc-icon";
-                    ae(B, A);
-                    ae(D, B)
-                } else {
-                    ae(D, A)
-                }
+        if (l != null) {
+            if (h) {
+                ae(g, ct(" "))
+            } else {
+                h = 1
             }
-        },
-                    {
-            id: "group",
-            name: LANG.group,
-            value: "group",
-            compute: function (A, B) {
-                if (A.group != null) {
-                    return A.group
-                }
-            }
-        },
-                    {
-            id: "side",
-            name: LANG.side,
-            width: "10%",
-            compute: function (B, C) {
-                if (B.side) {
-                    var A = ce("span");
-                    A.className = (B.side == 1 ? "alliance-icon" : "horde-icon");
-                    ae(A, ct(g_sides[B.side]));
-                    ae(C, A)
-                }
-            },
-            sortFunc: function (B, A, C) {
-                return strcmp(g_sides[B.side], g_sides[A.side])
-            }
-        }],
-        getItemLink: function (A) {
-            return "?faction=" + A.id
+            k = ce("span");
+            k.className = "moneyachievement tip";
+            k.onmouseover = Listview.funcBox.moneyAchievementOver;
+            k.onmousemove = Tooltip.cursorUpdate;
+            k.onmouseout = Tooltip.hide;
+            ae(k, ct(number_format(l)));
+            ae(g, k)
         }
-    },
-    item: {
-        sort: [1],
-        columns: [{
-            id: "name",
-            name: LANG.name,
-            align: "left",
-            span: 2,
-            value: "name",
-            compute: function (D, G, E) {
-                var C = ce("td");
-                C.style.width = "1px";
-                C.style.padding = "0";
-                C.style.borderRight = "none";
-                var B = null,
-                    F = null;
-                if (D.stack != null) {
-                    B = Listview.funcBox.createTextRange(D.stack[0], D.stack[1])
+    },getUpperSource: function(a, b) {
+        switch (a) {
+            case 2:
+                if (b.z) {
+                    return LANG.source_zonedrop
                 }
-                if (D.avail != null) {
-                    F = D.avail
+                break;
+            case 4:
+                return LANG.source_quests;
+            case 5:
+                return LANG.source_vendors
+        }
+        return g_sources[a]
+    },getLowerSource: function(a, d, c) {
+        switch (a) {
+            case 3:
+                if (d.p && g_sources_pvp[d.p]) {
+                    return {text: g_sources_pvp[d.p]}
                 }
-                ae(C, g_items.createIcon(D.id, 1, B, F));
-                ae(E, C);
-                G.style.borderLeft = "none";
-                var A = ce("a");
-                A.className = "q" + (6 - parseInt(D.name.charAt(0)));
-                A.style.fontFamily = "Verdana, sans-serif";
-                A.href = this.template.getItemLink(D);
-                ae(A, ct(D.name.substring(1)));
-                ae(G, A)
-            }
-        },
-                    {
-            id: "level",
-            name: LANG.level,
-            width: "7%",
-            value: "level",
-            sortFunc: function (B, A, C) {
-                return strcmp(B.level, A.level) || strcmp(B.reqlevel, A.reqlevel)
-            }
-        },
-                    {
-            id: "reqlevel",
-            name: LANG.req,
-            tooltip: LANG.tooltip_reqlevel,
-            width: "7%",
-            value: "reqlevel",
-            compute: function (A, B) {
-                if (A.reqlevel > 1) {
-                    return A.reqlevel
-                }
-            },
-            sortFunc: function (B, A, C) {
-                return strcmp(B.reqlevel, A.reqlevel) || strcmp(B.level, A.level)
-            }
-        },
-                    {
-            id: "dps",
-            name: LANG.dps,
-            width: "10%",
-            value: "dps",
-            compute: function (A, B) {
-                return (A.dps || 0).toFixed(1)
-            },
-            hidden: true
-        },
-                    {
-            id: "speed",
-            name: LANG.speed,
-            width: "10%",
-            value: "speed",
-            compute: function (A, B) {
-                return (A.speed || 0).toFixed(2)
-            },
-            hidden: true
-        },
-                    {
-            id: "armor",
-            name: LANG.armor,
-            width: "10%",
-            value: "armor",
-            compute: function (A, B) {
-                if (A.armor > 0) {
-                    return A.armor
-                }
-            },
-            hidden: true
-        },
-                    {
-            id: "slot",
-            name: LANG.slot,
-            width: "10%",
-            compute: function (A, B) {
-                return g_item_slots[A.slot]
-            },
-            sortFunc: function (B, A, C) {
-                return strcmp(g_item_slots[B.slot], g_item_slots[A.slot])
-            },
-            hidden: true
-        },
-                    {
-            id: "slots",
-            name: LANG.slots,
-            width: "10%",
-            value: "nslots",
-            hidden: true
-        },
-                    {
-            id: "skill",
-            name: LANG.skill,
-            width: "10%",
-            value: "skill",
-            hidden: true
-        },
-                    {
-            id: "source",
-            name: LANG.source,
-            width: "12%",
-            compute: function (C, D) {
-                if (C.source != null) {
-                    for (var B = 0, A = C.source.length; B < A; ++B) {
-                        if (B > 0) {
-                            ae(D, ct(LANG.comma))
-                        }
-                        ae(D, ct(g_sources[C.source[B]]))
+                break
+        }
+        switch (c) {
+            case 0:
+            case 1:
+            case 2:
+                if (d.z) {
+                    var b = {url: "?maps=" + d.z,text: g_zones[d.z]};
+                    if (d.t && a == 5) {
+                        b.pretext = LANG.lvitem_vendorin
                     }
-                }
-            },
-            sortFunc: function (B, A, C) {
-                return Listview.funcBox.assocArrCmp(B.source, A.source, g_sources)
-            }
-        },
-                    {
-            id: "type",
-            name: LANG.type,
-            width: "14%",
-            compute: function (C, D) {
-                D.className = "small q1";
-                var A = ce("a");
-                var B = "?items=" + C.classs;
-                if (g_item_subclasses[C.classs] != null) {
-                    B += "." + C.subclass
-                }
-                if (C.subsubclass != null && g_item_subsubclasses[C.classs][C.subclass] != null) {
-                    B += "." + C.subsubclass
-                }
-                A.href = B;
-                ae(A, ct(Listview.funcBox.getItemType(C.classs, C.subclass, C.subsubclass)));
-                ae(D, A)
-            },
-            sortFunc: function (B, A, D) {
-                var C = Listview.funcBox.getItemType;
-                return strcmp(C(B.classs, B.subclass, B.subsubclass), C(A.classs, A.subclass, A.subsubclass))
-            }
-        }],
-        getItemLink: function (A) {
-            return "?item=" + A.id
-        }
-    },
-    itemset: {
-        sort: [1],
-        nItemsPerPage: 75,
-        columns: [{
-            id: "name",
-            name: LANG.name,
-            align: "left",
-            value: "name",
-            compute: function (B, D) {
-                var A = ce("a");
-                A.className = "q" + (6 - parseInt(B.name.charAt(0)));
-                A.style.fontFamily = "Verdana, sans-serif";
-                A.href = this.template.getItemLink(B);
-                ae(A, ct(B.name.substring(1)));
-                ae(D, A);
-                if (B.note) {
-                    var C = ce("div");
-                    C.className = "small";
-                    ae(C, ct(g_itemset_notes[B.note]));
-                    ae(D, C)
-                }
-            }
-        },
-                    {
-            id: "level",
-            name: LANG.level,
-            compute: function (A, B) {
-                if (A.minlevel > 0 && A.maxlevel > 0) {
-                    if (A.minlevel != A.maxlevel) {
-                        return A.minlevel + LANG.hyphen + A.maxlevel
-                    } else {
-                        return A.minlevel
-                    }
-                } else {
-                    return -1
-                }
-            },
-            sortFunc: function (B, A, C) {
-                if (C > 0) {
-                    return strcmp(B.minlevel, A.minlevel) || strcmp(B.maxlevel, A.maxlevel)
-                } else {
-                    return strcmp(B.maxlevel, A.maxlevel) || strcmp(B.minlevel, A.minlevel)
-                }
-            }
-        },
-                    {
-            id: "pieces",
-            name: LANG.pieces,
-            compute: function (A, B) {
-                B.style.padding = "0";
-                Listview.funcBox.createCenteredIcons(A.pieces, B)
-            },
-            sortFunc: function (B, A) {
-                var D = (B.pieces != null ? B.pieces.length : 0);
-                var C = (A.pieces != null ? A.pieces.length : 0);
-                return strcmp(D, C)
-            }
-        },
-                    {
-            id: "type",
-            name: LANG.type,
-            compute: function (A, B) {
-                return g_itemset_types[A.type]
-            },
-            sortFunc: function (B, A, C) {
-                return strcmp(g_itemset_types[B.type], g_itemset_types[A.type])
-            }
-        },
-                    {
-            id: "classes",
-            name: LANG.classes,
-            compute: function (C, D) {
-                if (C.classes != null) {
-                    for (var B = 0, A = C.classes.length; B < A; ++B) {
-                        if (B > 0) {
-                            ae(D, ct(LANG.comma))
-                        }
-                        ae(D, ct(g_chr_classes[C.classes[B]]))
-                    }
-                }
-            },
-            sortFunc: function (B, A, C) {
-                return Listview.funcBox.assocArrCmp(B.classes, A.classes, g_chr_classes)
-            }
-        }],
-        getItemLink: function (A) {
-            return "?itemset=" + A.id
-        }
-    },
-    npc: {
-        sort: [1],
-        nItemsPerPage: 100,
-        columns: [{
-            id: "name",
-            name: LANG.name,
-            align: "left",
-            value: "name",
-            compute: function (B, D) {
-                var A = ce("a");
-                A.style.fontFamily = "Verdana, sans-serif";
-                A.href = this.template.getItemLink(B);
-                ae(A, ct(B.name));
-                ae(D, A);
-                if (B.tag != null) {
-                    var C = ce("div");
-                    C.className = "small";
-                    ae(C, ct("<" + B.tag + ">"));
-                    ae(D, C)
-                }
-            }
-        },
-                    {
-            id: "level",
-            name: LANG.level,
-            width: "10%",
-            compute: function (A, C) {
-                if (A.classification) {
-                    var B = ce("div");
-                    B.className = "small";
-                    ae(B, ct(g_npc_classifications[A.classification]));
-                    ae(C, B)
-                }
-                if (A.classification == 3) {
-                    return "??"
-                }
-                if (A.minlevel > 0 && A.maxlevel > 0) {
-                    if (A.minlevel != A.maxlevel) {
-                        return A.minlevel + LANG.hyphen + A.maxlevel
-                    } else {
-                        return A.minlevel
-                    }
-                }
-                return -1
-            },
-            sortFunc: function (B, A, C) {
-                if (C > 0) {
-                    return strcmp(B.minlevel, A.minlevel) || strcmp(B.maxlevel, A.maxlevel) || strcmp(B.classification, A.classification)
-                } else {
-                    return strcmp(B.maxlevel, A.maxlevel) || strcmp(B.minlevel, A.minlevel) || strcmp(B.classification, A.classification)
-                }
-            }
-        },
-                    {
-            id: "location",
-            name: LANG.location,
-            compute: function (A, B) {
-                return Listview.funcBox.location(A, B)
-            },
-            sortFunc: function (B, A, C) {
-                return Listview.funcBox.assocArrCmp(B.location, A.location, g_zones)
-            }
-        },
-                    {
-            id: "react",
-            name: LANG.react,
-            width: "10%",
-            value: "react",
-            compute: function (B, G) {
-                if (B.react == null) {
-                    return -1
-                }
-                var D = [LANG.lvnpc_alliance, LANG.lvnpc_horde];
-                var C = "";
-                var F = 0;
-                for (var A = 0; A < 2; ++A) {
-                    if (B.react[A] != null) {
-                        if (F++ > 0) {
-                            ae(G, ct(" "))
-                        }
-                        var E = ce("span");
-                        E.className = (B.react[A] < 0 ? "q7" : (B.react[A] > 0 ? "q2" : "q"));
-                        ae(E, ct(D[A]));
-                        ae(G, E)
-                    }
-                }
-            }
-        },
-                    {
-            id: "petfamily",
-            name: LANG.petfamily,
-            width: "12%",
-            compute: function (B, C) {
-                C.className = "q1";
-                var A = ce("a");
-                A.href = "?spells=-3." + B.family;
-                ae(A, ct(g_spell_skills[B.family]));
-                ae(C, A)
-            },
-            sortFunc: function (B, A, C) {
-                return strcmp(g_spell_skills[B.family], g_spell_skills[A.family])
-            },
-            hidden: 1
-        },
-                    {
-            id: "type",
-            name: LANG.type,
-            width: "12%",
-            compute: function (B, C) {
-                C.className = "small q1";
-                var A = ce("a");
-                A.href = "?npcs=" + B.type;
-                ae(A, ct(g_npc_types[B.type]));
-                ae(C, A)
-            },
-            sortFunc: function (B, A, C) {
-                return strcmp(g_npc_types[B.type], g_npc_types[A.type])
-            }
-        }],
-        getItemLink: function (A) {
-            return "?npc=" + A.id
-        }
-    },
-    object: {
-        sort: [1],
-        nItemsPerPage: 100,
-        columns: [{
-            id: "name",
-            name: LANG.name,
-            align: "left",
-            value: "name",
-            compute: function (B, C) {
-                var A = ce("a");
-                A.style.fontFamily = "Verdana, sans-serif";
-                A.href = this.template.getItemLink(B);
-                ae(A, ct(B.name));
-                ae(C, A)
-            }
-        },
-                    {
-            id: "location",
-            name: LANG.location,
-            compute: function (A, B) {
-                return Listview.funcBox.location(A, B)
-            },
-            sortFunc: function (B, A, C) {
-                return Listview.funcBox.assocArrCmp(B.location, A.location, g_zones)
-            }
-        },
-                    {
-            id: "skill",
-            name: LANG.skill,
-            width: "10%",
-            value: "skill",
-            hidden: true
-        },
-                    {
-            id: "type",
-            name: LANG.type,
-            width: "12%",
-            compute: function (B, C) {
-                C.className = "small q1";
-                var A = ce("a");
-                A.href = "?objects=" + B.type;
-                ae(A, ct(g_object_types[B.type]));
-                ae(C, A)
-            },
-            sortFunc: function (B, A, C) {
-                return strcmp(g_object_types[B.type], g_object_types[A.type])
-            }
-        }],
-        getItemLink: function (A) {
-            return "?object=" + A.id
-        }
-    },
-    quest: {
-        sort: [1, 2],
-        nItemsPerPage: 100,
-        columns: [{
-            id: "name",
-            name: LANG.name,
-            align: "left",
-            value: "name",
-            compute: function (B, C) {
-                var A = ce("a");
-                A.style.fontFamily = "Verdana, sans-serif";
-                A.href = this.template.getItemLink(B);
-                ae(A, ct(B.name));
-                ae(C, A)
-            }
-        },
-                    {
-            id: "level",
-            name: LANG.level,
-            width: "7%",
-            compute: function (A, C) {
-                if (A.type || A.daily) {
-                    var B = ce("div");
-                    B.className = "small";
-                    B.style.whiteSpace = "nowrap";
-                    if (A.type && A.daily) {
-                        ae(B, ct(sprintf(LANG.lvquest_daily, g_quest_types[A.type])))
-                    } else {
-                        if (A.daily) {
-                            ae(B, ct(LANG.daily))
+                    if (d.dd) {
+                        if (d.dd == 1) {
+                            b.posttext = LANG.lvitem_normal
                         } else {
-                            if (A.type) {
-                                ae(B, ct(g_quest_types[A.type]))
+                            if (d.dd == 2) {
+                                b.posttext = LANG.lvitem_heroic
                             }
                         }
                     }
-                    ae(C, B)
+                    return b
                 }
-                return A.level
-            },
-            sortFunc: function (B, A, C) {
-                return strcmp(B.level, A.level) || strcmp(B.type, A.type) || strcmp(B.reqlevel, A.reqlevel)
-            }
-        },
-                    {
-            id: "reqlevel",
-            name: LANG.req,
-            tooltip: LANG.tooltip_reqlevel,
-            width: "7%",
-            value: "reqlevel",
-            sortFunc: function (B, A, C) {
-                return strcmp(B.reqlevel, A.reqlevel) || strcmp(B.level, A.level)
-            }
-        },
-                    {
-            id: "side",
-            name: LANG.side,
-            width: "10%",
-            compute: function (A, C) {
-                if (A.side) {
-                    var B = ce("span");
-                    if (A.side == 1) {
-                        B.className = "alliance-icon"
-                    } else {
-                        if (A.side == 2) {
-                            B.className = "horde-icon"
-                        }
-                    }
-                    ae(B, ct(g_sides[A.side]));
-                    ae(C, B)
+                break;
+            case 5:
+                return {url: "?quests=" + d.c2 + "." + d.c,text: Listview.funcBox.getQuestCategory(d.c)};
+                break;
+            case 6:
+                if (d.c && d.s) {
+                    return {url: "?spells=" + d.c + "." + d.s,text: g_spell_skills[d.s]}
                 } else {
-                    return -1
+                    return {url: "?spells=0",text: "??"}
                 }
-            },
-            sortFunc: function (B, A, C) {
-                return strcmp(g_sides[B.side], g_sides[A.side])
-            }
-        },
-                    {
-            id: "rewards",
-            name: LANG.rewards,
-            width: "25%",
-            compute: function (B, F) {
-                var A = (B.itemchoices != null || B.itemrewards != null);
-                if (A) {
-                    F.style.padding = "0";
-                    var E, D;
-                    if (B.itemchoices && B.itemchoices.length > 1) {
-                        E = LANG.lvquest_pickone;
-                        if (B.itemrewards && B.itemrewards.length > 0) {
-                            D = LANG.lvquest_alsoget
-                        }
-                    }
-                    Listview.funcBox.createCenteredIcons(B.itemchoices, F, E);
-                    Listview.funcBox.createCenteredIcons(B.itemrewards, F, D)
-                }
-                if (B.xp > 0 || B.money > 0) {
-                    var C = ce("div");
-                    if (A) {
-                        C.style.padding = "4px"
-                    }
-                    if (B.xp > 0) {
-                        ae(C, ct(sprintf(LANG.lvquest_xp, B.xp) + (B.money > 0 ? " + " : "")))
-                    }
-                    if (B.money > 0) {
-                        Listview.funcBox.appendMoney(C, B.money)
-                    }
-                    ae(F, C)
-                }
-            },
-            sortFunc: function (B, A, C) {
-                var E = (B.itemchoices != null ? B.itemchoices.length : 0) + (B.itemrewards != null ? B.itemrewards.length : 0);
-                var D = (A.itemchoices != null ? A.itemchoices.length : 0) + (A.itemrewards != null ? A.itemrewards.length : 0);
-                return strcmp(E, D) || strcmp((B.xp | 0) + (B.money | 0), (A.xp | 0) + (A.money | 0))
-            }
-        },
-                    {
-            id: "reputation",
-            name: LANG.reputation,
-            width: "14%",
-            value: "id",
-            hidden: true
-        },
-                    {
-            id: "category",
-            name: LANG.category,
-            width: "16%",
-            compute: function (B, C) {
-                if (B.category != 0) {
-                    C.className = "small q1";
-                    var A = ce("a");
-                    A.href = "?quests=" + B.category2 + "." + B.category;
-                    ae(A, ct(Listview.funcBox.getQuestCategory(B.category)));
-                    ae(C, A)
-                }
-            },
-            sortFunc: function (B, A, D) {
-                var C = Listview.funcBox.getQuestCategory;
-                return strcmp(C(B.category), C(A.category))
-            }
-        }],
-        getItemLink: function (A) {
-            return "?quest=" + A.id
+                break
         }
-    },
-    spell: {
-        sort: [1, 2],
-        columns: [{
-            id: "name",
-            name: LANG.name,
-            align: "left",
-            span: 2,
-            value: "name",
-            compute: function (F, C, J) {
-                var E = ce("td"),
-                    M;
-                E.style.width = "44px";
-                E.style.padding = "0";
-                E.style.borderRight = "none";
-                if (F.creates != null) {
-                    M = g_items.createIcon(F.creates[0], 1, Listview.funcBox.createTextRange(F.creates[1], F.creates[2]))
-                } else {
-                    M = g_spells.createIcon(F.id, 1)
-                }
-                M.style.cssFloat = M.style.styleFloat = "left";
-                ae(E, M);
-                ae(J, E);
-                C.style.borderLeft = "none";
-                var A = ce("div");
-                var L = ce("a");
-                var I = F.name.charAt(0);
-                if (I != "@") {
-                    L.className = "q" + (6 - parseInt(I))
-                }
-                L.style.fontFamily = "Verdana, sans-serif";
-                L.href = this.template.getItemLink(F);
-                ae(L, ct(F.name.substring(1)));
-                ae(A, L);
-                var B = F.talent != null && this._noTalents == null;
-                if (F.rank != null || B) {
-                    var H = ce("div");
-                    H.className = "small2";
-                    var D = "";
-                    if (F.rank != null) {
-                        D += F.rank;
-                        if (B) {
-                            D += " "
+    }};
+Listview.templates = {faction: {sort: [1],nItemsPerPage: -1,searchable: 1,filtrable: 1,columns: [{id: "name",name: LANG.name,type: "text",align: "left",value: "name",compute: function(d, e) {
+                    var b = ce("a");
+                    b.style.fontFamily = "Verdana, sans-serif";
+                    b.href = this.template.getItemLink(d);
+                    ae(b, ct(d.name));
+                    if (d.expansion) {
+                        var c = ce("span");
+                        c.className = (d.expansion == 1 ? "bc-icon" : "wotlk-icon");
+                        ae(c, b);
+                        ae(e, c)
+                    } else {
+                        ae(e, b)
+                    }
+                },getVisibleText: function(a) {
+                    var b = a.name;
+                    if (a.expansion == 1) {
+                        b += " bc"
+                    } else {
+                        if (a.expansion == 2) {
+                            b += "wotlk wrath"
                         }
                     }
-                    if (B) {
-                        D += "(Talent)"
+                    return b
+                }}, {id: "side",name: LANG.side,type: "text",width: "10%",compute: function(b, c) {
+                    if (b.side) {
+                        var a = ce("span");
+                        a.className = (b.side == 1 ? "alliance-icon" : "horde-icon");
+                        ae(a, ct(g_sides[b.side]));
+                        ae(c, a)
                     }
-                    ae(H, ct(D));
-                    ae(A, H)
-                }
-                if (F.races != null) {
-                    A.style.position = "relative";
-                    var H = ce("div");
-                    H.className = "small";
-                    H.style.fontStyle = "italic";
-                    H.style.position = "absolute";
-                    H.style.right = H.style.bottom = "3px";
-                    var K = F.races.toString();
-                    if (K == "1,3,4,7,11") {
-                        ae(H, ct(g_sides[1]))
-                    } else {
-                        if (K == "2,5,6,8,10") {
-                            ae(H, ct(g_sides[2]))
-                        } else {
-                            for (var E = 0, G = F.races.length; E < G; ++E) {
-                                if (E > 0) {
-                                    ae(H, ct(LANG.comma))
+                },getVisibleText: function(a) {
+                    if (a.side) {
+                        return g_sides[a.side]
+                    }
+                },sortFunc: function(d, c, e) {
+                    return strcmp(g_sides[d.side], g_sides[c.side])
+                }}, {id: "category",name: LANG.category,type: "text",width: "16%",compute: function(d, e) {
+                    if (d.category2 != null) {
+                        e.className = "small q1";
+                        var b = ce("a"), c = "?factions=" + d.category2;
+                        if (d.category) {
+                            c += "." + d.category
+                        }
+                        b.href = c;
+                        ae(b, ct(Listview.funcBox.getFactionCategory(d.category, d.category2)));
+                        ae(e, b)
+                    }
+                },getVisibleText: function(a) {
+                    return Listview.funcBox.getFactionCategory(a.category, a.category2)
+                },sortFunc: function(d, c, f) {
+                    var e = Listview.funcBox.getFactionCategory;
+                    return strcmp(e(d.category, d.category2), e(c.category, c.category2))
+                }}],getItemLink: function(a) {
+            return "?faction=" + a.id
+        }},item: {sort: [1],searchable: 1,filtrable: 1,columns: [{id: "name",name: LANG.name,type: "text",align: "left",span: 2,value: "name",compute: function(m, c, k) {
+                    var f = ce("td");
+                    f.style.width = "1px";
+                    f.style.padding = "0";
+                    f.style.borderRight = "none";
+                    var g = null, n = null;
+                    if (m.stack != null) {
+                        g = Listview.funcBox.createTextRange(m.stack[0], m.stack[1])
+                    }
+                    if (m.avail != null) {
+                        n = m.avail
+                    }
+                    ae(f, g_items.createIcon(m.id, (this.iconSize == null ? 1 : this.iconSize), g, n));
+                    ae(k, f);
+                    c.style.borderLeft = "none";
+                    var l = ce("a");
+                    l.className = "q" + (7 - parseInt(m.name.charAt(0)));
+                    l.style.fontFamily = "Verdana, sans-serif";
+                    l.href = this.template.getItemLink(m);
+                    if (m.rel) {
+                        Icon.getLink(f.firstChild).rel = m.rel;
+                        l.rel = m.rel
+                    }
+                    ae(l, ct(m.name.substring(1)));
+                    ae(c, l);
+                    if (typeof fi_nExtraCols == "number" && fi_nExtraCols >= 5) {
+                        if (m.source != null && m.source.length == 1) {
+                            var h = ce("div");
+                            h.className = "small2";
+                            var b = (m.sourcemore ? m.sourcemore[0] : {});
+                            var j = 0;
+                            if (b.t) {
+                                j = b.t;
+                                var l = ce("a");
+                                if (b.q != null) {
+                                    l.className = "q" + b.q
+                                } else {
+                                    l.className = "q1"
                                 }
-                                ae(H, ct(g_chr_races[F.races[E]]))
-                            }
-                        }
-                    }
-                    ae(A, H)
-                }
-                ae(C, A)
-            }
-        },
-                    {
-            id: "level",
-            name: LANG.level,
-            width: "10%",
-            value: "level",
-            compute: function (A, B) {
-                if (A.level > 0) {
-                    return A.level
-                }
-            },
-            hidden: true
-        },
-                    {
-            id: "school",
-            name: LANG.school,
-            width: "10%",
-            hidden: true,
-            compute: function (A, B) {
-                return g_spell_resistances[A.school]
-            },
-            sortFunc: function (B, A, C) {
-                return strcmp(g_spell_resistances[B.school], g_spell_resistances[A.school])
-            }
-        },
-                    {
-            id: "reagents",
-            name: LANG.reagents,
-            align: "left",
-            width: "15%",
-            compute: function (F, C) {
-                var A = (F.reagents != null);
-                if (A) {
-                    C.style.padding = "0";
-                    var H = ce("div");
-                    var I = F.reagents;
-                    H.style.width = (44 * I.length) + "px";
-                    for (var D = 0, G = I.length; D < G; ++D) {
-                        var B = I[D][0];
-                        var E = I[D][1];
-                        var J = g_items.createIcon(B, 1, E);
-                        J.style.cssFloat = J.style.styleFloat = "left";
-                        ae(H, J)
-                    }
-                    ae(C, H)
-                }
-            },
-            sortFunc: function (B, A) {
-                var D = (B.reagents != null ? B.reagents.length : 0);
-                var C = (A.reagents != null ? A.reagents.length : 0);
-                if (D > 0 && D == C) {
-                    return strcmp(B.reagents.toString(), A.reagents.toString())
-                } else {
-                    return strcmp(D, C)
-                }
-            }
-        },
-                    {
-            id: "tp",
-            name: LANG.tp,
-            tooltip: LANG.tooltip_trainingpoints,
-            width: "7%",
-            hidden: true,
-            value: "tp",
-            compute: function (A, B) {
-                if (A.tp > 0) {
-                    return A.tp
-                }
-            }
-        },
-                    {
-            id: "source",
-            name: LANG.source,
-            width: "12%",
-            hidden: true,
-            compute: function (B, D) {
-                if (B.source != null) {
-                    for (var C = 0, A = B.source.length; C < A; ++C) {
-                        if (C > 0) {
-                            ae(D, ct(LANG.comma))
-                        }
-                        ae(D, ct(g_sources[B.source[C]]))
-                    }
-                }
-            },
-            sortFunc: function (B, A, C) {
-                return Listview.funcBox.assocArrCmp(B.source, A.source, g_sources)
-            }
-        },
-                    {
-            id: "skill",
-            name: LANG.skill,
-            width: "16%",
-            compute: function (E, C) {
-                if (E.skill != null) {
-                    var B = ce("div");
-                    B.className = "small";
-                    for (var D = 0, G = E.skill.length; D < G; ++D) {
-                        if (D > 0) {
-                            ae(B, ct(LANG.comma))
-                        }
-                        if (E.skill[D] == -1) {
-                            ae(B, ct(LANG.ellipsis))
-                        } else {
-                            if (in_array([7, -2, -3, 11, 9], E.cat) != -1) {
-                                var H = ce("a");
-                                H.className = "q1";
-                                H.href = "?spells=" + E.cat + "." + (E.chrclass ? E.chrclass + "." : "") + E.skill[D];
-                                ae(H, ct(g_spell_skills[E.skill[D]]));
-                                ae(B, H)
+                                l.href = "?" + g_types[b.t] + "=" + b.ti;
+                                if (b.n.length <= 30) {
+                                    ae(l, ct(b.n))
+                                } else {
+                                    l.title = b.n;
+                                    ae(l, ct(trim(b.n.substr(0, 27)) + "..."))
+                                }
+                                ae(h, l)
                             } else {
-                                ae(B, ct(g_spell_skills[E.skill[D]]))
+                                ae(h, ct(Listview.funcBox.getUpperSource(m.source[0], b)))
                             }
-                        }
-                    }
-                    if (E.learnedat > 0) {
-                        ae(B, ct(" ("));
-                        var F = ce("span");
-                        if (E.learnedat == 9999) {
-                            F.className = "q0";
-                            ae(F, ct("??"))
-                        } else {
-                            if (E.learnedat > 0) {
-                                ae(F, ct(E.learnedat));
-                                F.style.fontWeight = "bold"
-                            }
-                        }
-                        ae(B, F);
-                        ae(B, ct(")"))
-                    }
-                    ae(C, B);
-                    if (E.colors != null) {
-                        var A = E.colors,
-                            I = 0;
-                        for (var D = 0; D < A.length; ++D) {
-                            if (A[D] > 0) {
-                                ++I;
-                                break
-                            }
-                        }
-                        if (I > 0) {
-                            I = 0;
-                            B = ce("div");
-                            B.className = "small";
-                            B.style.fontWeight = "bold";
-                            for (var D = 0; D < A.length; ++D) {
-                                if (A[D] > 0) {
-                                    if (I++ > 0) {
-                                        ae(B, ct(" "))
-                                    }
-                                    var J = ce("span");
-                                    J.className = "r" + (D + 1);
-                                    ae(J, ct(A[D]));
-                                    ae(B, J)
+                            var e = Listview.funcBox.getLowerSource(m.source[0], b, j);
+                            if (e != null) {
+                                ae(h, ct(LANG.hyphen));
+                                if (e.pretext) {
+                                    ae(h, ct(e.pretext))
+                                }
+                                if (e.url) {
+                                    var l = ce("a");
+                                    l.className = "q1";
+                                    l.href = e.url;
+                                    ae(l, ct(e.text));
+                                    ae(h, l)
+                                } else {
+                                    ae(h, ct(e.text))
+                                }
+                                if (e.posttext) {
+                                    ae(h, ct(e.posttext))
                                 }
                             }
-                            ae(C, B)
+                            ae(c, h)
                         }
                     }
-                }
-            },
-            sortFunc: function (B, A) {
-                var D = strcmp(B.learnedat, A.learnedat);
-                if (D != 0) {
-                    return D
-                }
-                if (B.colors != null && A.colors != null) {
-                    for (var C = 0; C < 4; ++C) {
-                        D = strcmp(B.colors[C], A.colors[C]);
-                        if (D != 0) {
-                            return D
-                        }
-                    }
-                }
-                return Listview.funcBox.assocArrCmp(B.skill, A.skill, g_spell_skills)
-            }
-        }],
-        getItemLink: function (A) {
-            return "?spell=" + A.id
-        }
-    },
-    zone: {
-        sort: [1],
-        nItemsPerPage: -1,
-        columns: [{
-            id: "name",
-            name: LANG.name,
-            align: "left",
-            value: "name",
-            compute: function (B, D) {
-                var A = ce("a");
-                A.style.fontFamily = "Verdana, sans-serif";
-                A.href = this.template.getItemLink(B);
-                ae(A, ct(B.name));
-                if (B.expansion == 1) {
-                    var C = ce("span");
-                    C.className = "bc-icon";
-                    ae(C, A);
-                    ae(D, C)
-                } else {
-                    ae(D, A)
-                }
-            }
-        },
-                    {
-            id: "level",
-            name: LANG.level,
-            width: "10%",
-            compute: function (A, B) {
-                if (A.minlevel > 0 && A.maxlevel > 0) {
-                    if (A.minlevel != A.maxlevel) {
-                        return A.minlevel + LANG.hyphen + A.maxlevel
-                    } else {
-                        return A.minlevel
-                    }
-                }
-            },
-            sortFunc: function (B, A, C) {
-                if (C > 0) {
-                    return strcmp(B.minlevel, A.minlevel) || strcmp(B.maxlevel, A.maxlevel)
-                } else {
-                    return strcmp(B.maxlevel, A.maxlevel) || strcmp(B.minlevel, A.minlevel)
-                }
-            }
-        },
-                    {
-            id: "territory",
-            name: LANG.territory,
-            width: "13%",
-            compute: function (A, C) {
-                var B = ce("span");
-                switch (A.territory) {
-                case 0:
-                    B.className = "alliance-icon";
-                    break;
-                case 1:
-                    B.className = "horde-icon";
-                    break;
-                case 4:
-                    B.className = "ffapvp-icon";
-                    break
-                }
-                ae(B, ct(g_zone_territories[A.territory]));
-                ae(C, B)
-            },
-            sortFunc: function (B, A, C) {
-                return strcmp(g_zone_territories[B.territory], g_zone_territories[A.territory])
-            }
-        },
-                    {
-            id: "instancetype",
-            name: LANG.instancetype,
-            compute: function (A, D) {
-                if (A.instance > 0) {
-                    var B = ce("span");
-                    if (A.instance >= 1 && A.instance <= 5) {
-                        B.className = "instance-icon" + A.instance
-                    }
-                    var C = g_zone_instancetypes[A.instance];
-                    if (A.nplayers > 0 && ((A.instance != 2 && A.instance != 5) || A.nplayers > 5)) {
-                        C += " (";
-                        if (A.instance == 4) {
-                            C += sprintf(LANG.lvzone_xvx, A.nplayers, A.nplayers)
-                        } else {
-                            C += sprintf(LANG.lvzone_xman, A.nplayers)
-                        }
-                        C += ")"
-                    }
-                    ae(B, ct(C));
-                    ae(D, B)
-                }
-            },
-            sortFunc: function (B, A, C) {
-                return strcmp(g_zone_instancetypes[B.instance], g_zone_instancetypes[A.instance]) || strcmp(B.instance, A.instance) || strcmp(B.nplayers, A.nplayers)
-            }
-        },
-                    {
-            id: "category",
-            name: LANG.category,
-            width: "15%",
-            compute: function (B, C) {
-                C.className = "small q1";
-                var A = ce("a");
-                A.href = "?zones=" + B.category;
-                ae(A, ct(g_zone_categories[B.category]));
-                ae(C, A)
-            },
-            sortFunc: function (B, A, C) {
-                return strcmp(g_zone_categories[B.category], g_zone_categories[A.category])
-            }
-        }],
-        getItemLink: function (A) {
-            return "?zone=" + A.id
-        }
-    },
-    comment: {
-        sort: [1],
-        mode: 2,
-        nItemsPerPage: 40,
-        poundable: 2,
-        columns: [{
-            value: "number"
-        },
-                    {
-            value: "id"
-        },
-                    {
-            value: "rating"
-        }],
-        compute: function (A, R) {
-            var l, h = new Date(A.date),
-                F = (g_serverTime - h) / 1000,
-                j = (g_user.roles & 26) != 0,
-                I = A.rating < 0 || A.purged || A.deleted,
-                X = j || A.user.toLowerCase() == g_user.name.toLowerCase(),
-                K = X && A.deleted == 0,
-                G = X && A.replyTo != A.id,
-                g = A.purged == 0 && A.deleted == 0 && g_user.id && A.user.toLowerCase() != g_user.name.toLowerCase() && in_array(A.raters, g_user.id, function (n) {
-                    return n[0]
-                }) == -1,
-                m = A.rating >= 0 && (g_user.id == 0 || g);
-            A.ratable = g;
-            R.className = "comment";
-            if (A.indent) {
-                R.className += " comment-indent"
-            }
-            var V = ce("div");
-            var N = ce("div");
-            var Q = ce("div");
-            A.divHeader = V;
-            A.divBody = N;
-            A.divLinks = Q;
-            V.className = (I ? "comment-header-bt" : "comment-header");
-            var L = ce("div");
-            L.className = "comment-rating";
-            if (I) {
-                var J = ce("a");
-                J.href = "javascript:;";
-                J.onclick = Listview.funcBox.coToggleVis.bind(J, A);
-                ae(J, ct(LANG.lvcomment_show));
-                ae(L, J);
-                ae(L, ct(" " + String.fromCharCode(160) + " "))
-            }
-            var C = ce("b");
-            ae(C, ct(LANG.lvcomment_rating));
-            var U = ce("span");
-            ae(U, ct((A.rating > 0 ? "+" : "") + A.rating));
-            ae(C, U);
-            ae(L, C);
-            ae(L, ct(" "));
-            var O = ce("span");
-            var i = ce("a"),
-                H = ce("a");
-            if (g) {
-                i.href = H.href = "javascript:;";
-                i.onclick = Listview.funcBox.coRate.bind(i, A, 1);
-                H.onclick = Listview.funcBox.coRate.bind(H, A, -1);
-                if (j) {
-                    var W = ce("a");
-                    W.href = "javascript:;";
-                    W.onclick = Listview.funcBox.coRate.bind(W, A, 0);
-                    W.onmouseover = Listview.funcBox.coCustomRatingOver;
-                    W.onmousemove = Tooltip.cursorUpdate;
-                    W.onmouseout = Tooltip.hide;
-                    ae(W, ct("[~]"));
-                    ae(O, W);
-                    ae(O, ct(" "))
-                }
-            } else {
-                i.href = H.href = "?account=signin"
-            }
-            ae(i, ct("[+]"));
-            i.onmouseover = Listview.funcBox.coPlusRatingOver;
-            H.onmouseover = Listview.funcBox.coMinusRatingOver;
-            i.onmousemove = H.onmousemove = Tooltip.cursorUpdate;
-            i.onmouseout = H.onmouseout = Tooltip.hide;
-            ae(H, ct("[-]"));
-            ae(O, H);
-            ae(O, ct(" "));
-            ae(O, i);
-            ae(L, O);
-            if (!m) {
-                O.style.display = "none"
-            }
-            ae(V, L);
-            ae(V, ct(LANG.lvcomment_by));
-            var B = ce("a");
-            B.href = "?user=" + A.user;
-            ae(B, ct(A.user));
-            ae(V, B);
-            ae(V, ct(" "));
-            var M = ce("a");
-            M.className = "q0";
-            M.href = "#comments:id=" + A.id;
-            Listview.funcBox.coFormatDate(M, F, h);
-            M.style.cursor = "pointer";
-            ae(V, M);
-            ae(V, ct(LANG.lvcomment_patch1 + g_getPatchVersion(h) + LANG.lvcomment_patch2));
-            ae(R, V);
-            N.className = "comment-body" + Listview.funcBox.coGetColor(A);
-            if (A.indent) {
-                N.className += " comment-body-indent"
-            }
-            N.innerHTML = Markup.toHtml(A.body, {
-                mode: Markup.MODE_COMMENT
-            });
-            ae(R, N);
-            if ((A.roles & 26) == 0 || g_user.roles & 26) {
-                var e = ce("div");
-                A.divLastEdit = e;
-                e.className = "comment-lastedit";
-                ae(e, ct(LANG.lvcomment_lastedit));
-                var Z = ce("a");
-                ae(Z, ct(" "));
-                ae(e, Z);
-                ae(e, ct(" "));
-                var a = ce("span");
-                ae(e, a);
-                ae(e, ct(" "));
-                Listview.funcBox.coUpdateLastEdit(A);
-                if (I) {
-                    e.style.display = "none"
-                }
-                ae(R, e)
-            }
-            Q.className = "comment-links";
-            if (X) {
-                var E = ce("span");
-                var Y = ce("a");
-                ae(Y, ct(LANG.lvcomment_edit));
-                Y.onclick = Listview.funcBox.coEdit.bind(this, A, 0);
-                ns(Y);
-                Y.href = "javascript:;";
-                ae(E, Y);
-                ae(E, ct("|"));
-                ae(Q, E)
-            }
-            if (K) {
-                var k = ce("span");
-                var P = ce("a");
-                ae(P, ct(LANG.lvcomment_delete));
-                P.onclick = Listview.funcBox.coDelete.bind(this, A);
-                ns(P);
-                P.href = "javascript:;";
-                ae(k, P);
-                ae(k, ct("|"));
-                ae(Q, k)
-            }
-            if (G) {
-                var D = ce("span");
-                var T = ce("a");
-                ae(T, ct(LANG.lvcomment_detach));
-                T.onclick = Listview.funcBox.coDetach.bind(this, A);
-                ns(T);
-                T.href = "javascript:;";
-                ae(D, T);
-                ae(D, ct("|"));
-                ae(Q, D)
-            }
-            var S = ce("a");
-            ae(S, ct(LANG.lvcomment_reply));
-            if (g_user.id > 0) {
-                S.onclick = Listview.funcBox.coReply.bind(this, A);
-                S.href = "javascript:;"
-            } else {
-                S.href = "?account=signin"
-            }
-            ae(Q, S);
-            if (I) {
-                N.style.display = "none";
-                Q.style.display = "none"
-            }
-            ae(R, Q)
-        },
-        createNote: function (F) {
-            var E = ce("small");
-            var A = ce("a");
-            if (g_user.id > 0) {
-                A.href = "javascript:;";
-                A.onclick = co_addYourComment
-            } else {
-                A.href = "?account=signin"
-            }
-            ae(A, ct(LANG.lvcomment_add));
-            ae(E, A);
-            var D = ce("span");
-            D.style.padding = "0 5px";
-            D.style.color = "white";
-            ae(D, ct("|"));
-            ae(E, D);
-            ae(E, ct(LANG.lvcomment_sort));
-            var C = ce("a");
-            C.href = "javascript:;";
-            ae(C, ct(LANG.lvcomment_sortdate));
-            C.onclick = Listview.funcBox.coSortDate.bind(this, C);
-            ae(E, C);
-            ae(E, ct(LANG.comma));
-            var B = ce("a");
-            B.href = "javascript:;";
-            ae(B, ct(LANG.lvcomment_sortrating));
-            B.onclick = Listview.funcBox.coSortHighestRatedFirst.bind(this, B);
-            ae(E, B);
-            C.onclick();
-            ae(F, E)
-        },
-        onNoData: function (C) {
-            if (typeof g_pageInfo == "object" && g_pageInfo.type > 0) {
-                var A = "<b>" + LANG.lvnodata_co1 + "</b><br /><br />";
-                if (g_user.id > 0) {
-                    var B = LANG.lvnodata_co2;
-                    B = B.replace("<a>", '<a href="javascript:;" onclick="co_addYourComment()" onmousedown="return false">');
-                    A += B
-                } else {
-                    var B = LANG.lvnodata_co3;
-                    B = B.replace("<a>", '<a href="?account=signin">');
-                    B = B.replace("<a>", '<a href="?account=signup">');
-                    A += B
-                }
-                C.style.padding = "1.5em 0";
-                C.innerHTML = A
-            }
-        },
-        onBeforeCreate: function () {
-            if (location.hash.match(/:id=([0-9]+)/) != null) {
-                var A = in_array(this.data, parseInt(RegExp.$1), function (B) {
-                    return B.id
-                });
-                this.rowOffset = this.getRowOffset(A);
-                return this.data[A]
-            }
-        },
-        onAfterCreate: function (A) {
-            if (A != null) {
-                var B = A.__div;
-                this.tabs.__st = B;
-                B.firstChild.style.border = "1px solid #505050"
-            }
-        }
-    },
-    commentpreview: {
-        sort: [3],
-        nItemsPerPage: 75,
-        columns: [{
-            id: "subject",
-            name: LANG.subject,
-            align: "left",
-            value: "subject",
-            compute: function (D, C) {
-                var A = ce("a");
-                A.style.fontFamily = "Verdana, sans-serif";
-                A.href = this.template.getItemLink(D);
-                ae(A, ct(D.subject));
-                ae(C, A);
-                var B = ce("div");
-                B.className = "small";
-                ae(B, ct(LANG.types[D.type][0]));
-                ae(C, B)
-            }
-        },
-                    {
-            id: "preview",
-            name: LANG.preview,
-            align: "left",
-            width: "50%",
-            value: "preview",
-            compute: function (H, G) {
-                var E = ce("div");
-                E.className = "crop";
-                if (H.rating >= 10) {
-                    E.className += " comment-green"
-                }
-                ae(E, ct(Markup.removeTags(H.preview, {
-                    mode: (H.rating != null ? Markup.MODE_COMMENT : Markup.MODE_ARTICLE)
-                })));
-                ae(G, E);
-                var A = H.rating != null;
-                var D = H.user != null;
-                if (A || D) {
-                    E = ce("div");
-                    E.className = "small3";
-                    if (D) {
-                        ae(E, ct(LANG.lvcomment_by));
-                        var B = ce("a");
-                        B.href = "?user=" + H.user;
-                        ae(B, ct(H.user));
-                        ae(E, B);
-                        if (A) {
-                            ae(E, ct(LANG.hyphen))
-                        }
-                    }
-                    if (A) {
-                        ae(E, ct(LANG.lvcomment_rating + (H.rating > 0 ? "+" : "") + H.rating));
-                        var C = ce("span"),
-                            F = "";
-                        C.className = "q7";
-                        if (H.deleted) {
-                            F = " (Deleted)"
-                        } else {
-                            if (H.purged) {
-                                F = " (Purged)"
+                },getVisibleText: function(c) {
+                    var e = c.name.substring(1);
+                    if (typeof fi_nExtraCols == "number" && fi_nExtraCols >= 5) {
+                        if (c.source != null && c.source.length == 1) {
+                            var d = (c.sourcemore ? c.sourcemore[0] : {});
+                            var b = 0;
+                            if (d.t) {
+                                b = d.t;
+                                e += " " + d.n
+                            } else {
+                                e += " " + Listview.funcBox.getUpperSource(c.source[0], d)
+                            }
+                            var a = Listview.funcBox.getLowerSource(c.source[0], d, b);
+                            if (a != null) {
+                                if (a.pretext) {
+                                    e += " " + a.pretext
+                                }
+                                e += " " + a.text;
+                                if (a.posttext) {
+                                    e += " " + a.posttext
+                                }
                             }
                         }
-                        ae(C, ct(F));
-                        ae(E, C)
                     }
-                    ae(G, E)
-                }
-            }
-        },
-                    {
-            id: "posted",
-            name: LANG.posted,
-            width: "16%",
-            value: "elapsed",
-            compute: function (E, D) {
-                var B = new Date(E.date),
-                    A = (g_serverTime - B) / 1000;
-                var C = ce("span");
-                Listview.funcBox.coFormatDate(C, A, B, 0, 1);
-                ae(D, C)
-            }
-        }],
-        getItemLink: function (A) {
-            return "?" + g_types[A.type] + "=" + A.typeId + (A.id != null ? "#comments:id=" + A.id : "")
-        }
-    },
-    screenshot: {
-        sort: [],
-        mode: 3,
-        nItemsPerPage: 40,
-        nItemsPerRow: 4,
-        poundable: 2,
-        columns: [],
-        compute: function (J, C, E) {
-            var N, G = new Date(J.date),
-                O = (g_serverTime - G) / 1000;
-            C.className = "screenshot-cell";
-            C.vAlign = "bottom";
-            var M = ce("a");
-            M.href = "#screenshots:id=" + J.id;
-            M.onclick = rf2;
-            var F = ce("img"),
-                B = Math.min(150 / J.width, 150 / J.height);
-            F.src = "http://upload.wowhead.com/images/screenshots/thumb/" + J.id + ".jpg";
-            F.width = parseInt(B * J.width);
-            F.height = parseInt(B * J.height);
-            ae(M, F);
-            ae(C, M);
-            var I = ce("div");
-            I.className = "screenshot-cell-user";
-            var P = (J.user != null && J.user.length);
-            if (P) {
-                M = ce("a");
-                M.href = "?user=" + J.user;
-                ae(M, ct(J.user));
-                ae(I, ct(LANG.lvscreenshot_from));
-                ae(I, M);
-                ae(I, ct(" "))
-            }
-            var Q = ce("span");
-            if (P) {
-                Listview.funcBox.coFormatDate(Q, O, G)
-            } else {
-                Listview.funcBox.coFormatDate(Q, O, G, 0, 1)
-            }
-            ae(I, Q);
-            ae(C, I);
-            I = ce("div");
-            I.style.position = "relative";
-            I.style.height = "1em";
-            if (g_locale.id != 0 && g_locale.id != 25 && J.caption) {
-                J.caption = ""
-            }
-            var H = (J.caption != null && J.caption.length);
-            var D = (J.subject != null && J.subject.length);
-            if (H || D) {
-                var A = ce("div");
-                A.className = "screenshot-caption";
-                if (D) {
-                    var L = ce("small");
-                    ae(L, ct(LANG.types[J.type][0] + LANG.colon));
-                    var K = ce("a");
-                    ae(K, ct(J.subject));
-                    K.href = "?" + g_types[J.type] + "=" + J.typeId;
-                    ae(L, K);
-                    ae(A, L);
-                    if (H && J.caption.length) {
-                        ae(L, ct(" (...)"))
+                    return e
+                }}, {id: "level",name: LANG.level,value: "level"}, {id: "reqlevel",name: LANG.req,tooltip: LANG.tooltip_reqlevel,value: "reqlevel",compute: function(a, b) {
+                    if (a.reqlevel > 1) {
+                        return a.reqlevel
                     }
-                    ae(L, ce("br"))
+                }}, {id: "dps",name: LANG.dps,value: "dps",compute: function(a, b) {
+                    return (a.dps || 0).toFixed(1)
+                },hidden: true}, {id: "speed",name: LANG.speed,value: "speed",compute: function(a, b) {
+                    return (a.speed || 0).toFixed(2)
+                },hidden: true}, {id: "armor",name: LANG.armor,value: "armor",compute: function(a, b) {
+                    if (a.armor > 0) {
+                        return a.armor
+                    }
+                },hidden: true}, {id: "slot",name: LANG.slot,type: "text",compute: function(a, b) {
+                    nw(b);
+                    return g_item_slots[a.slot]
+                },getVisibleText: function(a) {
+                    return g_item_slots[a.slot]
+                },sortFunc: function(d, c, e) {
+                    return strcmp(g_item_slots[d.slot], g_item_slots[c.slot])
+                },hidden: true}, {id: "slots",name: LANG.slots,value: "nslots",hidden: true}, {id: "skill",name: LANG.skill,value: "skill",hidden: true}, {id: "glyph",name: LANG.glyphtype,type: "text",value: "glyph",compute: function(a, b) {
+                    if (a.glyph) {
+                        return g_item_glyphs[a.glyph]
+                    }
+                },getVisibleText: function(a) {
+                    return g_item_glyphs[a.glyph]
+                },sortFunc: function(d, c, e) {
+                    return strcmp(g_item_glyphs[d.glyph], g_item_glyphs[c.glyph])
+                },hidden: true}, {id: "source",name: LANG.source,type: "text",compute: function(k, d) {
+                    if (this.iconSize == 0) {
+                        d.className = "small"
+                    }
+                    if (k.source != null) {
+                        if (k.source.length == 1) {
+                            nw(d);
+                            var c = (k.sourcemore ? k.sourcemore[0] : {});
+                            var h = 0;
+                            if (c.t) {
+                                h = c.t;
+                                var j = ce("a");
+                                if (c.q != null) {
+                                    j.className = "q" + c.q
+                                } else {
+                                    j.className = "q1"
+                                }
+                                j.href = "?" + g_types[c.t] + "=" + c.ti;
+                                if (this.iconSize == 0 || c.n.length <= 20) {
+                                    ae(j, ct(c.n))
+                                } else {
+                                    j.title = c.n;
+                                    ae(j, ct(trim(c.n.substr(0, 17)) + "..."))
+                                }
+                                ae(d, j)
+                            } else {
+                                ae(d, ct(Listview.funcBox.getUpperSource(k.source[0], c)))
+                            }
+                            var f = Listview.funcBox.getLowerSource(k.source[0], c, h);
+                            if (this.iconSize != 0 && f != null) {
+                                var b = ce("div");
+                                b.className = "small2";
+                                if (f.pretext) {
+                                    ae(b, ct(f.pretext))
+                                }
+                                if (f.url) {
+                                    var j = ce("a");
+                                    j.className = "q1";
+                                    j.href = f.url;
+                                    ae(j, ct(f.text));
+                                    ae(b, j)
+                                } else {
+                                    ae(b, ct(f.text))
+                                }
+                                if (f.posttext) {
+                                    ae(b, ct(f.posttext))
+                                }
+                                ae(d, b)
+                            }
+                        } else {
+                            var l = "";
+                            for (var e = 0, g = k.source.length; e < g; ++e) {
+                                if (e > 0) {
+                                    l += LANG.comma
+                                }
+                                l += g_sources[k.source[e]]
+                            }
+                            return l
+                        }
+                    }
+                },getVisibleText: function(c) {
+                    if (c.source != null) {
+                        if (c.source.length == 1) {
+                            var e = "";
+                            var d = (c.sourcemore ? c.sourcemore[0] : {});
+                            var b = 0;
+                            if (d.t) {
+                                b = d.t;
+                                e += " " + d.n
+                            } else {
+                                e += " " + Listview.funcBox.getUpperSource(c.source[0], d)
+                            }
+                            var a = Listview.funcBox.getLowerSource(c.source[0], d, b);
+                            if (a != null) {
+                                if (a.pretext) {
+                                    e += " " + a.pretext
+                                }
+                                e += " " + a.text;
+                                if (a.posttext) {
+                                    e += " " + a.posttext
+                                }
+                            }
+                            return e
+                        } else {
+                            return Listview.funcBox.arrayText(c.source, g_sources)
+                        }
+                    }
+                },sortFunc: function(f, d) {
+                    var g = Listview.funcBox.assocArrCmp(f.source, d.source, g_sources);
+                    if (g != 0) {
+                        return g
+                    }
+                    var e = (f.sourcemore && f.source.length == 1 ? f.sourcemore[0].n : null), c = (d.sourcemore && d.source.length == 1 ? d.sourcemore[0].n : null);
+                    return strcmp(e, c)
+                }}, {id: "type",name: LANG.type,type: "text",compute: function(d, e) {
+                    e.className = "small q1";
+                    nw(e);
+                    var b = ce("a");
+                    var c = Listview.funcBox.getItemType(d.classs, d.subclass, d.subsubclass);
+                    b.href = c.url;
+                    ae(b, ct(c.text));
+                    ae(e, b)
+                },getVisibleText: function(a) {
+                    return Listview.funcBox.getItemType(a.classs, a.subclass, a.subsubclass).text
+                },sortFunc: function(d, c, f) {
+                    var e = Listview.funcBox.getItemType;
+                    return strcmp(e(d.classs, d.subclass, d.subsubclass).text, e(c.classs, c.subclass, c.subsubclass).text)
+                }}],getItemLink: function(a) {
+            return "?item=" + a.id
+        },onBeforeCreate: function() {
+            var b = false;
+            for (var c = 0, a = this.data.length; c < a; ++c) {
+                var d = this.data[c];
+                if (d.slot > 0 && d.slot != 18) {
+                    ++b
+                } else {
+                    d.__nochk = 1
                 }
-                if (H) {
-                    aE(C, "mouseover", Listview.funcBox.ssCellOver.bind(A));
-                    aE(C, "mouseout", Listview.funcBox.ssCellOut.bind(A));
-                    ae(A, ct('"' + J.caption + '"'))
-                }
-                ae(I, A)
             }
-            aE(C, "click", Listview.funcBox.ssCellClick.bind(this, E));
-            ae(C, I)
-        },
-        createNote: function (C) {
-            if (typeof g_pageInfo == "object" && g_pageInfo.type > 0) {
-                var B = ce("small");
-                var A = ce("a");
-                if (g_user.id > 0) {
+            if (b > 0) {
+                this.mode = 1;
+                this._nComparable = b
+            }
+        },createCbControls: function(d, c) {
+            if (!c && this._nComparable < 15) {
+                return
+            }
+            var b = ce("input"), a = ce("input");
+            b.type = a.type = "button";
+            b.value = LANG.button_compare;
+            a.value = LANG.button_deselect;
+            b.onclick = this.template.compareItems.bind(this);
+            a.onclick = Listview.cbSelect.bind(this, false);
+            ae(d, b);
+            ae(d, a)
+        },compareItems: function() {
+            var b = this.getCheckedRows();
+            if (!b.length) {
+                return
+            }
+            var a = "";
+            array_walk(b, function(c) {
+                a += c.id + ";"
+            });
+            su_addToSaved(rtrim(a, ";"))
+        }},itemset: {sort: [1],nItemsPerPage: 75,searchable: 1,filtrable: 1,columns: [{id: "name",name: LANG.name,type: "text",align: "left",value: "name",compute: function(c, f) {
+                    var b = ce("a");
+                    b.className = "q" + (7 - parseInt(c.name.charAt(0)));
+                    b.style.fontFamily = "Verdana, sans-serif";
+                    b.href = this.template.getItemLink(c);
+                    ae(b, ct(c.name.substring(1)));
+                    ae(f, b);
+                    if (c.note) {
+                        var e = ce("div");
+                        e.className = "small";
+                        ae(e, ct(g_itemset_notes[c.note]));
+                        ae(f, e)
+                    }
+                },getVisibleText: function(a) {
+                    var b = a.name.substring(1);
+                    if (a.note) {
+                        b += " " + g_itemset_notes[a.note]
+                    }
+                    return b
+                }}, {id: "level",name: LANG.level,type: "range",getMinValue: function(a) {
+                    return a.minlevel
+                },getMaxValue: function(a) {
+                    return a.maxlevel
+                },compute: function(a, b) {
+                    if (a.minlevel > 0 && a.maxlevel > 0) {
+                        if (a.minlevel != a.maxlevel) {
+                            return a.minlevel + LANG.hyphen + a.maxlevel
+                        } else {
+                            return a.minlevel
+                        }
+                    } else {
+                        return -1
+                    }
+                },sortFunc: function(d, c, e) {
+                    if (e > 0) {
+                        return strcmp(d.minlevel, c.minlevel) || strcmp(d.maxlevel, c.maxlevel)
+                    } else {
+                        return strcmp(d.maxlevel, c.maxlevel) || strcmp(d.minlevel, c.minlevel)
+                    }
+                }}, {id: "pieces",name: LANG.pieces,getValue: function(a) {
+                    return a.pieces.length
+                },compute: function(a, b) {
+                    b.style.padding = "0";
+                    Listview.funcBox.createCenteredIcons(a.pieces, b)
+                },sortFunc: function(d, c) {
+                    var f = (d.pieces != null ? d.pieces.length : 0);
+                    var e = (c.pieces != null ? c.pieces.length : 0);
+                    return strcmp(f, e)
+                }}, {id: "type",name: LANG.type,type: "text",compute: function(a, b) {
+                    return g_itemset_types[a.type]
+                },sortFunc: function(d, c, e) {
+                    return strcmp(g_itemset_types[d.type], g_itemset_types[c.type])
+                }}, {id: "classes",name: LANG.classes,type: "text",compute: function(c, e) {
+                    if (c.classes != null) {
+                        var d = "";
+                        for (var b = 0, a = c.classes.length; b < a; ++b) {
+                            if (b > 0) {
+                                d += LANG.comma
+                            }
+                            d += g_chr_classes[c.classes[b]]
+                        }
+                        return d
+                    }
+                },sortFunc: function(d, c, e) {
+                    return Listview.funcBox.assocArrCmp(d.classes, c.classes, g_chr_classes)
+                }}],getItemLink: function(a) {
+            return "?itemset=" + a.id
+        }},npc: {sort: [1],nItemsPerPage: 100,searchable: 1,filtrable: 1,columns: [{id: "name",name: LANG.name,type: "text",align: "left",value: "name",compute: function(c, f) {
+                    var b = ce("a");
+                    b.style.fontFamily = "Verdana, sans-serif";
+                    b.href = this.template.getItemLink(c);
+                    ae(b, ct(c.name));
+                    ae(f, b);
+                    if (c.tag != null) {
+                        var e = ce("div");
+                        e.className = "small";
+                        ae(e, ct("<" + c.tag + ">"));
+                        ae(f, e)
+                    }
+                },getVisibleText: function(a) {
+                    var b = a.name;
+                    if (a.tag) {
+                        b += " <" + a.tag + ">"
+                    }
+                    return b
+                }}, {id: "level",name: LANG.level,type: "range",width: "10%",getMinValue: function(a) {
+                    return a.minlevel
+                },getMaxValue: function(a) {
+                    return a.maxlevel
+                },compute: function(a, c) {
+                    if (a.classification) {
+                        var b = ce("div");
+                        b.className = "small";
+                        ae(b, ct(g_npc_classifications[a.classification]));
+                        ae(c, b)
+                    }
+                    if (a.classification == 3) {
+                        return "??"
+                    }
+                    if (a.minlevel > 0 && a.maxlevel > 0) {
+                        if (a.minlevel != a.maxlevel) {
+                            return a.minlevel + LANG.hyphen + a.maxlevel
+                        } else {
+                            return a.minlevel
+                        }
+                    }
+                    return -1
+                },getVisibleText: function(a) {
+                    var b = "";
+                    if (a.classification) {
+                        b += " " + g_npc_classifications[a.classification]
+                    }
+                    if (a.minlevel > 0 && a.maxlevel > 0) {
+                        b += " ";
+                        if (a.minlevel != a.maxlevel) {
+                            b += a.minlevel + LANG.hyphen + a.maxlevel
+                        } else {
+                            b += a.minlevel
+                        }
+                    }
+                    return b
+                },sortFunc: function(d, c, e) {
+                    if (e > 0) {
+                        return strcmp(d.minlevel, c.minlevel) || strcmp(d.maxlevel, c.maxlevel) || strcmp(d.classification, c.classification)
+                    } else {
+                        return strcmp(d.maxlevel, c.maxlevel) || strcmp(d.minlevel, c.minlevel) || strcmp(d.classification, c.classification)
+                    }
+                }}, {id: "location",name: LANG.location,type: "text",compute: function(a, b) {
+                    return Listview.funcBox.location(a, b)
+                },getVisibleText: function(a) {
+                    return Listview.funcBox.arrayText(a.location, g_zones)
+                },sortFunc: function(d, c, e) {
+                    return Listview.funcBox.assocArrCmp(d.location, c.location, g_zones)
+                }}, {id: "react",name: LANG.react,type: "text",width: "10%",value: "react",filtrable: 0,compute: function(b, g) {
+                    if (b.react == null) {
+                        return -1
+                    }
+                    var d = [LANG.lvnpc_alliance, LANG.lvnpc_horde];
+                    var f = 0;
+                    for (var a = 0; a < 2; ++a) {
+                        if (b.react[a] != null) {
+                            if (f++ > 0) {
+                                ae(g, ct(" "))
+                            }
+                            var e = ce("span");
+                            e.className = (b.react[a] < 0 ? "q10" : (b.react[a] > 0 ? "q2" : "q"));
+                            ae(e, ct(d[a]));
+                            ae(g, e)
+                        }
+                    }
+                }}, {id: "skin",name: LANG.skin,type: "text",value: "skin",compute: function(c, d) {
+                    if (c.skin) {
+                        var b = ce("a");
+                        b.className = "q1";
+                        b.href = "?npcs&filter=cr=35;crs=0;crv=" + c.skin;
+                        ae(b, ct(c.skin));
+                        ae(d, b)
+                    }
+                },hidden: 1}, {id: "petfamily",name: LANG.petfamily,type: "text",width: "12%",compute: function(c, d) {
+                    d.className = "q1";
+                    var b = ce("a");
+                    b.href = "?pet=" + c.family;
+                    ae(b, ct(g_pet_families[c.family]));
+                    ae(d, b)
+                },getVisibleText: function(a) {
+                    return g_pet_families[a.family]
+                },sortFunc: function(d, c, e) {
+                    return strcmp(g_pet_families[d.family], g_pet_families[c.family])
+                },hidden: 1}, {id: "type",name: LANG.type,type: "text",width: "12%",compute: function(c, d) {
+                    d.className = "small q1";
+                    var b = ce("a");
+                    b.href = "?npcs=" + c.type;
+                    ae(b, ct(g_npc_types[c.type]));
+                    ae(d, b)
+                },getVisibleText: function(a) {
+                    return g_npc_types[a.type]
+                },sortFunc: function(d, c, e) {
+                    return strcmp(g_npc_types[d.type], g_npc_types[c.type])
+                }}],getItemLink: function(a) {
+            return "?npc=" + a.id
+        }},object: {sort: [1],nItemsPerPage: 100,searchable: 1,filtrable: 1,columns: [{id: "name",name: LANG.name,type: "text",align: "left",value: "name",compute: function(c, d) {
+                    var b = ce("a");
+                    b.style.fontFamily = "Verdana, sans-serif";
+                    b.href = this.template.getItemLink(c);
+                    ae(b, ct(c.name));
+                    ae(d, b)
+                }}, {id: "location",name: LANG.location,type: "text",compute: function(a, b) {
+                    return Listview.funcBox.location(a, b)
+                },getVisibleText: function(a) {
+                    return Listview.funcBox.arrayText(a.location, g_zones)
+                },sortFunc: function(d, c, e) {
+                    return Listview.funcBox.assocArrCmp(d.location, c.location, g_zones)
+                }}, {id: "skill",name: LANG.skill,width: "10%",value: "skill",hidden: true}, {id: "type",name: LANG.type,type: "text",width: "12%",compute: function(c, d) {
+                    d.className = "small q1";
+                    var b = ce("a");
+                    b.href = "?objects=" + c.type;
+                    ae(b, ct(g_object_types[c.type]));
+                    ae(d, b)
+                },getVisibleText: function(a) {
+                    return g_object_types[a.type]
+                },sortFunc: function(d, c, e) {
+                    return strcmp(g_object_types[d.type], g_object_types[c.type])
+                }}],getItemLink: function(a) {
+            return "?object=" + a.id
+        }},quest: {sort: [1, 2],nItemsPerPage: 100,searchable: 1,filtrable: 1,columns: [{id: "name",name: LANG.name,type: "text",align: "left",value: "name",compute: function(c, d) {
+                    var b = ce("a");
+                    b.style.fontFamily = "Verdana, sans-serif";
+                    b.href = this.template.getItemLink(c);
+                    ae(b, ct(c.name));
+                    ae(d, b)
+                }}, {id: "level",name: LANG.level,width: "7%",value: "level",compute: function(a, c) {
+                    if (a.type || a.daily) {
+                        var b = ce("div");
+                        b.className = "small";
+                        nw(b);
+                        if (a.type && a.daily) {
+                            ae(b, ct(sprintf(LANG.lvquest_daily, g_quest_types[a.type])))
+                        } else {
+                            if (a.daily) {
+                                ae(b, ct(LANG.daily))
+                            } else {
+                                if (a.type) {
+                                    ae(b, ct(g_quest_types[a.type]))
+                                }
+                            }
+                        }
+                        ae(c, b)
+                    }
+                    return a.level
+                },getVisibleText: function(a) {
+                    var b = "";
+                    if (a.type) {
+                        b += " " + g_quest_types[a.type]
+                    }
+                    if (a.daily) {
+                        b += " " + LANG.daily
+                    }
+                    if (a.level) {
+                        b += " " + a.level
+                    }
+                    return b
+                },sortFunc: function(d, c, e) {
+                    return strcmp(d.level, c.level) || strcmp(d.type, c.type)
+                }}, {id: "reqlevel",name: LANG.req,tooltip: LANG.tooltip_reqlevel,width: "7%",value: "reqlevel"}, {id: "side",name: LANG.side,type: "text",width: "10%",compute: function(a, c) {
+                    if (a.side) {
+                        var b = ce("span");
+                        if (a.side == 1) {
+                            b.className = "alliance-icon"
+                        } else {
+                            if (a.side == 2) {
+                                b.className = "horde-icon"
+                            }
+                        }
+                        ae(b, ct(g_sides[a.side]));
+                        ae(c, b)
+                    } else {
+                        return -1
+                    }
+                },getVisibleText: function(a) {
+                    if (a.side) {
+                        return g_sides[a.side]
+                    }
+                },sortFunc: function(d, c, e) {
+                    return strcmp(g_sides[d.side], g_sides[c.side])
+                }}, 
+				{id: "rewards",name: LANG.rewards,filtrable: 0,width: "25%",compute: function(b, g) {
+                    var a = (b.itemchoices != null || b.itemrewards != null);
+                    if (a) {
+                        g.style.padding = "0";
+                        var f, e;
+                        if (b.itemchoices && b.itemchoices.length > 1) {
+                            f = LANG.lvquest_pickone;
+                            if (b.itemrewards && b.itemrewards.length > 0) {
+                                e = LANG.lvquest_alsoget
+                            }
+                        }
+                        Listview.funcBox.createCenteredIcons(b.itemchoices, g, f);
+                        Listview.funcBox.createCenteredIcons(b.itemrewards, g, e);
+                    }},
+
+				getVisibleText: function(a) {
+                    var b = "";
+                    if (a.itemchoices && a.itemchoices.length) {
+                        b += " " + LANG.lvquest_pickone;
+                        if (a.itemrewards && a.itemrewards.length) {
+                            b += " " + LANG.lvquest_alsoget
+                        }
+                    }
+                    if (a.xp > 0) {
+                        b += " " + sprintf(LANG.lvquest_xp, a.xp)
+                    }
+                    return b
+                },sortFunc: function(d, c, e) {
+                    var g = (d.itemchoices != null ? d.itemchoices.length : 0) + (d.itemrewards != null ? d.itemrewards.length : 0);
+                    var f = (c.itemchoices != null ? c.itemchoices.length : 0) + (c.itemrewards != null ? c.itemrewards.length : 0);
+                }}, 
+				{id: "expirience",name: LANG.expirience,tooltip: LANG.tooltip_expirience,width: "7%",value: "xp"},
+				{id: "money",name: LANG.money,tooltip: LANG.tooltip_moeny,width: "10%",compute: function(b, g) {
+				if (b.money > 0) {
+                        var c = ce("div");
+                        Listview.funcBox.appendMoney(c, b.money)
+						ae(c, ct(sprintf(b.money > 0 ? "  " : "")))
+						ae(g, c)
+				}}},
+				{id: "reputation",name: LANG.reputation,width: "14%",value: "id",hidden: true}, {id: "category",name: LANG.category,type: "text",width: "16%",compute: function(c, d) {
+                    if (c.category != 0) {
+                        d.className = "small q1";
+                        var b = ce("a");
+                        b.href = "?quests=" + c.category2 + "." + c.category;
+                        ae(b, ct(Listview.funcBox.getQuestCategory(c.category)));
+                        ae(d, b)
+                    }
+                },getVisibleText: function(a) {
+                    return Listview.funcBox.getQuestCategory(a.category)
+                },sortFunc: function(d, c, f) {
+                    var e = Listview.funcBox.getQuestCategory;
+                    return strcmp(e(d.category), e(c.category))
+                }}],getItemLink: function(a) {
+            return "?quest=" + a.id
+        }},spell: {sort: [1, 2],searchable: 1,filtrable: 1,columns: [{id: "name",name: LANG.name,type: "text",align: "left",span: 2,value: "name",compute: function(g, e, k) {
+                    var f = ce("td"), o;
+                    f.style.width = "44px";
+                    f.style.padding = "0";
+                    f.style.borderRight = "none";
+                    if (g.creates != null) {
+                        o = g_items.createIcon(g.creates[0], 1, Listview.funcBox.createTextRange(g.creates[1], g.creates[2]))
+                    } else {
+                        o = g_spells.createIcon(g.id, 1)
+                    }
+                    o.style.cssFloat = o.style.styleFloat = "left";
+                    ae(f, o);
+                    ae(k, f);
+                    e.style.borderLeft = "none";
+                    var b = ce("div");
+                    var n = ce("a");
+                    var l = g.name.charAt(0);
+                    if (l != "@") {
+                        n.className = "q" + (7 - parseInt(l))
+                    }
+                    n.style.fontFamily = "Verdana, sans-serif";
+                    n.href = this.template.getItemLink(g);
+                    ae(n, ct(g.name.substring(1)));
+                    ae(b, n);
+                    if (g.rank) {
+                        var j = ce("div");
+                        j.className = "small2";
+                        ae(j, ct(g.rank));
+                        ae(b, j)
+                    }
+                    if (g.races != null) {
+                        b.style.position = "relative";
+                        var j = ce("div");
+                        j.className = "small";
+                        j.style.fontStyle = "italic";
+                        j.style.position = "absolute";
+                        j.style.right = j.style.bottom = "3px";
+                        var m = g.races.toString();
+                        if (m == "1,3,4,7,11") {
+                            ae(j, ct(g_sides[1]))
+                        } else {
+                            if (m == "2,5,6,8,10") {
+                                ae(j, ct(g_sides[2]))
+                            } else {
+                                for (var f = 0, h = g.races.length; f < h; ++f) {
+                                    if (f > 0) {
+                                        ae(j, ct(LANG.comma))
+                                    }
+                                    ae(j, ct(g_chr_races[g.races[f]]))
+                                }
+                            }
+                        }
+                        ae(b, j)
+                    }
+                    ae(e, b)
+                },getVisibleText: function(a) {
+                    var b = a.name;
+                    if (a.rank) {
+                        b += " " + a.rank
+                    }
+                    if (a.races) {
+                        b += " " + Listview.funcBox.arrayText(a.races, g_chr_races)
+                    }
+                    return b
+                }}, {id: "level",name: LANG.level,width: "10%",value: "level",compute: function(a, b) {
+                    if (a.level > 0) {
+                        return a.level
+                    }
+                },hidden: true}, {id: "school",name: LANG.school,type: "text",width: "10%",hidden: true,compute: function(a, b) {
+                    return g_spell_resistances[a.school]
+                },sortFunc: function(d, c, e) {
+                    return strcmp(g_spell_resistances[d.school], g_spell_resistances[c.school])
+                }}, {id: "reagents",name: LANG.reagents,align: "left",width: "9%",getValue: function(a) {
+                    return (a.reagents ? a.reagents.length : 0)
+                },compute: function(g, c) {
+                    var a = (g.reagents != null);
+                    if (a) {
+                        c.style.padding = "0";
+                        var k = ce("div");
+                        var j = g.reagents;
+                        k.style.width = (44 * j.length) + "px";
+                        for (var e = 0, h = j.length; e < h; ++e) {
+                            var b = j[e][0];
+                            var f = j[e][1];
+                            var l = g_items.createIcon(b, 1, f);
+                            l.style.cssFloat = l.style.styleFloat = "left";
+                            ae(k, l)
+                        }
+                        ae(c, k)
+                    }
+                },sortFunc: function(d, c) {
+                    var f = (d.reagents != null ? d.reagents.length : 0);
+                    var e = (c.reagents != null ? c.reagents.length : 0);
+                    if (f > 0 && f == e) {
+                        return strcmp(d.reagents.toString(), c.reagents.toString())
+                    } else {
+                        return strcmp(f, e)
+                    }
+                }}, {id: "tp",name: LANG.tp,tooltip: LANG.tooltip_trainingpoints,width: "7%",hidden: true,value: "tp",compute: function(a, b) {
+                    if (a.tp > 0) {
+                        return a.tp
+                    }
+                }}, {id: "source",name: LANG.source,type: "text",width: "12%",hidden: true,compute: function(b, e) {
+                    if (b.source != null) {
+                        var d = "";
+                        for (var c = 0, a = b.source.length; c < a; ++c) {
+                            if (c > 0) {
+                                d += LANG.comma
+                            }
+                            d += g_sources[b.source[c]]
+                        }
+                        return d
+                    }
+                },sortFunc: function(d, c, e) {
+                    return Listview.funcBox.assocArrCmp(d.source, c.source, g_sources)
+                }}, {id: "skill",name: LANG.skill,type: "text",width: "16%",getValue: function(a) {
+                    return a.learnedat
+                },compute: function(f, d, j, n) {
+                    if (f.skill != null) {
+                        var b = ce("div");
+                        b.className = "small";
+                        for (var e = 0, g = f.skill.length; e < g; ++e) {
+                            if (e > 0) {
+                                ae(b, ct(LANG.comma))
+                            }
+                            if (f.skill[e] == -1) {
+                                ae(b, ct(LANG.ellipsis))
+                            } else {
+                                if (in_array([7, -2, -3, -5, -6, -7, 11, 9], f.cat) != -1) {
+                                    var l = ce("a");
+                                    l.className = "q1";
+                                    if (in_array([-5, -6, -7], f.cat) != -1) {
+                                        l.href = "?spells=" + f.cat
+                                    } else {
+                                        l.href = "?spells=" + f.cat + "." + (f.chrclass ? f.chrclass + "." : "") + f.skill[e]
+                                    }
+                                    ae(l, ct(g_spell_skills[f.skill[e]]));
+                                    ae(b, l)
+                                } else {
+                                    ae(b, ct(g_spell_skills[f.skill[e]]))
+                                }
+                            }
+                        }
+                        if (f.learnedat > 0) {
+                            ae(b, ct(" ("));
+                            var c = ce("span");
+                            if (f.learnedat == 9999) {
+                                c.className = "q0";
+                                ae(c, ct("??"))
+                            } else {
+                                if (f.learnedat > 0) {
+                                    ae(c, ct(f.learnedat));
+                                    c.style.fontWeight = "bold"
+                                }
+                            }
+                            ae(b, c);
+                            ae(b, ct(")"))
+                        }
+                        ae(d, b);
+                        if (f.colors != null) {
+                            this.template.columns[n].type = null;
+                            var h = f.colors, m = 0;
+                            for (var e = 0; e < h.length; ++e) {
+                                if (h[e] > 0) {
+                                    ++m;
+                                    break
+                                }
+                            }
+                            if (m > 0) {
+                                m = 0;
+                                b = ce("div");
+                                b.className = "small";
+                                b.style.fontWeight = "bold";
+                                for (var e = 0; e < h.length; ++e) {
+                                    if (h[e] > 0) {
+                                        if (m++ > 0) {
+                                            ae(b, ct(" "))
+                                        }
+                                        var k = ce("span");
+                                        k.className = "r" + (e + 1);
+                                        ae(k, ct(h[e]));
+                                        ae(b, k)
+                                    }
+                                }
+                                ae(d, b)
+                            }
+                        }
+                    }
+                },getVisibleText: function(a) {
+                    var b = Listview.funcBox.arrayText(a.skill, g_spell_skills);
+                    if (a.learnedat > 0) {
+                        b += " " + (a.learnedat == 9999 ? "??" : a.learnedat)
+                    }
+                    return b
+                },sortFunc: function(d, c) {
+                    var f = strcmp(d.learnedat, c.learnedat);
+                    if (f != 0) {
+                        return f
+                    }
+                    if (d.colors != null && c.colors != null) {
+                        for (var e = 0; e < 4; ++e) {
+                            f = strcmp(d.colors[e], c.colors[e]);
+                            if (f != 0) {
+                                return f
+                            }
+                        }
+                    }
+                    return Listview.funcBox.assocArrCmp(d.skill, c.skill, g_spell_skills)
+                }}],getItemLink: function(a) {
+            return "?spell=" + a.id
+        }},zone: {sort: [1],nItemsPerPage: -1,searchable: 1,filtrable: 1,columns: [{id: "name",name: LANG.name,type: "text",align: "left",value: "name",compute: function(c, e) {
+                    var b = ce("a");
+                    b.style.fontFamily = "Verdana, sans-serif";
+                    b.href = this.template.getItemLink(c);
+                    ae(b, ct(c.name));
+                    if (c.expansion) {
+                        var d = ce("span");
+                        d.className = (c.expansion == 1 ? "bc-icon" : "wotlk-icon");
+                        ae(d, b);
+                        ae(e, d)
+                    } else {
+                        ae(e, b)
+                    }
+                },getVisibleText: function(a) {
+                    var b = a.name;
+                    if (a.expansion == 1) {
+                        b += " bc"
+                    } else {
+                        if (a.expansion == 2) {
+                            b += "wotlk wrath"
+                        }
+                    }
+                    return b
+                }}, {id: "level",name: LANG.level,type: "range",width: "10%",getMinValue: function(a) {
+                    return a.minlevel
+                },getMaxValue: function(a) {
+                    return a.maxlevel
+                },compute: function(a, b) {
+                    if (a.minlevel > 0 && a.maxlevel > 0) {
+                        if (a.minlevel != a.maxlevel) {
+                            return a.minlevel + LANG.hyphen + a.maxlevel
+                        } else {
+                            return a.minlevel
+                        }
+                    }
+                },sortFunc: function(d, c, e) {
+                    if (e > 0) {
+                        return strcmp(d.minlevel, c.minlevel) || strcmp(d.maxlevel, c.maxlevel)
+                    } else {
+                        return strcmp(d.maxlevel, c.maxlevel) || strcmp(d.minlevel, c.minlevel)
+                    }
+                }}, {id: "territory",name: LANG.territory,type: "text",width: "13%",compute: function(a, c) {
+                    var b = ce("span");
+                    switch (a.territory) {
+                        case 0:
+                            b.className = "alliance-icon";
+                            break;
+                        case 1:
+                            b.className = "horde-icon";
+                            break;
+                        case 4:
+                            b.className = "ffapvp-icon";
+                            break
+                    }
+                    ae(b, ct(g_zone_territories[a.territory]));
+                    ae(c, b)
+                },getVisibleText: function(a) {
+                    return g_zone_territories[a.territory]
+                },sortFunc: function(d, c, e) {
+                    return strcmp(g_zone_territories[d.territory], g_zone_territories[c.territory])
+                }}, {id: "instancetype",name: LANG.instancetype,type: "text",compute: function(a, d) {
+                    if (a.instance > 0) {
+                        var b = ce("span");
+                        if ((a.instance >= 1 && a.instance <= 5) || a.instance == 7) {
+                            b.className = "instance-icon" + a.instance
+                        }
+                        if (a.nplayers == -2) {
+                            a.nplayers = "10/25"
+                        }
+                        var c = g_zone_instancetypes[a.instance];
+                        if (a.nplayers && ((a.instance != 2 && a.instance != 5) || a.nplayers > 5)) {
+                            c += " (";
+                            if (a.instance == 4) {
+                                c += sprintf(LANG.lvzone_xvx, a.nplayers, a.nplayers)
+                            } else {
+                                c += sprintf(LANG.lvzone_xman, a.nplayers)
+                            }
+                            c += ")"
+                        }
+                        ae(b, ct(c));
+                        ae(d, b)
+                    }
+                },getVisibleText: function(a) {
+                    if (a.instance > 0) {
+                        var b = g_zone_instancetypes[a.instance];
+                        if (a.nplayers && ((a.instance != 2 && a.instance != 5) || a.nplayers > 5)) {
+                            if (a.instance == 4) {
+                                b += " " + sprintf(LANG.lvzone_xvx, a.nplayers, a.nplayers)
+                            } else {
+                                b += " " + sprintf(LANG.lvzone_xman, a.nplayers)
+                            }
+                        }
+                        return b
+                    }
+                },sortFunc: function(d, c, e) {
+                    return strcmp(g_zone_instancetypes[d.instance], g_zone_instancetypes[c.instance]) || strcmp(d.instance, c.instance) || strcmp(d.nplayers, c.nplayers)
+                }}, {id: "category",name: LANG.category,type: "text",width: "15%",compute: function(c, d) {
+                    d.className = "small q1";
+                    var b = ce("a");
+                    b.href = "?zones=" + c.category;
+                    ae(b, ct(g_zone_categories[c.category]));
+                    ae(d, b)
+                },getVisibleText: function(a) {
+                    return g_zone_categories[a.category]
+                },sortFunc: function(d, c, e) {
+                    return strcmp(g_zone_categories[d.category], g_zone_categories[c.category])
+                }}],getItemLink: function(a) {
+            return "?maps=" + a.id
+        }},holiday: {sort: [2],nItemsPerPage: -1,searchable: 1,filtrable: 1,columns: [{id: "name",name: LANG.name,type: "text",align: "left",value: "name",compute: function(c, d) {
+                    var b = ce("a");
+                    b.style.fontFamily = "Verdana, sans-serif";
+                    b.href = this.template.getItemLink(c);
+                    ae(b, ct(c.name));
+                    ae(d, b)
+                },getVisibleText: function(a) {
+                    return a.name
+                }}, {id: "date",name: LANG.date,type: "text",width: "16%",allText: true,compute: function(b, e) {
+                    if (b.startDate && b.endDate) {
+                        var c = ce("span");
+                        if (b.today)
+                            c.style.color = "#00bb00";
+                        var d = b.startDate, a = b.endDate;
+                        if (d != a) {
+                            ae(c, ct(d + LANG.hyphen + a))
+                        } else {
+                            ae(c, ct(d))
+                        }
+                        ae(e, c)
+                    }
+                },getVisibleText: function(b) {
+                    if (b.startDate && b.endDate) {
+                        var d = b.startDate, a = b.endDate;
+                        if (d != a) {
+                            return d + LANG.hyphen + a
+                        } else {
+                            return d
+                        }
+                    }
+                    return ""
+                },sortFunc: function(e, c, g) {
+                    if (e.startDate && c.startDate) {
+                        return (e.startDate < c.startDate) ? -1 : (e.startDate > c.startDate) ? 1 : 0;
+                    } else {
+                        return e.startDate ? -1 : c.startDate ? 1 : 0;
+                    }
+                }}, {id: "category",name: LANG.category,type: "text",width: "16%",compute: function(d, e) {
+                    e.className = "small q1";
+                    var b = ce("a"), c = "?events=" + d.category;
+                    b.href = c;
+                    ae(b, ct(g_holiday_categories[d.category]));
+                    ae(e, b)
+                },getVisibleText: function(a) {
+                    return g_holiday_categories[a.category]
+                },sortFunc: function(d, c, e) {
+                    return strcmp(g_holiday_categories[d.category], g_holiday_categories[c.category])
+                },hidden: true}],getItemLink: function(a) {
+            return "?event=" + a.id
+        }},comment: {sort: [1],mode: 2,nItemsPerPage: 40,poundable: 2,columns: [{value: "number"}, {value: "id"}, {value: "rating"}],compute: function(t, H) {
+            var L, s = new Date(t.date), F = (g_serverTime - s) / 1000, d = (g_user.roles & 26) != 0, I = t.rating < 0 || t.purged || t.deleted, C = d || t.user.toLowerCase() == g_user.name.toLowerCase(), v = C && t.deleted == 0, c = C && t.replyTo != t.id, J = ((t.roles & 190) == 0), D = t.purged == 0 && t.deleted == 0 && g_user.id && t.user.toLowerCase() != g_user.name.toLowerCase() && in_array(t.raters, g_user.id, function(M) {
+                return M[0]
+            }) == -1, i = t.rating >= 0 && (g_user.id == 0 || D);
+            t.ratable = D;
+            H.className = "comment";
+            if (t.indent) {
+                H.className += " comment-indent"
+            }
+            var w = ce("div");
+            var m = ce("div");
+            var k = ce("div");
+            t.divHeader = w;
+            t.divBody = m;
+            t.divLinks = k;
+            w.className = (I ? "comment-header-bt" : "comment-header");
+            var g = ce("div");
+            g.className = "comment-rating";
+            if (I) {
+                var p = ce("a");
+                p.href = "javascript:;";
+                p.onclick = Listview.funcBox.coToggleVis.bind(p, t);
+                ae(p, ct(LANG.lvcomment_show));
+                ae(g, p);
+                ae(g, ct(" " + String.fromCharCode(160) + " "))
+            }
+            var n = ce("b");
+            ae(n, ct(LANG.lvcomment_rating));
+            var q = ce("span");
+            ae(q, ct((t.rating > 0 ? "+" : "") + t.rating));
+            ae(n, q);
+            ae(g, n);
+            ae(g, ct(" "));
+            var B = ce("span");
+            var j = ce("a"), K = ce("a");
+            if (D) {
+                j.href = K.href = "javascript:;";
+                j.onclick = Listview.funcBox.coRate.bind(j, t, 1);
+                K.onclick = Listview.funcBox.coRate.bind(K, t, -1);
+                if (d) {
+                    var A = ce("a");
                     A.href = "javascript:;";
-                    A.onclick = ss_submitAScreenshot
-                } else {
-                    A.href = "?account=signin"
+                    A.onclick = Listview.funcBox.coRate.bind(A, t, 0);
+                    A.onmouseover = Listview.funcBox.coCustomRatingOver;
+                    A.onmousemove = Tooltip.cursorUpdate;
+                    A.onmouseout = Tooltip.hide;
+                    ae(A, ct("[~]"));
+                    ae(B, A);
+                    ae(B, ct(" "))
                 }
-                ae(A, ct(LANG.lvscreenshot_submit));
-                ae(B, A);
-                ae(C, B)
+            } else {
+                j.href = K.href = "?account=signin"
             }
-        },
-        onNoData: function (C) {
-            if (typeof g_pageInfo == "object" && g_pageInfo.type > 0) {
-                var A = "<b>" + LANG.lvnodata_ss1 + "</b><br /><br />";
-                if (g_user.id > 0) {
-                    var B = LANG.lvnodata_ss2;
-                    B = B.replace("<a>", '<a href="javascript:;" onclick="ss_submitAScreenshot()" onmousedown="return false">');
-                    A += B
-                } else {
-                    var B = LANG.lvnodata_ss3;
-                    B = B.replace("<a>", '<a href="?account=signin">');
-                    B = B.replace("<a>", '<a href="?account=signup">');
-                    A += B
+            ae(j, ct("[+]"));
+            j.onmouseover = Listview.funcBox.coPlusRatingOver;
+            K.onmouseover = Listview.funcBox.coMinusRatingOver;
+            j.onmousemove = K.onmousemove = Tooltip.cursorUpdate;
+            j.onmouseout = K.onmouseout = Tooltip.hide;
+            ae(K, ct("[-]"));
+            ae(B, K);
+            ae(B, ct(" "));
+            ae(B, j);
+            ae(g, B);
+            if (!i) {
+                B.style.display = "none"
+            }
+            ae(w, g);
+            ae(w, ct(LANG.lvcomment_by));
+            var G = ce("a");
+            G.href = "?user=" + t.user;
+            ae(G, ct(t.user));
+            ae(w, G);
+            ae(w, ct(" "));
+            var a = ce("a");
+            a.className = "q0";
+            a.id = "comments:id=" + t.id;
+            a.href = "#" + a.id;
+            Listview.funcBox.coFormatDate(a, F, s);
+            a.style.cursor = "pointer";
+            ae(w, a);
+            ae(w, ct(LANG.lvcomment_patch1 + g_getPatchVersion(s) + LANG.lvcomment_patch2));
+            ae(H, w);
+            m.className = "comment-body" + Listview.funcBox.coGetColor(t);
+            if (t.indent) {
+                m.className += " comment-body-indent"
+            }
+            m.innerHTML = Markup.toHtml(t.body, {mode: Markup.MODE_COMMENT,roles: t.roles});
+            ae(H, m);
+            if ((t.roles & 26) == 0 || g_user.roles & 26) {
+                var E = ce("div");
+                t.divLastEdit = E;
+                E.className = "comment-lastedit";
+                ae(E, ct(LANG.lvcomment_lastedit));
+                var o = ce("a");
+                ae(o, ct(" "));
+                ae(E, o);
+                ae(E, ct(" "));
+                var z = ce("span");
+                ae(E, z);
+                ae(E, ct(" "));
+                Listview.funcBox.coUpdateLastEdit(t);
+                if (I) {
+                    E.style.display = "none"
                 }
-                C.style.padding = "1.5em 0";
-                C.innerHTML = A
+                ae(H, E)
+            }
+            k.className = "comment-links";
+            if (C) {
+                var b = ce("span");
+                var y = ce("a");
+                ae(y, ct(LANG.lvcomment_edit));
+                y.onclick = Listview.funcBox.coEdit.bind(this, t, 0);
+                ns(y);
+                y.href = "javascript:;";
+                ae(b, y);
+                ae(b, ct("|"));
+                ae(k, b)
+            }
+            if (v) {
+                var l = ce("span");
+                var r = ce("a");
+                ae(r, ct(LANG.lvcomment_delete));
+                r.onclick = Listview.funcBox.coDelete.bind(this, t);
+                ns(r);
+                r.href = "javascript:;";
+                ae(l, r);
+                ae(l, ct("|"));
+                ae(k, l)
+            }
+            if (c) {
+                var x = ce("span");
+                var e = ce("a");
+                ae(e, ct(LANG.lvcomment_detach));
+                e.onclick = Listview.funcBox.coDetach.bind(this, t);
+                ns(e);
+                e.href = "javascript:;";
+                ae(x, e);
+                ae(x, ct("|"));
+                ae(k, x)
+            }
+            if (J) {
+                var u = ce("span");
+                var f = ce("a");
+                ae(f, ct(LANG.lvcomment_report));
+                if (g_user.id > 0) {
+                    f.onclick = Listview.funcBox.coReportClick.bind(f, t, 0);
+                    f.href = "javascript:;"
+                } else {
+                    f.href = "?account=signin"
+                }
+                ae(u, f);
+                ae(u, ct("|"));
+                ae(k, u)
+            }
+            var h = ce("a");
+            ae(h, ct(LANG.lvcomment_reply));
+            if (g_user.id > 0) {
+                h.onclick = Listview.funcBox.coReply.bind(this, t);
+                h.href = "javascript:;"
+            } else {
+                h.href = "?account=signin"
+            }
+            ae(k, h);
+            if (I) {
+                m.style.display = "none";
+                k.style.display = "none"
+            }
+            ae(H, k)
+        },createNote: function(g) {
+            var f = ce("small");
+            var b = ce("a");
+            if (g_user.id > 0) {
+                b.href = "javascript:;";
+                b.onclick = co_addYourComment
+            } else {
+                b.href = "?account=signin"
+            }
+            ae(b, ct(LANG.lvcomment_add));
+            ae(f, b);
+            var e = ce("span");
+            e.style.padding = "0 5px";
+            e.style.color = "white";
+            ae(e, ct("|"));
+            ae(f, e);
+            ae(f, ct(LANG.lvcomment_sort));
+            var c = ce("a");
+            c.href = "javascript:;";
+            ae(c, ct(LANG.lvcomment_sortdate));
+            c.onclick = Listview.funcBox.coSortDate.bind(this, c);
+            ae(f, c);
+            ae(f, ct(LANG.comma));
+            var d = ce("a");
+            d.href = "javascript:;";
+            ae(d, ct(LANG.lvcomment_sortrating));
+            d.onclick = Listview.funcBox.coSortHighestRatedFirst.bind(this, d);
+            ae(f, d);
+            c.onclick();
+            ae(g, f)
+        },onNoData: function(c) {
+            if (typeof g_pageInfo == "object" && g_pageInfo.type > 0) {
+                var a = "<b>" + LANG.lvnodata_co1 + '</b><div class="pad2"></div>';
+                if (g_user.id > 0) {
+                    var b = LANG.lvnodata_co2;
+                    b = b.replace("<a>", '<a href="javascript:;" onclick="co_addYourComment()" onmousedown="return false">');
+                    a += b
+                } else {
+                    var b = LANG.lvnodata_co3;
+                    b = b.replace("<a>", '<a href="?account=signin">');
+                    b = b.replace("<a>", '<a href="?account=signup">');
+                    a += b
+                }
+                c.style.padding = "1.5em 0";
+                c.innerHTML = a
+            }
+        },onBeforeCreate: function() {
+            if (location.hash && location.hash.match(/:id=([0-9]+)/) != null) {
+                var a = in_array(this.data, parseInt(RegExp.$1), function(b) {
+                    return b.id
+                });
+                this.rowOffset = this.getRowOffset(a);
+                return this.data[a]
+            }
+        },onAfterCreate: function(a) {
+            if (a != null) {
+                var b = a.__div;
+                this.tabs.__st = b;
+                b.firstChild.style.border = "1px solid #505050"
+            }
+        }},commentpreview: {sort: [3],nItemsPerPage: 75,columns: [{id: "subject",name: LANG.subject,align: "left",value: "subject",compute: function(f, e) {
+                    var b = ce("a");
+                    b.style.fontFamily = "Verdana, sans-serif";
+                    b.href = this.template.getItemLink(f);
+                    ae(b, ct(f.subject));
+                    ae(e, b);
+                    var c = ce("div");
+                    c.className = "small";
+                    ae(c, ct(LANG.types[f.type][0]));
+                    ae(e, c)
+                }}, {id: "preview",name: LANG.preview,align: "left",width: "50%",value: "preview",compute: function(j, i) {
+                    var g = ce("div");
+                    g.className = "crop";
+                    if (j.rating >= 10) {
+                        g.className += " comment-green"
+                    }
+                    ae(g, ct(Markup.removeTags(j.preview, {mode: (j.rating != null ? Markup.MODE_COMMENT : Markup.MODE_ARTICLE)})));
+                    ae(i, g);
+                    var e = j.rating != null;
+                    var f = j.user != null;
+                    if (e || f) {
+                        g = ce("div");
+                        g.className = "small3";
+                        if (f) {
+                            ae(g, ct(LANG.lvcomment_by));
+                            var b = ce("a");
+                            b.href = "?user=" + j.user;
+                            ae(b, ct(j.user));
+                            ae(g, b);
+                            if (e) {
+                                ae(g, ct(LANG.hyphen))
+                            }
+                        }
+                        if (e) {
+                            ae(g, ct(LANG.lvcomment_rating + (j.rating > 0 ? "+" : "") + j.rating));
+                            var c = ce("span"), h = "";
+                            c.className = "q10";
+                            if (j.deleted) {
+                                h = LANG.lvcomment_deleted
+                            } else {
+                                if (j.purged) {
+                                    h = LANG.lvcomment_purged
+                                }
+                            }
+                            ae(c, ct(h));
+                            ae(g, c)
+                        }
+                        ae(i, g)
+                    }
+                }}, {id: "posted",name: LANG.posted,width: "16%",value: "elapsed",compute: function(e, d) {
+                    var a = new Date(e.date), c = (g_serverTime - a) / 1000;
+                    var b = ce("span");
+                    Listview.funcBox.coFormatDate(b, c, a, 0, 1);
+                    ae(d, b)
+                }}],getItemLink: function(a) {
+            return "?" + g_types[a.type] + "=" + a.typeId + (a.id != null ? "#comments:id=" + a.id : "")
+        }},screenshot: {sort: [],mode: 3,nItemsPerPage: 40,nItemsPerRow: 4,poundable: 2,columns: [],compute: function(k, e, l) {
+            var u, o = new Date(k.date), f = (g_serverTime - o) / 1000;
+            e.className = "screenshot-cell";
+            e.vAlign = "bottom";
+            var q = ce("a");
+            q.href = "#screenshots:id=" + k.id;
+            q.onclick = rf2;
+            var v = ce("img"), t = Math.min(150 / k.width, 150 / k.height);
+            v.src = "images/screenshots/thumb/" + k.body.replace("gif","jpg").replace("png","jpg");
+            ae(q, v);
+            ae(e, q);
+            var p = ce("div");
+            p.className = "screenshot-cell-user";
+            var m = (k.user != null && k.user.length);
+            if (m) {
+                q = ce("a");
+                q.href = "?user=" + k.user;
+                ae(q, ct(k.user));
+                ae(p, ct(LANG.lvscreenshot_from));
+                ae(p, q);
+                ae(p, ct(" "))
+            }
+            var j = ce("span");
+            if (m) {
+                Listview.funcBox.coFormatDate(j, f, o)
+            } else {
+                Listview.funcBox.coFormatDate(j, f, o, 0, 1)
+            }
+            ae(p, j);
+            ae(e, p);
+            p = ce("div");
+            p.style.position = "relative";
+            p.style.height = "1em";
+            if (g_getLocale(true) != 0 && k.caption) {
+                k.caption = ""
+            }
+            var h = (k.caption != null && k.caption.length);
+            var g = (k.subject != null && k.subject.length);
+            if (h || g) {
+                var r = ce("div");
+                r.className = "screenshot-caption";
+                if (g) {
+                    var c = ce("small");
+                    ae(c, ct(LANG.types[k.type][0] + LANG.colon));
+                    var b = ce("a");
+                    ae(b, ct(k.subject));
+                    b.href = "?" + g_types[k.type] + "=" + k.typeId;
+                    ae(c, b);
+                    ae(r, c);
+                    if (h && k.caption.length) {
+                        ae(c, ct(" (...)"))
+                    }
+                    ae(c, ce("br"))
+                }
+                if (h) {
+                    aE(e, "mouseover", Listview.funcBox.ssCellOver.bind(r));
+                    aE(e, "mouseout", Listview.funcBox.ssCellOut.bind(r));
+                    var n = ce("span");
+                    n.innerHTML = k.caption;
+                    ae(r, n)
+                }
+                ae(p, r)
+            }
+            aE(e, "click", Listview.funcBox.ssCellClick.bind(this, l));
+            ae(e, p)
+        },createNote: function(d) {
+            if (typeof g_pageInfo == "object" && g_pageInfo.type > 0) {
+                var c = ce("small");
+                var b = ce("a");
+                if (g_user.id > 0) {
+                    b.href = "javascript:;";
+                    b.onclick = ss_submitAScreenshot
+                } else {
+                    b.href = "?account=signin"
+                }
+                ae(b, ct(LANG.lvscreenshot_submit));
+                ae(c, b);
+                ae(d, c)
+            }
+        },onNoData: function(c) {
+            if (typeof g_pageInfo == "object" && g_pageInfo.type > 0) {
+                var a = "<b>" + LANG.lvnodata_ss1 + '</b><div class="pad2"></div>';
+                if (g_user.id > 0) {
+                    var b = LANG.lvnodata_ss2;
+                    b = b.replace("<a>", '<a href="javascript:;" onclick="ss_submitAScreenshot()" onmousedown="return false">');
+                    a += b
+                } else {
+                    var b = LANG.lvnodata_ss3;
+                    b = b.replace("<a>", '<a href="?account=signin">');
+                    b = b.replace("<a>", '<a href="?account=signup">');
+                    a += b
+                }
+                c.style.padding = "1.5em 0";
+                c.innerHTML = a
             } else {
                 return -1
             }
-        },
-        onBeforeCreate: function () {
-            if (location.hash.match(/:id=([0-9]+)/) != null) {
-                var A = in_array(this.data, parseInt(RegExp.$1), function (B) {
-                    return B.id
+        },onBeforeCreate: function() {
+            if (location.hash && location.hash.match(/:id=([0-9]+)/) != null) {
+                var a = in_array(this.data, parseInt(RegExp.$1), function(b) {
+                    return b.id
                 });
-                this.rowOffset = this.getRowOffset(A);
-                return A
+                this.rowOffset = this.getRowOffset(a);
+                return a
             }
-        },
-        onAfterCreate: function (A) {
-            if (A != null) {
-                setTimeout((function () {
-                    ScreenshotViewer.show({
-                        screenshots: this.data,
-                        pos: A
-                    })
+        },onAfterCreate: function(a) {
+            if (a != null) {
+                setTimeout((function() {
+                    ScreenshotViewer.show({screenshots: this.data,pos: a})
                 }).bind(this), 1)
             }
-        }
-    }
-};
+        }},pet: {sort: [1],nItemsPerPage: -1,searchable: 1,filtrable: 1,columns: [{id: "name",name: LANG.name,type: "text",align: "left",value: "name",span: 2,compute: function(b, k, g) {
+                    var e = ce("td");
+                    e.style.width = "1px";
+                    e.style.padding = "0";
+                    e.style.borderRight = "none";
+                    ae(e, Icon.create(b.icon, 0));
+                    ae(g, e);
+                    k.style.borderLeft = "none";
+                    var j = ce("div");
+                    var c = ce("a");
+                    c.style.fontFamily = "Verdana, sans-serif";
+                    c.href = this.template.getItemLink(b);
+                    ae(c, ct(b.name));
+                    if (b.expansion) {
+                        var f = ce("span");
+                        f.className = (b.expansion == 1 ? "bc-icon" : "wotlk-icon");
+                        ae(f, c);
+                        ae(j, f)
+                    } else {
+                        ae(j, c)
+                    }
+                    if (b.exotic) {
+                        j.style.position = "relative";
+                        var h = ce("div");
+                        h.className = "small";
+                        h.style.fontStyle = "italic";
+                        h.style.position = "absolute";
+                        h.style.right = "3px";
+                        h.style.bottom = "0px";
+                        ae(h, ct(LANG.lvpet_exotic));
+                        ae(j, h)
+                    }
+                    ae(k, j)
+                },getVisibleText: function(a) {
+                    var b = a.name;
+                    if (a.expansion == 1) {
+                        b += " bc"
+                    } else {
+                        if (a.expansion == 2) {
+                            b += "wotlk wrath"
+                        }
+                    }
+                    if (a.exotic) {
+                        b += " " + LANG.lvpet_exotic
+                    }
+                    return b
+                }}, {id: "level",name: LANG.level,type: "range",getMinValue: function(a) {
+                    return a.minlevel
+                },getMaxValue: function(a) {
+                    return a.maxlevel
+                },compute: function(a, b) {
+                    if (a.minlevel > 0 && a.maxlevel > 0) {
+                        if (a.minlevel != a.maxlevel) {
+                            return a.minlevel + LANG.hyphen + a.maxlevel
+                        } else {
+                            return a.minlevel
+                        }
+                    } else {
+                        return -1
+                    }
+                },sortFunc: function(d, c, e) {
+                    if (e > 0) {
+                        return strcmp(d.minlevel, c.minlevel) || strcmp(d.maxlevel, c.maxlevel)
+                    } else {
+                        return strcmp(d.maxlevel, c.maxlevel) || strcmp(d.minlevel, c.minlevel)
+                    }
+                }}, {id: "damage",name: LANG.damage,value: "damage",compute: function(a, b) {
+                    ae(b, this.template.getStatPct(a.damage))
+                }}, {id: "armor",name: LANG.armor,value: "armor",compute: function(a, b) {
+                    ae(b, this.template.getStatPct(a.armor))
+                }}, {id: "health",name: LANG.health,value: "health",compute: function(a, b) {
+                    ae(b, this.template.getStatPct(a.health))
+                }}, {id: "abilities",name: LANG.abilities,type: "text",getValue: function(b) {
+                    if (!b.spells) {
+                        return ""
+                    }
+                    if (b.spells.length > 0) {
+                        var d = "";
+                        for (var c = 0, a = b.spells.length; c < a; ++c) {
+                            if (b.spells[c]) {
+                                d += g_spells[b.spells[c]]["name_" + g_locale.name]
+                            }
+                        }
+                        return d
+                    }
+                },compute: function(a, b) {
+                    if (!a.spells) {
+                        return ""
+                    }
+                    if (a.spells.length > 0) {
+                        b.style.padding = "0";
+                        Listview.funcBox.createCenteredIcons(a.spells, b, "", 1)
+                    }
+                },sortFunc: function(d, c) {
+                    if (!d.spells || !c.spells) {
+                        return 0
+                    }
+                    return strcmp(d.spellCount, c.spellCount) || strcmp(d.spells, c.spells)
+                },hidden: true}, {id: "diet",name: LANG.diet,type: "text",compute: function(a, e) {
+                    if (e) {
+                        e.className = "small"
+                    }
+                    var b = 0, c = "";
+                    for (var d in g_pet_foods) {
+                        if (a.diet & d) {
+                            if (b++ > 0) {
+                                c += LANG.comma
+                            }
+                            c += g_pet_foods[d]
+                        }
+                    }
+                    return c
+                },sortFunc: function(d, c) {
+                    return strcmp(c.foodCount, d.foodCount) || Listview.funcBox.assocArrCmp(d.diet, c.diet, g_pet_foods)
+                }}, {id: "type",name: LANG.type,type: "text",compute: function(b, d) {
+                    if (b.type != null) {
+                        d.className = "small q1";
+                        var c = ce("a");
+                        c.href = "?pets=" + b.type;
+                        ae(c, ct(g_pet_types[b.type]));
+                        ae(d, c)
+                    }
+                },getVisibleText: function(a) {
+                    if (a.type != null) {
+                        return g_pet_types[a.type]
+                    }
+                },sortFunc: function(d, c, e) {
+                    return strcmp(g_pet_types[d.type], g_pet_types[c.type])
+                }}],getItemLink: function(a) {
+            return "?pet=" + a.id
+        },getStatPct: function(b) {
+            var a = ce("span");
+            if (!isNaN(b) && b > 0) {
+                a.className = "q2";
+                ae(a, ct("+" + b + "%"))
+            } else {
+                if (!isNaN(b) && b < 0) {
+                    a.className = "q10";
+                    ae(a, ct(b + "%"))
+                }
+            }
+            return a
+        }},achievement: {sort: [1, 2],nItemsPerPage: 100,searchable: 1,filtrable: 1,columns: [{id: "name",name: LANG.name,type: "text",align: "left",value: "name",span: 2,compute: function(c, j, g) {
+                    var b = null;
+                    if (c.who && c.completed) {
+                        b = "who=" + c.who + "&when=" + c.completed.getTime()
+                    }
+                    var f = ce("td");
+                    f.style.width = "1px";
+                    f.style.padding = "0";
+                    f.style.borderRight = "none";
+                    ae(f, g_achievements.createIcon(c.id, 1));
+                    Icon.getLink(f.firstChild).rel = b;
+                    ae(g, f);
+                    j.style.borderLeft = "none";
+                    var e = ce("a");
+                    e.style.fontFamily = "Verdana, sans-serif";
+                    e.href = this.template.getItemLink(c);
+                    e.rel = b;
+                    ae(e, ct(c.name));
+                    ae(j, e);
+                    if (c.description != null) {
+                        var h = ce("div");
+                        h.className = "small";
+                        ae(h, ct(c.description));
+                        ae(j, h)
+                    }
+                },getVisibleText: function(a) {
+                    var b = a.name;
+                    if (a.description) {
+                        b += " " + a.description
+                    }
+                    return b
+                }}, {id: "location",name: LANG.location,type: "text",width: "15%",compute: function(b, d) {
+                    if (b.zone) {
+                        var c = ce("a");
+                        c.className = "q1";
+                        c.href = "?maps=" + b.zone;
+                        ae(c, ct(g_zones[b.zone]));
+                        ae(d, c)
+                    }
+                },getVisibleText: function(a) {
+                    return Listview.funcBox.arrayText(a.zone, g_zones)
+                },sortFunc: function(d, c, e) {
+                    return Listview.funcBox.assocArrCmp(d.zone, c.zone, g_zones)
+                }}, {id: "side",name: LANG.side,type: "text",width: "10%",compute: function(a, c) {
+                    if (a.side) {
+                        var b = ce("span");
+                        if (a.side == 1) {
+                            b.className = "alliance-icon"
+                        } else {
+                            if (a.side == 2) {
+                                b.className = "horde-icon"
+                            }
+                        }
+                        ae(b, ct(g_sides[a.side]));
+                        ae(c, b)
+                    } else {
+                        return -1
+                    }
+                },getVisibleText: function(a) {
+                    if (a.side) {
+                        return g_sides[a.side]
+                    }
+                },sortFunc: function(d, c, e) {
+                    return strcmp(g_sides[d.side], g_sides[c.side])
+                }}, {id: "points",name: LANG.points,type: "number",width: "10%",value: "points",compute: function(a, b) {
+                    if (a.points) {
+                        Listview.funcBox.appendMoney(b, 0, null, 0, 0, 0, a.points)
+                    }
+                }}, {id: "category",name: LANG.category,type: "text",width: "15%",compute: function(b, d) {
+                    d.className = "small q1";
+                    var c = ce("a");
+                    c.href = "?achievements=" + b.category;
+                    ae(c, ct(g_achievement_categories[b.category]));
+                    ae(d, c)
+                },getVisibleText: function(a) {
+                    return g_achievement_categories[a.category]
+                },sortFunc: function(d, c, e) {
+                    return strcmp(g_achievement_categories[d.category], g_achievement_categories[c.category])
+                },hidden: true}],getItemLink: function(a) {
+            return "?achievement=" + a.id
+        }},profile: {sort: [],nItemsPerPage: 50,searchable: 1,filtrable: 1,columns: [{id: "name",name: LANG.name,value: "name",type: "text",align: "left",span: 2,compute: function(f, c, h) {
+                    if (f.level) {
+                        var e = ce("td");
+                        e.style.width = "1px";
+                        e.style.padding = "0";
+                        e.style.borderRight = "none";
+                        ae(e, Icon.create(f.icon ? f.icon : "chr_" + g_file_races[f.race] + "_" + g_file_genders[f.gender] + "_" + g_file_classes[f.classs] + "0" + (f.level > 59 ? (Math.floor((f.level - 60) / 10) + 2) : 1), 1));
+                        ae(h, e);
+                        c.style.borderLeft = "none"
+                    } else {
+                        c.colSpan = 2
+                    }
+                    var b = ce("div");
+                    b.style.position = "relative";
+                    var k = ce("a");
+                    k.style.fontFamily = "Verdana, sans-serif";
+                    k.href = this.template.getItemLink(f);
+                    ae(k, ct(f.name));
+                    ae(b, k);
+                    var g = ce("div");
+                    g.className = "small";
+                    if (f.guild) {
+                        var k = ce("a");
+                        k.className = "q1";
+                        k.href = "?profiles=" + f.region + "." + f.realm + "&filter=cr=9;crs=0;crv=" + str_replace(urlencode(f.guild), "%20", "+") + "&roster=1";
+                        ae(k, ct(f.guild));
+                        ae(g, ct("<"));
+                        ae(g, k);
+                        ae(g, ct(">"))
+                    } else {
+                        if (f.description) {
+                            ae(g, ct(f.description))
+                        }
+                    }
+                    var l = ce("span"), j = "";
+                    l.className = "q10";
+                    if (f.deleted) {
+                        j = LANG.lvcomment_deleted
+                    }
+                    ae(l, ct(j));
+                    ae(g, l);
+                    ae(b, g);
+                    var g = ce("div");
+                    g.className = "small";
+                    g.style.fontStyle = "italic";
+                    g.style.position = "absolute";
+                    g.style.right = "3px";
+                    g.style.bottom = "0px";
+                    if (!f.published && !f.region && !f.realm) {
+                        ae(g, ct(LANG.privateprofile))
+                    }
+                    ae(b, g);
+                    ae(c, b)
+                },getVisibleText: function(a) {
+                    var b = a.name;
+                    if (a.guild) {
+                        b += " " + a.guild
+                    }
+                    return b
+                }}, {id: "faction",name: LANG.faction,type: "text",compute: function(a, f) {
+                    if (!a.size && !a.members && !a.level) {
+                        return
+                    }
+                    var e = ce("div"), c = ce("div"), b;
+                    b = Icon.create("faction_" + g_file_factions[a.faction + 1], 0);
+                    b.onmouseover = function(d) {
+                        Tooltip.showAtCursor(d, g_sides[a.faction + 1], 0, 0, "q")
+                    };
+                    b.onmousemove = Tooltip.cursorUpdate;
+                    b.onmouseout = Tooltip.hide;
+                    b.style.cssFloat = b.style.syleFloat = "left";
+                    e.style.margin = "0 auto";
+                    e.style.textAlign = "left";
+                    e.style.width = "26px";
+                    c.className = "clear";
+                    ae(e, b);
+                    ae(f, e);
+                    ae(f, c)
+                },getVisibleText: function(a) {
+                    return g_sides[a.faction + 1]
+                },sortFunc: function(d, c, e) {
+                    return strcmp(this.getVisibleText(d), this.getVisibleText(c))
+                }}, {id: "members",name: LANG.members,value: "members",hidden: 1}, {id: "size",name: "Size",value: "size",hidden: 1}, {id: "rank",name: "Rank",value: "rank",hidden: 1}, {id: "race",name: LANG.race,type: "text",compute: function(a, f) {
+                    if (a.race) {
+                        var e = ce("div"), c = ce("div"), b;
+                        b = Icon.create("race_" + g_file_races[a.race] + "_" + g_file_genders[a.gender], 0);
+                        b.onmouseover = function(d) {
+                            Tooltip.showAtCursor(d, g_chr_races[a.race], 0, 0, "q")
+                        };
+                        b.onmousemove = Tooltip.cursorUpdate;
+                        b.onmouseout = Tooltip.hide;
+                        b.style.cssFloat = b.style.syleFloat = "left";
+                        e.style.margin = "0 auto";
+                        e.style.textAlign = "left";
+                        e.style.width = "26px";
+                        c.className = "clear";
+                        ae(e, b);
+                        ae(f, e);
+                        ae(f, c)
+                    }
+                },getVisibleText: function(a) {
+                    return g_file_genders[a.gender] + " " + g_chr_races[a.race]
+                },sortFunc: function(d, c, e) {
+                    return strcmp(g_chr_races[d.race], g_chr_races[c.race])
+                },hidden: 1}, {id: "classs",name: LANG.classs,type: "text",compute: function(a, f) {
+                    if (a.classs) {
+                        var e = ce("div"), c = ce("div"), b;
+                        b = Icon.create("class_" + g_file_classes[a.classs], 0);
+                        b.onmouseover = function(d) {
+                            Tooltip.showAtCursor(d, g_chr_classes[a.classs], 0, 0, "q")
+                        };
+                        b.onmousemove = Tooltip.cursorUpdate;
+                        b.onmouseout = Tooltip.hide;
+                        b.style.cssFloat = b.style.syleFloat = "left";
+                        e.style.margin = "0 auto";
+                        e.style.textAlign = "left";
+                        e.style.width = "26px";
+                        c.className = "clear";
+                        ae(e, b);
+                        ae(f, e);
+                        ae(f, c)
+                    } else {
+                        return -1
+                    }
+                },getVisibleText: function(a) {
+                    if (a.classs) {
+                        return g_chr_classes[a.classs]
+                    }
+                },sortFunc: function(d, c, e) {
+                    return strcmp(this.getVisibleText(d), this.getVisibleText(c))
+                },hidden: 1}, {id: "level",name: LANG.level,value: "level",hidden: 1}, {id: "talents",name: LANG.talents,type: "text",compute: function(e, j) {
+                    if (!e.level) {
+                        return
+                    }
+                    var i = [e.talenttree1, e.talenttree2, e.talenttree3], f = pr_getSpecFromTalents(e.classs, i), c, g, b = ce("a");
+                    var h = ce("div");
+                    h.style.width = "82px";
+                    h.style.height = "23px";
+                    h.style.margin = "0 auto";
+                    h.style.lineHeight = "23px";
+                    h.style.backgroundImage = "url(" + f.icon + ")";
+                    h.style.backgroundRepeat = "no-repeat";
+                    h.style.backgroundPosition = "left";
+                    var b = ce("a");
+                    b.className = "small q1";
+                    b.style.padding = "7px 0 7px 28px";
+                    b.style.fontWeight = "bold";
+                    b.rel = "np";
+                    b.href = this.template.getItemLink(e) + "#talents";
+                    b.onmouseover = function(a) {
+                        Tooltip.showAtCursor(a, f.name, 0, 0, "q")
+                    };
+                    b.onmousemove = Tooltip.cursorUpdate;
+                    b.onmouseout = Tooltip.hide;
+                    ae(b, ct(e.talenttree1 + " / " + e.talenttree2 + " / " + e.talenttree3));
+                    ae(h, b);
+                    ae(j, h)
+                },getVisibleText: function(a) {
+                    if (a.talenttree1 || a.talenttree2 || a.talenttree3) {
+                        if (a.talentspec > 0) {
+                            return g_chr_specs[a.classs][a.talentspec - 1]
+                        } else {
+                            return g_chr_specs[0]
+                        }
+                    } else {
+                        return g_chr_specs["-1"]
+                    }
+                },sortFunc: function(d, c, e) {
+                    return strcmp(this.getVisibleText(d), this.getVisibleText(c))
+                },hidden: 1}, {id: "gearscore",name: LANG.gearscore,value: "gearscore",compute: function(a, c) {
+                    var b = (a.level ? a.level : (a.members ? 80 : 0));
+                    if (isNaN(a.gearscore) || !b) {
+                        return
+                    }
+                    c.className = "q" + pr_getGearScoreQuality(b, a.gearscore, (in_array([2, 6, 7, 11], a.classs) != -1));
+                    return (a.gearscore ? number_format(a.gearscore) : 0)
+                },hidden: 1}, {id: "achievementpoints",name: LANG.points,value: "achievementpoints",compute: function(a, b) {
+                    if (a.achievementpoints) {
+                        Listview.funcBox.appendMoney(b, 0, null, 0, 0, 0, a.achievementpoints)
+                    }
+                },hidden: 1}, {id: "wins",name: LANG.wins,value: "wins",hidden: 1}, {id: "losses",name: LANG.losses,compute: function(a, b) {
+                    return a.games - a.wins
+                },hidden: 1}, {id: "guildrank",name: LANG.guildrank,value: "guildrank",compute: function(c, d) {
+                    if (c.guildrank > 0) {
+                        return sprintf(LANG.rankno, c.guildrank)
+                    } else {
+                        if (c.guildrank == 0) {
+                            var a = ce("b");
+                            ae(a, ct(LANG.guildleader));
+                            ae(d, a)
+                        }
+                    }
+                },sortFunc: function(d, c, e) {
+                    return strcmp((d.guildrank >= 0 ? d.guildrank : 11), (c.guildrank >= 0 ? c.guildrank : 11))
+                },hidden: 1}, {id: "rating",name: LANG.rating,value: "rating",compute: function(a, b) {
+                    if (a.roster) {
+                        return a.arenateam[a.roster].rating
+                    }
+                    return a.rating
+                },sortFunc: function(d, c, e) {
+                    if (d.roster && c.roster) {
+                        return strcmp(d.arenateam[d.roster].rating, c.arenateam[c.roster].rating)
+                    }
+                    return strcmp(d.rating, c.rating)
+                },hidden: 1}, {id: "location",name: LANG.location,type: "text",compute: function(c, e) {
+                    var b;
+                    if (c.region) {
+                        if (c.realm) {
+                            b = ce("a");
+                            b.className = "q1";
+                            b.href = "?profiles=" + c.region + "." + c.realm;
+                            ae(b, ct(c.realmname));
+                            ae(e, b);
+                            ae(e, ce("br"))
+                        }
+                        var d = ce("small");
+                        b = ce("a");
+                        b.className = "q1";
+                        b.href = "?profiles=" + c.region;
+                        ae(b, ct(c.region.toUpperCase()));
+                        ae(d, b);
+                        if (c.battlegroup) {
+                            ae(d, ct(LANG.hyphen));
+                            b = ce("a");
+                            b.className = "q1";
+                            b.href = "?profiles=" + c.region + "." + c.battlegroup;
+                            ae(b, ct(c.battlegroupname));
+                            ae(d, b)
+                        }
+                        ae(e, d)
+                    }
+                },getVisibleText: function(a) {
+                    var b = "";
+                    if (a.region) {
+                        b += " " + a.region
+                    }
+                    if (a.battlegroup) {
+                        b += " " + a.battlegroup
+                    }
+                    if (a.realm) {
+                        b += " " + a.realm
+                    }
+                    return trim(b)
+                },sortFunc: function(d, c, e) {
+                    if (d.region != c.region) {
+                        return strcmp(d.region, c.region)
+                    }
+                    if (d.battlegroup != c.battlegroup) {
+                        return strcmp(d.battlegroup, c.battlegroup)
+                    }
+                    return strcmp(d.realm, c.realm)
+                }}, {id: "guild",name: LANG.guild,value: "guild",type: "text",compute: function(c, d) {
+                    if (!c.region || !c.battlegroup || !c.realm || !c.guild) {
+                        return
+                    }
+                    var b = ce("a");
+                    b.className = "q1";
+                    b.href = "?profiles=" + c.region + "." + c.realm + "&filter=cr=9;crs=0;crv=" + str_replace(urlencode(c.guild), "%20", "+") + "&roster=1";
+                    ae(b, ct(c.guild));
+                    ae(d, b)
+                }}],getItemLink: function(a) {
+            if (a.size) {
+                return "?profiles=" + a.region + "." + a.realm + "&filter=cr=" + (a.size == 2 ? 12 : (a.size == 3 ? 15 : 18)) + ";crs=0;crv=" + str_replace(urlencode(a.name), "%20", "+") + "&roster=" + (a.size == 5 ? 4 : a.size)
+            } else {
+                if (a.members) {
+                    return "?profiles=" + a.region + "." + a.realm + "&filter=cr=9;crs=0;crv=" + str_replace(urlencode(a.name), "%20", "+") + "&roster=1"
+                } else {
+                    if (a.region && a.realm) {
+                        return "?profile=" + a.region + "." + a.realm + "." + g_cleanCharacterName(a.name)
+                    } else {
+                        return "?profile=" + a.id
+                    }
+                }
+            }
+        }},model: {sort: [],mode: 3,nItemsPerPage: 40,nItemsPerRow: 4,poundable: 2,columns: [],compute: function(c, k, e) {
+            k.className = "screenshot-cell";
+            k.vAlign = "bottom";
+            var j = ce("div");
+            j.className = "pet-model";
+            var b = ce("a");
+            b.className = "pet-zoom";
+            b.href = "javascript:;";
+            b.onclick = this.template.modelShow.bind(this.template, c.npcId, c.displayId);
+            ae(j, b);
+            var g = ce("div");
+            g.id = "pm" + c.displayId;
+            ae(j, g);
+            ae(k, j);
+            j = ce("div");
+            j.className = "screenshot-cell-user";
+            b = ce("a");
+            b.href = this.template.getItemLink(c);
+            ae(b, ct(c.skin));
+            ae(j, b);
+            ae(j, ct(" (" + c.count + ")"));
+            ae(k, j);
+            j = ce("div");
+            j.style.position = "relative";
+            j.style.height = "1em";
+            var h = ce("div");
+            h.className = "screenshot-caption";
+            var f = ce("small");
+            ae(f, ct(LANG.level + ": "));
+            ae(f, ct(c.minLevel + (c.minLevel == c.maxLevel ? "" : LANG.hyphen + (c.maxLevel == 9999 ? "??" : c.maxLevel))));
+            ae(f, ce("br"));
+            ae(h, f);
+            ae(j, h);
+            ae(k, j);
+            setTimeout(this.template.appendFlash.bind(g, c), 1)
+        },getItemLink: function(a) {
+            return "?npcs=1&filter=" + (a.family ? "fa=" + a.family + ";" : "") + "minle=1;cr=35;crs=0;crv=" + a.skin
+        },modelShow: function(b, a) {
+            ModelViewer.show({type: 1,typeId: b,displayId: a,noPound: 1})
+        },appendFlash: function(a) {
+            var c = {model: a.displayId,modelType: 8,contentPath: "http://static.wowhead.com/modelviewer/",blur: (OS.mac ? "0" : "1")};
+            var b = {quality: "high",allowscriptaccess: "always",menu: false,wmode: "opaque",bgcolor: "#101010"};
+            swfobject.embedSWF("http://static.wowhead.com/modelviewer/ModelView.swf", this.id, "100%", "100%", "10.0.0", "http://static.wowhead.com/modelviewer/expressInstall.swf", c, b)
+        }}};
 Menu.fixUrls(mn_items, "?items=");
 Menu.fixUrls(mn_itemSets, "?itemsets&filter=cl=");
 Menu.fixUrls(mn_npcs, "?npcs=");
