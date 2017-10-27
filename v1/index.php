@@ -142,6 +142,9 @@ switch ($razdel) {
     case 'spells':
         include 'spells.php';
         break;
+	case 'zone':
+        include 'zone.php';
+        break;
     default:
         include 'main.php';
         break;
