@@ -230,8 +230,10 @@ function sum_subarrays_by_key($tab, $key) {
     return $sum;
 }
 
-// Get NPC Location
+// Get NPC Location - I have no idea how this works, but all I know is that it does...
 function coord_tozone($mapid, $x, $y, $global) {
+    // Карты
+    global $map_images;
     // Подключение к базе
     global $DB;
 
@@ -247,6 +249,32 @@ function coord_tozone($mapid, $x, $y, $global) {
         //  делаем соответствующее преобразование.
         $tx = 100 - ($y - $row["y_min"]) / (($row["y_max"] - $row["y_min"]) / 100);
         $ty = 100 - ($x - $row["x_min"]) / (($row["x_max"] - $row["x_min"]) / 100);
+
+        // А если ещё и с цветом совпала - нах цикл, это всё наше :) Оо
+        // Если ещё не загружена - загружаем.
+        if (!isset($map_images[$wow['zone']])) {
+            $mapname = str_replace("\\", "/", getcwd()) . '/images/tmp/' . $row['areatableID'] . '.png';
+            if (file_exists($mapname)) {
+                $map_images[$wow['zone']] = @ImageCreateFromPNG($mapname);
+            }
+        }
+
+        // Если так и не загрузилась... Возможно такой карты ещё просто нету :)
+        if ($map_images[$wow['zone']]) {
+            if (@ImageColorAt($map_images[$wow['zone']], round($tx * 10), round($ty * 10)) === 0) {
+                break;
+            }
+        }
+    }
+
+    if (count($rows) == 0) {
+        // Ничего не найдено. Мб инста??
+
+        $row = $DB->selectRow("SELECT * FROM ?_aowow_zones WHERE (mapID=? and x_min=0 and x_max=0 and y_min=0 and y_max=0)", $mapid);
+        if ($row) {
+            $wow['zone'] = $row['areatableID'];
+            $wow['name'] = $row['name_loc' . $_SESSION['locale']];
+        }
     }
 
     $wow['x'] = round($tx, 4);
@@ -256,6 +284,8 @@ function coord_tozone($mapid, $x, $y, $global) {
 }
 
 function resolve_coord(&$data) {
+    // Карты
+    global $map_images;
 
     // Гуиды для эвента
     $guids = array();
@@ -264,7 +294,16 @@ function resolve_coord(&$data) {
     // Перебираем по порядку все координаты, посланные функции
     //  Если таких же координат (уже преобразованных) ещё нет, добавляем в новый массив
     foreach ($data as $ndata) {
+        // Если помимо координат есть ещё данные о респауне, преобразуем их к удобочитаемому виду:
+        if (isset($ndata['spawntimesecs']))
+        {
+            $coord_tozone =  coord_tozone($ndata['m'], $ndata['x'], $ndata['y'], false) ?: array();
+            $tmp = array_merge($coord_tozone, array('r' => sec_to_time($ndata['spawntimesecs'])));
+        }
+        else
+        {
             $tmp = coord_tozone($ndata['m'], $ndata['x'], $ndata['y'], false);
+        }
 
         $tmp['t'] = $ndata['type'];
         $xdata[] = $tmp;
@@ -275,9 +314,20 @@ function resolve_coord(&$data) {
 }
 
 function getLocation($id, $type) {
-    global $DB;
+    global $smarty, $exdata, $zonedata, $DB;
 
     $data = $DB->select('SELECT guid, map AS m, position_x AS x, position_y AS y, spawntimesecs, {MovementType AS ?#, }"0" AS `type` FROM ?_' . $type . ' WHERE id = ?d GROUP BY ROUND(x,-2), ROUND(y,-2) ORDER BY x,y', ($type == 'gameobject' ? DBSIMPLE_SKIP : 'mt'), $id);
+    if ($type <> 'gameobject') {
+        $wpWalkingCreaturesGuids = array();
+        foreach ($data as $spawnid => $spawn) {
+            if ($spawn['mt'] == 2)
+                $wpWalkingCreaturesGuids[] = $spawn['guid'];
+        }
+        if ($wpWalkingCreaturesGuids) {
+            $wps = $DB->select('SELECT c.map AS m, m.position_x AS x, m.position_y AS y, "3" AS `type` FROM ?_creature_movement m, ?_creature c WHERE m.id = c.guid AND m.id IN (?a) GROUP BY ROUND(x,-2), ROUND(y,-2) ORDER BY x,y', $wpWalkingCreaturesGuids);
+            $data = array_merge($data, $wps);
+        }
+    }
 
     if (count($data) > 0) {
         $data = resolve_coord($data);
@@ -293,11 +343,11 @@ function getLocation($id, $type) {
         $n = 0;
         $k = 0;
         $real_count = 0;
-        $locationdata[$n] = array();
-        $locationdata[$n]['zone'] = $data[$j]['zone'];
-        $locationdata[$n]['name'] = $data[$j]['name'];
+        $zonedata[$n] = array();
+        $zonedata[$n]['zone'] = $data[$j]['zone'];
+        $zonedata[$n]['name'] = $data[$j]['name'];
 		
-		return $locationdata[$n]['name'];
+		return $zonedata[$n]['zone'];
     }
 }
 

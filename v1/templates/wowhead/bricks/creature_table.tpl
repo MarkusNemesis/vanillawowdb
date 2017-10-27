@@ -35,7 +35,7 @@ new Listview(
 			{if $percent}Listview.extraCols.percent{/if}
 			{if $cost}Listview.extraCols.stock, {if $stack}Listview.funcBox.createSimpleCol('stack', 'stack', '10%', 'stack'),{/if} Listview.extraCols.cost{/if}
 		],
-		hiddenCols:[{if $cost}'type'{else}'location'{/if}],
+		hiddenCols:[{if $cost}'type'{/if}],
 		sort: [{if $percent}'-percent',{/if} 'name'],
 		data:[
 			{section name=i loop=$data}
@@ -46,10 +46,8 @@ new Listview(
 					{/if}
 					minlevel: {$data[i].minlevel},
 					maxlevel: {$data[i].maxlevel},
-					{if $zonedata}
-					Hello!
-					{/if}
 					type: {$data[i].type},
+					location: [{$data[i].location}],
 					classification: {$data[i].classification},
 					react: [{$data[i].react}],
 					{if $percent}
