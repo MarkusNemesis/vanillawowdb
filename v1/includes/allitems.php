@@ -679,6 +679,8 @@ function iteminfo($id, $level=0) {
  function sanitiseitemrows($rows)
  {
 	global $UDWBaseconf;
+	if (empty($rows))
+		return $rows;
 	 // Remove items that are of a higher patch
 	foreach ($rows as $i => $row) {
 		// Check if the patch number is valid
