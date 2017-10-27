@@ -700,7 +700,7 @@ function render_spell_tooltip(&$row) {
             $reagents[$i]['name'] = $DB->selectCell("
 			SELECT a.* FROM 
 			(
-				SELECT name FROM ?_item_template WHERE entry=?
+				SELECT name, entry, patch FROM ?_item_template WHERE entry=?
 			) a
 			INNER JOIN (
 				SELECT *, MAX(patch) patchno
@@ -729,7 +729,7 @@ function render_spell_tooltip(&$row) {
             $tools[$i]['name'] = $DB->selectCell("
 			SELECT a.* FROM 
 			(
-				SELECT name FROM ?_item_template WHERE entry=? 
+				SELECT name, entry, patch FROM ?_item_template WHERE entry=? 
 			) a
 			INNER JOIN (
 				SELECT *, MAX(patch) patchno
