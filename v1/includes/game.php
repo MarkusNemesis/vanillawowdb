@@ -163,57 +163,60 @@ function classes($class) {
  * @param type $race
  * @return string
  */
-function races($race) {
-    if ($race == RACE_HUMAN | RACE_ORC | RACE_DWARF | RACE_NIGHTELF | RACE_UNDEAD | RACE_TAUREN | RACE_GNOME | RACE_TROLL || $race == 0)
-        return array('side' => 3, 'name' => LOCALE_BOTH);
-    elseif ($race == RACE_ORC | RACE_UNDEAD | RACE_TAUREN | RACE_TROLL)
-        return array('side' => 2, 'name' => LOCALE_HORDE);
-    elseif ($race == RACE_HUMAN | RACE_DWARF | RACE_NIGHTELF | RACE_GNOME)
-        return array('side' => 1, 'name' => LOCALE_ALLIANCE);
-    else {
-        $races = array('name' => '', 'side' => 0);
-        if ($race & RACE_HUMAN) {
-            (($races['side'] == 2) or ($races['side'] == 3)) ? $races['side'] = 3 : $races['side'] = 1;
-            if ($races['name'])
-                $races['name'] .= ', '; $races['name'] .= LOCALE_HUMAN;
-        }
-        if ($race & RACE_ORC) {
-            (($races['side'] == 1) or ($races['side'] == 3)) ? $races['side'] = 3 : $races['side'] = 2;
-            if ($races['name'])
-                $races['name'] .= ', '; $races['name'] .= LOCALE_ORC;
-        }
-        if ($race & RACE_DWARF) {
-            (($races['side'] == 2) or ($races['side'] == 3)) ? $races['side'] = 3 : $races['side'] = 1;
-            if ($races['name'])
-                $races['name'] .= ', '; $races['name'] .= LOCALE_DWARF;
-        }
-        if ($race & RACE_NIGHTELF) {
-            (($races['side'] == 2) or ($races['side'] == 3)) ? $races['side'] = 3 : $races['side'] = 1;
-            if ($races['name'])
-                $races['name'] .= ', '; $races['name'] .= LOCALE_NIGHT_ELF;
-        }
-        if ($race & RACE_UNDEAD) {
-            (($races['side'] == 1) or ($races['side'] == 3)) ? $races['side'] = 3 : $races['side'] = 2;
-            if ($races['name'])
-                $races['name'] .= ', '; $races['name'] .= LOCALE_UNDEAD;
-        }
-        if ($race & RACE_TAUREN) {
-            (($races['side'] == 1) or ($races['side'] == 3)) ? $races['side'] = 3 : $races['side'] = 2;
-            if ($races['name'])
-                $races['name'] .= ', '; $races['name'] .= LOCALE_TAUREN;
-        }
-        if ($race & RACE_GNOME) {
-            (($races['side'] == 2) or ($races['side'] == 3)) ? $races['side'] = 3 : $races['side'] = 1;
-            if ($races['name'])
-                $races['name'] .= ', '; $races['name'] .= LOCALE_GNOME;
-        }
-        if ($race & RACE_TROLL) {
-            (($races['side'] == 1) or ($races['side'] == 3)) ? $races['side'] = 3 : $races['side'] = 2;
-            if ($races['name'])
-                $races['name'] .= ', '; $races['name'] .= LOCALE_TROLL;
-        }
-        return $races;
-    }
+function races($race)
+{
+	// Простые варианты:
+	if($race == (RACE_HUMAN|RACE_ORC|RACE_DWARF|RACE_NIGHTELF|RACE_UNDEAD|RACE_TAUREN|RACE_GNOME|RACE_TROLL) || $race == 0)
+		return array('side' => 3, 'name' => LOCALE_BOTH_FACTIONS);
+	elseif($race == (RACE_ORC|RACE_UNDEAD|RACE_TAUREN|RACE_TROLL))
+		return array('side' => 2, 'name' => LOCALE_HORDE);
+	elseif($race == (RACE_HUMAN|RACE_DWARF|RACE_NIGHTELF|RACE_GNOME))
+		return array('side' => 1, 'name' => LOCALE_ALLIANCE);
+	else
+	{
+		$races = array('name' => '', 'side' => 0);
+		if($race & RACE_HUMAN)
+		{
+			(($races['side']==2) || ($races['side']==3))? $races['side']=3 : $races['side']=1;
+			if($races['name']) $races['name'] .= ', '; $races['name'] .= LOCALE_HUMAN;
+		}
+		if($race & RACE_ORC)
+		{
+			(($races['side']==1) || ($races['side']==3))? $races['side']=3 : $races['side']=2;
+			if($races['name']) $races['name'] .= ', '; $races['name'] .= LOCALE_ORC;
+		}
+		if($race & RACE_DWARF)
+		{
+			(($races['side']==2) || ($races['side']==3))? $races['side']=3 : $races['side']=1;
+			if($races['name']) $races['name'] .= ', '; $races['name'] .= LOCALE_DWARF;
+		}
+		if($race & RACE_NIGHTELF)
+		{
+			(($races['side']==2) || ($races['side']==3))? $races['side']=3 : $races['side']=1;
+			if($races['name']) $races['name'] .= ', '; $races['name'] .= LOCALE_NIGHT_ELF;
+		}
+		if($race & RACE_UNDEAD)
+		{
+			(($races['side']==1) || ($races['side']==3))? $races['side']=3 : $races['side']=2;
+			if($races['name']) $races['name'] .= ', '; $races['name'] .= LOCALE_UNDEAD;
+		}
+		if($race & RACE_TAUREN)
+		{
+			(($races['side']==1) || ($races['side']==3))? $races['side']=3 : $races['side']=2;
+			if($races['name']) $races['name'] .= ', '; $races['name'] .= LOCALE_TAUREN;
+		}
+		if($race & RACE_GNOME)
+		{
+			(($races['side']==2) || ($races['side']==3))? $races['side']=3 : $races['side']=1;
+			if($races['name']) $races['name'] .= ', '; $races['name'] .= LOCALE_GNOME;
+		}
+		if($race & RACE_TROLL)
+		{
+			(($races['side']==1) || ($races['side']==3))? $races['side']=3 : $races['side']=2;
+			if($races['name']) $races['name'] .= ', '; $races['name'] .= LOCALE_TROLL;
+		}
+		return $races;
+	}
 }
 
 /**
