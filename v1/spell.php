@@ -192,12 +192,12 @@ if (!$spell = load_cache(13, intval($id))) {
                             //case 107: // "Summon Object (slot 4)"	// 0 spells; skipping
                                 $spell['effect'][$i]['object'] = array();
                                 $spell['effect'][$i]['object']['entry'] = $row['effect' . $j . 'MiscValue'];
-                                $spell['effect'][$i]['object']['name'] = $DB->selectCell("SELECT name FROM ?_gameobject_template WHERE entry=? LIMIT 1", $spell['effect'][$i]['object']['entry']) . ' (' . $spell['effect'][$i]['object']['entry'] . ')';
+                                $spell['effect'][$i]['object']['name'] = $DB->selectCell("SELECT name_loc0 FROM ?_gameobject_template WHERE entry=? LIMIT 1", $spell['effect'][$i]['object']['entry']) . ' (' . $spell['effect'][$i]['object']['entry'] . ')';
                                 break;
                             }
                         // скиллы
                         case 118: {// "Require Skill"
-                                $spell['effect'][$i]['name'] .= ' (' . $DB->selectCell('SELECT name FROM ?_aowow_skill WHERE skillID=? LIMIT 1', $row['effect' . $j . 'MiscValue']) . ')';
+                                $spell['effect'][$i]['name'] .= ' (' . $DB->selectCell('SELECT name_loc0 FROM ?_aowow_skill WHERE skillID=? LIMIT 1', $row['effect' . $j . 'MiscValue']) . ')';
                                 break;
                             }
                         // ауры
@@ -460,21 +460,30 @@ if (!$spell = load_cache(13, intval($id))) {
         }
 
         // Используется NPC:
-        $usedbynpc = $DB->select('
+		$usedbynpc = $DB->select('
 			SELECT ?#, c.entry
-			{ , name_loc?d AS name_loc, subname_loc' . $_SESSION['locale'] . ' AS subname_loc }
-			FROM ?_aowow_factiontemplate, ?_creature_template c
-			{ LEFT JOIN (?_locales_creature l) ON c.entry = l.entry AND ? }
+			{ , name_loc?d AS name_loc, subname_loc'.$_SESSION['locale'].' AS subname_loc }
+			FROM ?_aowow_factiontemplate, creature_template c
+			{ LEFT JOIN (locales_creature l) ON c.entry = l.entry AND ? }
 			WHERE
-				factiontemplateID=faction_A
-			', $npc_cols[0], ($_SESSION['locale'] > 0) ? $_SESSION['locale'] : DBSIMPLE_SKIP, ($_SESSION['locale'] > 0) ? 1 : DBSIMPLE_SKIP, $spell['entry'], $spell['entry'], $spell['entry'], $spell['entry']
-        );
-        if ($usedbynpc) {
-            $spell['usedbynpc'] = array();
-            foreach ($usedbynpc as $i => $row)
-                $spell['usedbynpc'][] = creatureinfo2($row);
-            unset($usedbynpc);
-        }
+				(spell1 = ?d
+				OR spell2 = ?d
+				OR spell3 = ?d
+				OR spell4 = ?d)
+				AND factiontemplateID=faction_A
+			',
+			$npc_cols[0],
+			($_SESSION['locale']>0)? $_SESSION['locale']: DBSIMPLE_SKIP,
+			($_SESSION['locale']>0)? 1: DBSIMPLE_SKIP,
+			$spell['entry'], $spell['entry'], $spell['entry'], $spell['entry']
+		);
+		if($usedbynpc)
+		{
+			$spell['usedbynpc'] = array();
+			foreach($usedbynpc as $i=>$row)
+				$spell['usedbynpc'][] = creatureinfo2($row);
+			unset($usedbynpc);
+		}
 
         // Используется вещями:
         $usedbyitem = $DB->select('
