@@ -32,8 +32,9 @@ $UDWBaseconf['register']                = false;
 $UDWBaseconf['expansion']               = 0; // Used with register
 $UDWBaseconf['limit']                   = 10000;
 $UDWBaseconf['debug']                   = false;
-
-
+// Map object grouping factor. Meters = 10^param.
+// 0 to disable.
+$UDWBaseconf['map_grouping'] 			= 0;
 // Patch version:
 $UDWBaseconf['patch']                   = 5;
 # 1.2 = 0 

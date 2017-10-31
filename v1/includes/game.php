@@ -317,9 +317,19 @@ function resolve_coord(&$data) {
 }
 
 function getLocation($id, $type) {
-    global $smarty, $exdata, $zonedata, $DB;
+    global $smarty, $exdata, $zonedata, $DB, $UDWBaseconf;
 
-    $data = $DB->select('SELECT guid, map AS m, position_x AS x, position_y AS y, spawntimesecs, {MovementType AS ?#, }"0" AS `type` FROM ?_' . $type . ' WHERE id = ?d GROUP BY ROUND(x,-2), ROUND(y,-2) ORDER BY x,y', ($type == 'gameobject' ? DBSIMPLE_SKIP : 'mt'), $id);
+    $data = $DB->select('
+		SELECT guid, map AS m, position_x AS x, position_y AS y, spawntimesecs, {MovementType AS ?#, }"0" AS `type` FROM ?_' . $type . ' 
+		WHERE id = ?d 
+		GROUP BY ROUND(x,?d), ROUND(y,?d) 
+		ORDER BY x,y
+		', 
+		($type == 'gameobject' ? DBSIMPLE_SKIP : 'mt'), 
+		$id,
+		$UDWBaseconf['map_grouping'] > 0 ? -$UDWBaseconf['map_grouping'] : 0,
+		$UDWBaseconf['map_grouping'] > 0 ? -$UDWBaseconf['map_grouping'] : 0
+	);
     if ($type <> 'gameobject') {
         $wpWalkingCreaturesGuids = array();
         foreach ($data as $spawnid => $spawn) {
@@ -327,7 +337,16 @@ function getLocation($id, $type) {
                 $wpWalkingCreaturesGuids[] = $spawn['guid'];
         }
         if ($wpWalkingCreaturesGuids) {
-            $wps = $DB->select('SELECT c.map AS m, m.position_x AS x, m.position_y AS y, "3" AS `type` FROM ?_creature_movement m, ?_creature c WHERE m.id = c.guid AND m.id IN (?a) GROUP BY ROUND(x,-2), ROUND(y,-2) ORDER BY x,y', $wpWalkingCreaturesGuids);
+            $wps = $DB->select('
+				SELECT c.map AS m, m.position_x AS x, m.position_y AS y, "3" AS `type` FROM ?_creature_movement m, ?_creature c 
+				WHERE m.id = c.guid AND m.id IN (?a) 
+				GROUP BY ROUND(x,?d), ROUND(y,?d) 
+				ORDER BY x,y
+				', 
+				$wpWalkingCreaturesGuids,
+				$UDWBaseconf['map_grouping'] > 0 ? -$UDWBaseconf['map_grouping'] : 0,
+				$UDWBaseconf['map_grouping'] > 0 ? -$UDWBaseconf['map_grouping'] : 0
+				);
             $data = array_merge($data, $wps);
         }
     }
@@ -632,9 +651,18 @@ function drop($table, $item) {
  * @param type $type 
  */
 function position($id, $type) {
-    global $smarty, $exdata, $zonedata, $DB;
+    global $smarty, $exdata, $zonedata, $DB, $UDWBaseconf;
 
-    $data = $DB->select('SELECT guid, map AS m, position_x AS x, position_y AS y, spawntimesecs, {MovementType AS ?#, }"0" AS `type` FROM ?_' . $type . ' WHERE id = ?d GROUP BY ROUND(x,-2), ROUND(y,-2) ORDER BY x,y', ($type == 'gameobject' ? DBSIMPLE_SKIP : 'mt'), $id);
+    $data = $DB->select('
+		SELECT guid, map AS m, position_x AS x, position_y AS y, spawntimesecs, {MovementType AS ?#, }"0" AS `type` FROM ?_' . $type . ' 
+		WHERE id = ?d 
+		GROUP BY ROUND(x,?d), ROUND(y,?d) 
+		ORDER BY x,y', 
+		($type == 'gameobject' ? DBSIMPLE_SKIP : 'mt'), 
+		$id,
+		$UDWBaseconf['map_grouping'] > 0 ? -$UDWBaseconf['map_grouping'] : 0,
+		$UDWBaseconf['map_grouping'] > 0 ? -$UDWBaseconf['map_grouping'] : 0
+	);
     if ($type <> 'gameobject') {
         $wpWalkingCreaturesGuids = array();
         foreach ($data as $spawnid => $spawn) {
@@ -642,7 +670,14 @@ function position($id, $type) {
                 $wpWalkingCreaturesGuids[] = $spawn['guid'];
         }
         if ($wpWalkingCreaturesGuids) {
-            $wps = $DB->select('SELECT c.map AS m, m.position_x AS x, m.position_y AS y, "3" AS `type` FROM ?_creature_movement m, ?_creature c WHERE m.id = c.guid AND m.id IN (?a) GROUP BY ROUND(x,-2), ROUND(y,-2) ORDER BY x,y', $wpWalkingCreaturesGuids);
+            $wps = $DB->select('
+				SELECT c.map AS m, m.position_x AS x, m.position_y AS y, "3" AS `type` FROM ?_creature_movement m, ?_creature c 
+				WHERE m.id = c.guid AND m.id IN (?a) GROUP BY ROUND(x,?d), ROUND(y,?d) 
+				ORDER BY x,y', 
+				$wpWalkingCreaturesGuids,
+				$UDWBaseconf['map_grouping'] > 0 ? -$UDWBaseconf['map_grouping'] : 0,
+				$UDWBaseconf['map_grouping'] > 0 ? -$UDWBaseconf['map_grouping'] : 0
+			);
             $data = array_merge($data, $wps);
         }
     }
