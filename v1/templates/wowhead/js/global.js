@@ -4042,7 +4042,7 @@ Listview.funcBox = {createSimpleCol: function(c, d, a, b) {
         switch (l) {
             case 1:
                 g.name = "commentbody";
-                g.onfocus = g_revealCaptcha;
+                //g.onfocus = g_revealCaptcha;
                 break;
             case 2:
                 g.name = "desc";
@@ -4050,7 +4050,7 @@ Listview.funcBox = {createSimpleCol: function(c, d, a, b) {
                 break;
             case 3:
                 g.name = "body";
-                g.onfocus = g_revealCaptcha;
+                //g.onfocus = g_revealCaptcha;
                 break;
             case 4:
                 g.name = "sig";
