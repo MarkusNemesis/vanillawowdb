@@ -1,8 +1,6 @@
 	<title>{if $page.Title}{$page.Title|escape:"html"} - {/if}{$app_name}</title>
 	<meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
 	<link rel="SHORTCUT ICON" href="templates/wowhead/images/favicon.ico">
-
-	<script src="templates/wowhead/js/gtag.js" type="text/javascript"></script>
 	{include file="analytics.html"} 
 	<script src="templates/wowhead/js/locale_{$language}.js" type="text/javascript"></script>
 
